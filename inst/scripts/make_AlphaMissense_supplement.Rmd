@@ -1,0 +1,126 @@
+---
+title: "make_AlphaMissense_supplement"
+author: "Tram Nguyen"
+date: "2024-07-10"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width = 80)
+```
+
+# Data information
+
+Data from ProteinGym datasets was curated and processed by (19) to assess predictors on
+predicting variant effects on protein fitness. The substitution benchmark consists of ~1.5M
+variants from 87 MAVE experiments measured with 72 proteins. Data was accessed from
+https://marks.hms.harvard.edu/tranception/ProteinGym_substitutions.zip (accessed 2023-01-13).
+We provide the list of variants and our predictions as Supplementary Data S8.
+
+Additional MAVE datasets
+To generate an additional independent MAVE benchmark data set, we searched across MaveDB
+(Esposito et al., 2019), MaveRegistry (Da Kuang et al., 2021), PubMed and BioRxiv. Studies
+were selected for inclusion if they were (1) not originally in ProteinGym; (2) covered a human
+protein; (3) measured a phenotype relevant to protein abundance/trafficking, protein-protein
+interaction, enzymatic activity, or function; (4) had more than 100 variant measurements. MAVE
+data was typically reported as a table available for download from the publication or data
+repository. The exception was PPARG_HUMAN, for which we queried the webserver
+accompanying the paper (https://miter.broadinstitute.org/) by searching through all possible
+missense mutations at prevalence 1e-5. This was performed by changing the [ID] field in this
+URL: https://miter.broadinstitute.org/mitergrade/?query=p.[ID]&prevalence=1.0e-5. Data
+sources for these additional MAVE datasets are listed in Table S5.
+
+
+# Download processed data
+
+The raw, unprocessed data for the 16 mice samples are available for download 
+through GEO with accession number [GSE129788](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE12978).
+
+Additional cell metadata, TSNE and PCA coordinates were provided 
+courtesy of the authors.
+
+# Generate `SingleCellExperiment` object
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(SingleCellExperiment)
+
+# Convert Seurat to SingleCellExperiment object
+s_sce <- as.SingleCellExperiment(s2, assay="RNA")
+
+# Format cell metadata
+s_sce$orig.ident <- NULL
+s_sce$ident <- NULL
+
+cols <- c("animal", "batch", "animal_type", "cell_type")
+colData(s_sce)[cols] <- lapply(colData(s_sce)[cols], factor)
+
+# Add cell type colors matching paper
+metadata(s_sce)$cell_colors<-s2@misc$colours
+
+# Format reduced dim elements
+reducedDims(s_sce) <- reducedDims(s_sce)[c("PCA","TSNE")]
+colnames(reducedDim(s_sce, "TSNE")) <- c("TSNE1", "TSNE2")
+colnames(reducedDim(s_sce, "PCA")) <- sub("_", "", 
+                                          colnames(reducedDim(s_sce, "PCA")))
+
+# Format row and column data
+colnames(s_sce) <- NULL
+rowData(s_sce)$geneID <- rownames(s_sce)
+
+# Retain only raw counts
+s_sce@assays@data@listData$logcounts <- NULL
+s_sce@assays@data@listData$scaledata <- NULL
+
+# Add Cell Ontology labels provided by authors
+CO <- read.csv("~/MouseAgingData_data/2019nn_co.csv")
+
+# Relabel csv column names. CO class and id are switched
+colnames(CO) <- c("cell_type", "cell_ontology_class", "cell_ontology_id")
+
+# Retain original cell_type levels
+cell_levels <- levels(colData(s_sce)$cell_type)
+
+# left join CO terms
+colData(s_sce) <- DataFrame(colData(s_sce) %>% as_tibble() %>% 
+                                left_join(CO, by = "cell_type"))
+
+# Set levels for cell_type, cell_ontology_id, and cell_ontology_class
+# Reorder levels based on aging biology and authors' study
+colData(s_sce)$cell_type <- factor(colData(s_sce)$cell_type, levels = cell_levels)
+levels(colData(s_sce)$cell_type) # check
+
+colData(s_sce)$cell_ontology_class <- factor(colData(s_sce)$cell_ontology_class, 
+                                             levels = unique(CO$cell_ontology_class), 
+                                             exclude = NULL)
+
+colData(s_sce)$cell_ontology_id <- factor(colData(s_sce)$cell_ontology_id, 
+                                          levels = unique(CO$cell_ontology_id), 
+                                          exclude = NULL)
+
+dim(s_sce)
+# should be 14699 37089
+```
+
+# Save `SingleCellExperiment` object
+
+```{r}
+saveRDS(s_sce, "brain10x_2019NN.rds")
+```
+
+# References
+
+Ximerakis, M., Lipnick, S.L., Innes, B.T. et al. Single-cell transcriptomic
+profiling of the aging mouse brain. *Nat Neurosci* 22, 1696–1708 (2019).
+<DOI:https://doi.org/10.1038/s41593-019-0491-3>.
+
+# Session info
+
+```{r}
+sessionInfo()
+```
