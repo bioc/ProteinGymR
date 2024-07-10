@@ -37,8 +37,8 @@ sources for these additional MAVE datasets are listed in Table S5.
 
 # Download processed data
 
-The raw, unprocessed data for the 16 mice samples are available for download 
-through GEO with accession number [GSE129788](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE12978).
+The original .csv table is available for download through the [AlphaMissense
+Supplementary Data](https://www.science.org/doi/suppl/10.1126/science.adg7492/suppl_file/science.adg7492_data_s1_to_s9.zip).
 
 Additional cell metadata, TSNE and PCA coordinates were provided 
 courtesy of the authors.
