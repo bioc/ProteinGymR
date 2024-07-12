@@ -13,7 +13,18 @@ knitr::opts_chunk$set(echo = TRUE)
 options(width = 80)
 ```
 
-# Data information
+```{r, warning=FALSE}
+suppressWarnings(library(dplyr))
+suppressWarnings(library(UniProt.ws))
+suppressWarnings(library(org.Hs.eg.db))
+```
+
+# Download processed data
+
+The original .csv table is available for download through the [AlphaMissense
+Supplementary Data](https://www.science.org/doi/suppl/10.1126/science.adg7492/suppl_file/science.adg7492_data_s1_to_s9.zip).
+
+# ProteinGym information
 
 Data from ProteinGym datasets was curated and processed by (19) to assess predictors on
 predicting variant effects on protein fitness. The substitution benchmark consists of ~1.5M
@@ -34,27 +45,6 @@ missense mutations at prevalence 1e-5. This was performed by changing the [ID] f
 URL: https://miter.broadinstitute.org/mitergrade/?query=p.[ID]&prevalence=1.0e-5. Data
 sources for these additional MAVE datasets are listed in Table S5.
 
-
-# Download processed data
-
-The original .csv table is available for download through the [AlphaMissense
-Supplementary Data](https://www.science.org/doi/suppl/10.1126/science.adg7492/suppl_file/science.adg7492_data_s1_to_s9.zip).
-
-Additional cell metadata, TSNE and PCA coordinates were provided 
-courtesy of the authors.
-
----
-title: "Load_ProteinGym"
-author: "Tram Nguyen"
-date: "2024-02-19"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-# ProteinGym information
 
 More info: https://github.com/OATML-Markslab/ProteinGym
 
@@ -99,14 +89,16 @@ the fitness cutoff (1 is fit (pathogenic for clinical variants), 0 is not fit
 Additionally, we provide two reference files for each benchmark that give
 further details on each assay and contain in particular.
 
+ProteinGym consists of 87 studies across 72 proteins (1.5 million variants) - 26
+of which cover human proteins. Check that this is accurate.
 
-# Load in all ProteinGym data
+# Load in all ProteinGym assays
 
 ```{r}
 # Downloaded manually from ProteinGym website 
 # https://proteingym.org/download
 # Data stored locally
-MAVE.dir <- "~/ProteinGym/DMS_ProteinGym_substitutions/"
+MAVE.dir <- "~/Desktop/R/docker-data/AlphaMissense_data/DMS_ProteinGym_substitutions/"
 
 ProGym_files <- list.files(path=MAVE.dir, full.names=F)
 
@@ -119,42 +111,48 @@ ProGym_tables <- lapply(paste0(MAVE.dir, ProGym_files), read.csv)
 # Assign respective MAVE study names to each list element
 names(ProGym_tables) <- ProGym_names 
 
-# Combine all of the dataframes together with each df name as a new column.
+# Combine all of the dataframes together with each df name as a new column:
+# `DMS_id` is the protein entry name with ProteinGym experiment names
 all_ProGym <- bind_rows(ProGym_tables, .id = "DMS_id")
 
-# Put back in list form
+# Put back in list form. Each table should DMS_id now.
 all_ProGym <- split(all_ProGym, all_ProGym$DMS_id)
 ```
 
-# Check ProteinGym data
-
-ProteinGym consists of 87 studies across 72 proteins (1.5 million variants) - 26
-of which cover human proteins. Check that this is accurate.
+# Convert ProteinGym's Entry Names to UniProt Accession
 
 ```{r}
-# Grab the protein names (first and second substring of each element in list)
-# If protein has two names, will be in the second substring. Else, the species
-lst <- strsplit(sub('(^[^_]+_[^_]+)_(.*)$', '\\1 \\2', ProGym_names), ' ')
+# Grab the protein Entry Name from ProteinGym assays by extracting only the 
+# UniProtId from the study names (first and second elements)
+entryNames <- strsplit(names(all_ProGym), split = "_", fixed = TRUE)
 
-proteins <- sapply(lst,"[[",1)
+# Define a function to extract the first two elements, apply to list elements
+entryNames <- sapply(entryNames, function(input_string) {
+  first_two_elements <- paste(input_string[1], input_string[2], sep = "_")
+  return(first_two_elements)
+})
 
-# Collapse same proteins
+# Convert entryNames to UniProt Accession ID
+ws <- UniProt.ws()
 
-cat("Confirmed", length(unique(proteins)), "unique proteins in ProteinGym data.")
-```
+out <- select(ws, entryNames, columns = "UniProtKB", keytype = "UniProtKB")
 
-Count how many human studies.
+accessions <- out$Entry
 
-```{r}
-indx <- paste("HUMAN")
-human_studies <- ProGym_names[grep(indx, ProGym_names)]
+print(accessions)
 
-# Count unique human proteins
-lst_human <- strsplit(human_studies, split = "_", fixed = TRUE)
+##### START HERE -- NEED TO FIGURE OUT HOW TO EXPAND BY FREQ. 
+##### NEED TO MAKE ENTRYNAME UNIQUE?
+# Expand the aggregated entryNames because there are duplicated proteins in PG
+ProtId_n <- as.data.frame(table(entryNames))
+ProtId_n$entryNames <- accessions
 
-proteins_human <- sapply(lst_human,"[[",1)
+ProtId_n <- ProtId_n[rep(1:nrow(ProtId_n), ProtId_n$Freq), ]
 
-cat("Confirmed", length(unique(proteins_human)), "unique human proteins.")
+# Overwrite accession with expanded vector
+accessions <- ProtId_n$accession
+
+length(accessions) # 32
 ```
 
 # Write MAVE list RDS
