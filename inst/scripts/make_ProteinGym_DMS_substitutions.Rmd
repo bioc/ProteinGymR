@@ -1,0 +1,204 @@
+---
+title: "make_ProteinGym_DMS_substitutions"
+author: "Tram Nguyen"
+date: "2024-07-15"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, warning=FALSE}
+suppressMessages(library(dplyr))
+suppressMessages(library(UniProt.ws))
+suppressMessages(library(org.Hs.eg.db))
+```
+
+# Download processed data
+
+The original .csv table is available for download through the [AlphaMissense
+Supplementary Data](https://www.science.org/doi/suppl/10.1126/science.adg7492/suppl_file/science.adg7492_data_s1_to_s9.zip).
+
+# ProteinGym information
+
+Data from ProteinGym datasets was curated and processed by (19) to assess predictors on
+predicting variant effects on protein fitness. The substitution benchmark consists of ~1.5M
+variants from 87 MAVE experiments measured with 72 proteins. Data was accessed from
+https://marks.hms.harvard.edu/tranception/ProteinGym_substitutions.zip (accessed 2023-01-13).
+We provide the list of variants and our predictions as Supplementary Data S8.
+
+Additional MAVE datasets
+To generate an additional independent MAVE benchmark data set, we searched across MaveDB
+(Esposito et al., 2019), MaveRegistry (Da Kuang et al., 2021), PubMed and BioRxiv. Studies
+were selected for inclusion if they were (1) not originally in ProteinGym; (2) covered a human
+protein; (3) measured a phenotype relevant to protein abundance/trafficking, protein-protein
+interaction, enzymatic activity, or function; (4) had more than 100 variant measurements. MAVE
+data was typically reported as a table available for download from the publication or data
+repository. The exception was PPARG_HUMAN, for which we queried the webserver
+accompanying the paper (https://miter.broadinstitute.org/) by searching through all possible
+missense mutations at prevalence 1e-5. This was performed by changing the [ID] field in this
+URL: https://miter.broadinstitute.org/mitergrade/?query=p.[ID]&prevalence=1.0e-5. Data
+sources for these additional MAVE datasets are listed in Table S5.
+
+
+More info: https://github.com/OATML-Markslab/ProteinGym
+
+ProteinGym is a collection of benchmarks aiming at comparing the ability of
+models to predict the effects of protein mutations. The benchmarks in ProteinGym
+are divided according to mutation type (substitutions vs. indels), ground truth
+source (DMS assay - Deep Mutational Scanning (DMS) assays - vs. clinical
+annotation), and training regime (zero-shot vs. supervised).
+
+Both the DMS assays and clinical variants are divided into 1) a substitution
+benchmark which currently consists of the experimental characterisation of ~2.7M
+missense variants across 217 DMS assays and 2,525 clinical proteins, and 2) an
+indel benchmark that includes ∼300k mutants across 74 DMS assays and 1,555
+clinical proteins.
+
+Each processed file in each benchmark corresponds to a single DMS assay or
+clinical protein, and contains the following variables:
+
+**mutant (str):** describes the set of substitutions to apply on the reference
+sequence to obtain the mutated sequence (eg., A1P:D2N implies the amino acid 'A'
+at position 1 should be replaced by 'P', and 'D' at position 2 should be
+replaced by 'N'). Present in the the ProteinGym substitution benchmark only (not
+indels). 
+
+**mutated_sequence (str):** represents the full amino acid sequence for the
+mutated protein. 
+
+**DMS_score (float):** corresponds to the experimental measurement
+in the DMS assay. Across all assays, the higher the DMS_score value, the higher
+the fitness of the mutated protein. This column is not present in the clinical
+files, since they are classified as benign/pathogenic, and do not have
+continuous scores DMS_score_bin 
+
+  - Higher DMS_score = more pathogenic. Affects fitness more.
+
+**(int):** indicates whether the DMS_score is above
+the fitness cutoff (1 is fit (pathogenic for clinical variants), 0 is not fit
+(benign for clinical variants))
+
+  - Binary based on cutoff whether impacts fitness or not.
+
+Additionally, we provide two reference files for each benchmark that give
+further details on each assay and contain in particular.
+
+ProteinGym consists of 87 studies across 72 proteins (1.5 million variants) - 26
+of which cover human proteins. Check that this is accurate.
+
+# Load in all ProteinGym assays
+
+```{r}
+# Downloaded manually from ProteinGym website 
+# https://proteingym.org/download
+# Data stored locally
+MAVE.dir <- "~/Desktop/R/docker-data/AlphaMissense_data/DMS_ProteinGym_substitutions/"
+
+ProGym_files <- list.files(path=MAVE.dir, full.names=F)
+
+# Grab MAVE study names. These should match AlphaMissense.
+ProGym_names <- sub(".csv", "", ProGym_files) 
+
+# Load in all the files as tables in a list
+ProGym_tables <- lapply(paste0(MAVE.dir, ProGym_files), read.csv)
+
+# Assign respective MAVE study names to each list element
+names(ProGym_tables) <- ProGym_names 
+
+# Combine all of the dataframes together with each df name as a new column:
+# `DMS_id` is the protein entry name with ProteinGym experiment names
+all_ProGym <- bind_rows(ProGym_tables, .id = "DMS_id")
+
+# Put back in list form. Each table should DMS_id now.
+all_ProGym <- split(all_ProGym, all_ProGym$DMS_id)
+```
+
+# Convert ProteinGym's Entry Names to UniProt Accession
+
+```{r}
+# Grab the protein Entry Name from ProteinGym assays by extracting only the 
+# UniProtId from the study names (first and second elements)
+entryNames <- strsplit(names(all_ProGym), split = "_", fixed = TRUE)
+
+# Define a function to extract the first two elements, apply to list elements
+entryNames <- sapply(entryNames, function(input_string) {
+  first_two_elements <- paste(input_string[1], input_string[2], sep = "_")
+  return(first_two_elements)
+})
+
+# Convert entryNames to UniProt Accession ID
+ws <- UniProt.ws()
+
+out <- select(ws, entryNames, columns = "UniProtKB", keytype = "UniProtKB")
+
+accessions <- out$Entry
+
+# Merge match results with original PG studies
+pg_names <- as.data.frame(entryNames)
+cdf <- left_join(pg_names, out, by = c("entryNames" = "From"), keep = TRUE)
+colnames(cdf) <- c("pg_names", "entry", "accessions")
+```
+
+# Two IDs not mapped: ANCSZ_Hobbs, PSAE_SYNP2
+
+```{r}
+# Manual curation of PSAE_SYNP2: to UniProt ID "P31969"
+cdf$accessions[which(cdf$pg_names == "PSAE_SYNP2")] <- "P31969"
+cdf$entry[which(cdf$pg_names == "PSAE_SYNP2")] <- "PSAE_SYNP2"
+```
+
+The "ANCSZ_Hobbs" assay is a DMS of an ancestral reconstruction of the 
+Syk-family kinases, AncSZ, that the [Hobbs et al. 2022](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9601881/) manually curated. 
+It is an ancestral sequence reconstruction to generate a 
+spleen tyrosine kinase (Syk), and therefore does not have an established UniProt
+accession ID. For this dataset, we will remove this assay from our data.
+
+```{r}
+# Remove it from the accession list
+cdf <- na.omit(cdf)
+
+# Remove ANCSZ_Hobbs
+all_ProGym[["ANCSZ_Hobbs_2022"]] <- NULL
+
+# update the PG study names without Hobbs
+ProGym_names <- names(all_ProGym)
+```
+
+# Add a column in the ProteinGym data with UniProt Accession
+```{r}
+# Assign respective MAVE study names to each list element
+names(all_ProGym) <- cdf$accessions 
+
+# Combine all of the dataframes together with each df name as a new column:
+# `UniProt_id` is the accession numbers after mapping
+all_ProGym2 <- bind_rows(all_ProGym, .id = "UniProt_id")
+
+# Put back in list form. Each table should DMS_id now.
+all_ProGym2 <- split(all_ProGym2, all_ProGym2$DMS_id)
+
+# Convert list element names back to ProteinGym DMS_id 
+# which matches Cheng et al. Supplement
+names(all_ProGym2) <- ProGym_names
+```
+
+# Remove empty "DMS_bin_score" field for all assays.
+```{r}
+all_ProGym2 <- lapply(all_ProGym2, function(df) {
+  df[, !(names(df) %in% "DMS_bin_score")]
+})
+```
+
+Returns a list of 216 unique DMS assays, each with 6 columns:
+"UniProt_id","DMS_id","mutant","mutated_sequence","DMS_score","DMS_score_bin".
+
+
+# Write ProteinGym DMS list to RDS object
+```{r, eval=FALSE}
+saveRDS(all_ProGym2, paste0(MAVE.dir, "ProGym216_v1.RDS"))
+```
+
+# SessionInfo
+```{r}
+sessionInfo()
+```
