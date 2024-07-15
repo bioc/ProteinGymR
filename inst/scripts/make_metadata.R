@@ -5,7 +5,7 @@
 
 # AlphaMissense_Supplementary
 AlphaMissense_Supplementary <- data.frame(
-    Title = "AlphaMissense_Supplementary",
+    Title = "Cheng_ProteinGym_S8_supplementary",
     Description = paste("ProteinGym data provided by Supplementary Table S9",
                          "from Cheng et al. 2023"),
     BiocVersion = "3.20",
@@ -20,36 +20,36 @@ AlphaMissense_Supplementary <- data.frame(
     Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",
     RDataClass = "Data.Frame",
     DispatchClass = "RDS",
-    RDataPath = "ProteinGymR/AlphaMissense_Supplementary",
+    RDataPath = "ProteinGymR/Cheng_ProteinGym_S8_supplementary",
     stringsAsFactors = FALSE
 )
 
 
-# AgingBrain10x_2019NN
-AgingBrain10x_2019NN <- data.frame(
-    Title = "AgingBrain10x_2019NN",
-    Description = paste0("10x Genomics processed single-cell dataset ",
-                         "from Ximerakis et al. 2019"),
-    BiocVersion = "3.19",
-    Genome = "mm10",
+# ProteinGym_DMS_substitutions_v1
+ProteinGym_DMS_subs <- data.frame(
+    Title = "ProteinGym_DMS_substitutions_v1",
+    Description = paste0("ProteinGym DMS information for 216 assays",
+                         "from Notin et al. 2023"),
+    BiocVersion = "3.20",
+    Genome = "hg38",
     SourceType = "RDS",
-    SourceUrl = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE129788",
+    SourceUrl = "https://proteingym.org/",
     SourceVersion = NA,
-    Species = "Mus musculus",
-    TaxonomyId = 10090,
+    Species = "Homo Sapiens",
+    TaxonomyId = 9606,
     Coordinate_1_based = NA,
-    DataProvider = "Lee Rubin at Harvard Stem Cell Institute",
+    DataProvider = "Marks Lab at Harvard Medical School",
     Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",
-    RDataClass = "SingleCellExperiment",
+    RDataClass = "List",
     DispatchClass = "RDS",
-    RDataPath = "MouseAgingData/brain10x_2019NN.rds",
+    RDataPath = "ProteinGymR/ProteinGym_DMS_substitutions_v1",
     stringsAsFactors = FALSE
 )
 
 # Combined meta-data
 df_all <- base::rbind(
     AlphaMissense_Supplementary, 
-    AgingBrain10x_2019NN
+    ProteinGym_DMS_subs
 )
 
 # Save .csv file
