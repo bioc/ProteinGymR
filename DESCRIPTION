@@ -8,6 +8,7 @@ Description: Provides programmatic access of ProteinGym resources through Experi
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
-biocViews: ExperimentData, ExperimentHub, PackageTypeData
+biocViews: ExperimentData, ExperimentHub, PackageTypeData, Homo_sapiens_Data,
+    ReproducibleResearch
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
