@@ -1,7 +1,7 @@
 ---
 title: "make_AlphaMissense_supplementary"
 author: "Tram Nguyen"
-date: "2024-07-15"
+date: "2024-07-22"
 output: html_document
 editor_options: 
   markdown: 
@@ -19,25 +19,32 @@ suppressMessages(library(dplyr))
 
 # Download processed data
 
-The original .csv table is available for download through the [AlphaMissense
-Supplementary Data](https://www.science.org/doi/suppl/10.1126/science.adg7492/suppl_file/science.adg7492_data_s1_to_s9.zip).
+The original .csv table is available for download through the 
+[AlphaMissense Supplementary Data](https://www.science.org/doi/suppl/10.1126/science.adg7492/suppl_file/science.adg7492_data_s1_to_s9.zip).
+
+# Data information
+
+The table is a data.frame containing the AlphaMissense pathogenicity scores for
+~1.6M variants that match those in ProteinGym. The variants are from 87 DMS 
+experiments measured with 72 proteins. See the AlphaMissense Cheng et al. 
+[2023](https://www.science.org/doi/10.1126/science.adg7492) publication for 
+more information.
 
 # Load in ProteinGym supplemental table from Cheng et al. 2023
 ```{r}
 # table S8
-cheng_suppl <- read.csv("~/Desktop/R/docker-data/AlphaMissense_data/data_s1_to_s9/Supplementary_Data_S8_proteingym.csv")
+cheng_suppl <- read.csv("~/AlphaMissense_data/data_s1_to_s9/Supplementary_Data_S8_proteingym.csv")
 cheng_suppl <- as.data.frame(cheng_suppl)
+cheng_suppl$AlphaMissense <- as.numeric(cheng_suppl$AlphaMissense)
 ```
 
-A data.frame with 87 ProteinGym assays and 4 fields:
+A data.frame with 1622429 for 87 ProteinGym assays and 4 fields:
 "DMS_id", "Uniprot_ID", "variant_id", "AlphaMissense".
 
 # Write ProteinGym DMS list to RDS object
 ```{r, eval=FALSE}
 # Save locally:
-MAVE.dir <- "~/Desktop/R/docker-data/AlphaMissense_data/DMS_ProteinGym_substitutions/"
-
-saveRDS(cheng_suppl, paste0(MAVE.dir,"Cheng_ProteinGym_S8_supplementary.RDS"))
+saveRDS(cheng_suppl, "ProteinGym/Cheng_ProteinGym_variants.rds"))
 ```
 
 # SessionInfo

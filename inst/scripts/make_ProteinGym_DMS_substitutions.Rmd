@@ -192,7 +192,7 @@ Returns a list of 216 unique DMS assays, each with 6 columns:
 # Write ProteinGym DMS list to RDS object
 
 ```{r, eval=FALSE}
-saveRDS(ProGym_tables, paste0(MAVE.dir, "ProGym216_v1.rds"))
+saveRDS(ProGym_tables, "ProteinGym/ProGym216_DMS_subs_v1.rds"))
 ```
 
 # SessionInfo
