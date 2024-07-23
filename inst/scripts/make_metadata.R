@@ -5,9 +5,10 @@
 
 # AlphaMissense_Supplementary
 AlphaMissense_Supplementary <- data.frame(
-    Title = "ProteinGym Data from the AlphaMissense publication",
-    Description = paste("ProteinGym variants from the AlphaMissense",
-                        "table from Cheng et al. 2023"),
+    Title = "AlphaMissense pathogenicity scores for variants in ProteinGym",
+    Description = paste("Supplementary table from Cheng et al. 2023 containing",
+                        "AlphaMissense pathogenicity scores for variants",
+                        "found in ProteinGym"),
     BiocVersion = "3.20",
     Genome = "hg38",
     SourceType = "RDS",
@@ -24,19 +25,18 @@ AlphaMissense_Supplementary <- data.frame(
     stringsAsFactors = FALSE
 )
 
-
-# ProteinGym_DMS_substitutions_v1
+# ProteinGym_DMS_substitutions
 ProteinGym_DMS_subs <- data.frame(
-    Title = "ProteinGym DMS Information for Substitutions",
-    Description = paste0("ProteinGym DMS information for 216 assays",
+    Title = "ProteinGym deep mutational scanning (DMS) assays for substitutions",
+    Description = paste("ProteinGym DMS information for 216 assays",
                          "from Notin et al. 2023"),
     BiocVersion = "3.20",
-    Genome = "hg38",
+    Genome = NA,
     SourceType = "RDS",
     SourceUrl = "https://proteingym.org/",
     SourceVersion = NA,
-    Species = "Homo sapiens",
-    TaxonomyId = 9606,
+    Species = NA,
+    TaxonomyId = NA,
     Coordinate_1_based = TRUE,
     DataProvider = "Marks Lab at Harvard Medical School",
     Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",

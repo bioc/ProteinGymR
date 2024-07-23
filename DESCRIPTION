@@ -2,11 +2,17 @@ Package: ProteinGymR
 Title: Programmatic Access of ProteinGym Datasets in R
 Version: 0.0.0.9000
 Authors@R: 
-    person("Tram", "Nguyen", , "Tram_Nguyen@hms.harvard.edu", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0003-4809-6227"))
-Description: Provides programmatic access of ProteinGym resources through ExperimentHub.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Tram", "Nguyen",
+        role = c("aut", "cre"),
+        email = "Tram_Nguyen@hms.harvard.edu",
+        comment = c(ORCID = "0000-0003-4809-6227")),
+Description: The ProteinGymR package provides analysis-ready data
+    resources from ProteinGym, a database of benchmarks and deep mutational 
+    scanning assays curated and processed by Notin et al. 2023. This package
+    provides programmatic access of ProteinGym resources through ExperimentHub.
+License: Artistic-2.0
+URL: https://github.com/ccb-hms/ProteinGymR
+BugReports: https://github.com/ccb-hms/ProteinGymR/issues
 Encoding: UTF-8
 biocViews: ExperimentData, ExperimentHub, PackageTypeData, Homo_sapiens_Data,
     ReproducibleResearch
