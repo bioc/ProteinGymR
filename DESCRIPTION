@@ -5,7 +5,7 @@ Authors@R:
     person("Tram", "Nguyen",
         role = c("aut", "cre"),
         email = "Tram_Nguyen@hms.harvard.edu",
-        comment = c(ORCID = "0000-0003-4809-6227")),
+        comment = c(ORCID = "0000-0003-4809-6227"))
 Description: The ProteinGymR package provides analysis-ready data
     resources from ProteinGym, a database of benchmarks and deep mutational 
     scanning assays curated and processed by Notin et al. 2023. This package
