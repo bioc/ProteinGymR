@@ -14,18 +14,12 @@
 
 #' The columns contain:
 #' \describe{
-#' \item{\code{barcode}:}{Character, unique cell identifier.}
-#' \item{\code{nCount_RNA}:}{Numeric, number of RNA transcripts.}
-#' \item{\code{nFeature_RNA}:}{Integer, number of RNA features.}
-#' \item{\code{animal}:}{Factor, unique animal identifier.}
-#' \item{\code{batch}:}{Factor, batch identifier.}
-#' \item{\code{animal_type}:}{Factor, young (YX) or old (OX) conditions of
-#'                      the animal.}
-#' \item{\code{percent_mito}:}{Numeric, percentage of mitochondrial content.}
-#' \item{\code{percent_ribo}:}{Numeric, percentage of ribosomal content.}
-#' \item{\code{cell_type}:}{Factor, cell type to which the cell was assigned.}
-#' \item{\code{cell_ontology_class}:}{Factor, Cell Ontology label.}
-#' \item{\code{cell_ontology_id}:}{Factor, Cell Ontology identifier}
+#' \item{\code{DMS_id}:}{Character, ProteinGym assay identifier.}
+#' \item{\code{Uniprot_ID}:}{Character, UniProt accession identifier.}
+#' \item{\code{variant_id}:}{Character, variant identifier string matching 
+#'    ProteinGym. Protein position in the middle, and the reference and mutant 
+#'    amino acid residues to the left and right of the position, respectively.}
+#' \item{\code{AlphaMissense}:}{Numeric, AlphaMissense pathogenicity score.}
 #'}
 #'
 #'@author Tram Nguyen
