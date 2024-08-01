@@ -9,32 +9,38 @@
 #' @details 
 #' This function loads in the ProteinGym deep mutational scanning assays (DMS) 
 #' scores for substitutions in 216 studies. The data is provided by Notin et. al
-#' ((2022))[https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10723403/].
+#' [(2022)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10723403/).
 #'
 #'
 #' Each assay includes 6 columns:
 #' \describe{
 #' \item{\code{UniProt_id}:}{Character, UniProt accession identifier.}
 #' \item{\code{DMS_id}:}{Character, ProteinGym assay identifier.}
-#' \item{\code{mutant}:}{Character, number of RNA features.}
-#' \item{\code{mutated_sequence}:}{Factor, unique animal identifier.}
-#' \item{\code{DMS_score}:}{Factor, batch identifier.}
-#' \item{\code{DMS_score_bin}:}{Factor, young (YX) or old (OX) conditions of
-#'                      the animal.}
+#' \item{\code{mutant}:}{Character, set of substitutions to apply on the 
+#'    reference sequence to obtain the mutated sequence (e.g., A1P:D2N implies 
+#'    the amino acid 'A' at position 1 should be replaced by 'P', and 'D' at 
+#'    position 2 should be replaced by 'N').}
+#' \item{\code{mutated_sequence}:}{Character, full amino acid sequence for the 
+#'    mutated protein.}
+#' \item{\code{DMS_score}:}{Numeric, experimental measurement in the DMS assay. 
+#'    Higher values indicate higher fitness of the mutated protein.}
+#' \item{\code{DMS_score_bin}:}{Factor, indicates whether the DMS_score is 
+#'    above the fitness cutoff (1 is fit, 0 is not fit).}
 #'}
 #'
 #'@author Tram Nguyen
 #'
 #' @references
-#' Cheng et al. (2023)
-#' Accurate proteome-wide missense variant effect prediction with AlphaMissense. 
-#' \emph{Science} 391, eadg7492. DOI:10.1126/science.adg7492.
+#' P. Notin, M. Dias, J. Frazer, J. Marchena Hurtado, A. N. Gomez, D. Marks, 
+#' Y. Gal, Tranception: Protein fitness prediction with autoregressive 
+#' transformers and inference-time retrieval. \emph{Proc. Mach. Learn. Res}.
+#' 162, 16990–17017 (2022).
 #' 
 #' @examples
 #' data <- ProteinGym_DMS_subs()
 #' data_meta <- ProteinGym_DMS_subs(metadata = TRUE)
 #' 
-ProteinGym_DMS_subs <- function (metadata = FALSE)
+DMS_substitutions <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()
     title <- "ProteinGymR"
