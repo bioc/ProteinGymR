@@ -40,6 +40,7 @@
 #' data <- ProteinGym_DMS_subs()
 #' data_meta <- ProteinGym_DMS_subs(metadata = TRUE)
 #' 
+#' @export
 DMS_substitutions <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()

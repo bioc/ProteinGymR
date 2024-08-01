@@ -33,6 +33,7 @@
 #' data <- AlphaMissense_scores()
 #' data_meta <- AlphaMissense_scores(metadata = TRUE)
 #' 
+#' @export
 AlphaMissense_scores <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()
