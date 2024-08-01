@@ -1,4 +1,4 @@
-#' Load ProteinGym information from AlphaMissense supplementary table
+#' Load AlphaMissense scores for ProteinGym variants
 #'
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
@@ -7,17 +7,12 @@
 #' Returns a [data.frame()] object.
 #' 
 #' @details 
-#' This function loads in the ProteinGym data provided in the original 
-#' AlphaMissense publication by Cheng et al.
+#' This function loads in the AlphaMissense information for variants in 
+#' ProteinGym. Data table derived from the AlphaMissense publication by 
+#' Cheng et al.
 #' ([2023](https://www.science.org/doi/10.1126/science.adg7492)).
-#'
-#' The processed dataset contains...
-#' 
-#' #' # Metadata
-#'
-#' The `colData` slot contains information about the cells and samples.
-#'
-#' The column metadata for called cells contains:
+
+#' The columns contain:
 #' \describe{
 #' \item{\code{barcode}:}{Character, unique cell identifier.}
 #' \item{\code{nCount_RNA}:}{Numeric, number of RNA transcripts.}
@@ -41,16 +36,16 @@
 #' \emph{Science} 391, eadg7492. DOI:10.1126/science.adg7492.
 #' 
 #' @examples
-#' data <- AlphaMissense_Supplementary()
-#' data_meta <- AlphaMissense_Supplementary(metadata = TRUE)
+#' data <- AlphaMissense_scores()
+#' data_meta <- AlphaMissense_scores(metadata = TRUE)
 #' 
-AlphaMissense_Supplementary <- function (metadata = FALSE)
+AlphaMissense_scores <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()
-    title <- "AM_csv"
+    title <- "ProteinGymR"
     
     eh <- AnnotationHub::query(eh, title)
-    ehid <- eh$ah_id
+    ehid <- "EH9554"
     
     if (metadata == TRUE) {
         eh[ehid]
