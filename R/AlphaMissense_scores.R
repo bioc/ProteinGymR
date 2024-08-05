@@ -8,7 +8,7 @@
 #' 
 #' @details 
 #' This function loads in the AlphaMissense information for variants in 
-#' ProteinGym. Data table derived from the AlphaMissense publication by 
+#' ProteinGym. Data table from the AlphaMissense publication by 
 #' Cheng et al.
 #' ([2023](https://www.science.org/doi/10.1126/science.adg7492)).
 
