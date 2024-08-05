@@ -9,7 +9,7 @@
 #' @details 
 #' This function loads in the ProteinGym deep mutational scanning assays (DMS) 
 #' scores for substitutions in 216 studies. The data is provided by Notin et. al
-#' [(2022)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10723403/).
+#' [(2023)](https://papers.nips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html).
 #'
 #'
 #' Each assay includes 6 columns:
@@ -31,11 +31,14 @@
 #'@author Tram Nguyen
 #'
 #' @references
-#' P. Notin, M. Dias, J. Frazer, J. Marchena Hurtado, A. N. Gomez, D. Marks, 
-#' Y. Gal, Tranception: Protein fitness prediction with autoregressive 
-#' transformers and inference-time retrieval. \emph{Proc. Mach. Learn. Res}.
-#' 162, 16990–17017 (2022).
-#' 
+#' Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., Spinner, H., 
+#' Rollins, N., Shaw, A., Orenbuch, R., Weitzman, R., Frazer, J., Dias, M., 
+#' Franceschi, D., Gal, Y., & Marks, D. (2023). ProteinGym: Large-Scale 
+#' Benchmarks for Protein Fitness Prediction and Design. In A. Oh, T. Neumann, 
+#' A. Globerson, K. Saenko, M. Hardt, & S. Levine (Eds.), Advances in Neural 
+#' Information Processing Systems (Vol. 36, pp. 64331-64379). 
+#' Curran Associates, Inc.
+#'
 #' @examples
 #' data <- ProteinGym_DMS_subs()
 #' data_meta <- ProteinGym_DMS_subs(metadata = TRUE)
