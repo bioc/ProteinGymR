@@ -7,9 +7,9 @@
 #' Returns a [data.frame()] object.
 #' 
 #' @details 
-#' This function loads in the AlphaMissense information for variants in 
-#' ProteinGym. Data table from the AlphaMissense publication by 
-#' Cheng et al.
+#' This function loads in the AlphaMissense information for substitutions 
+#' matching those in the ProteinGym DMS assays. The table is taken from the 
+#' AlphaMissense Supplementary Data by Cheng et al.
 #' ([2023](https://www.science.org/doi/10.1126/science.adg7492)).
 
 #' The columns contain:

@@ -2,7 +2,7 @@
 % Please edit documentation in R/DMS_substitutions.R
 \name{DMS_substitutions}
 \alias{DMS_substitutions}
-\title{Load ProteinGym DMS Substitutions Scores}
+\title{Load ProteinGym DMS Substitution Scores}
 \usage{
 DMS_substitutions(metadata = FALSE)
 }
@@ -14,7 +14,7 @@ Default behavior is to return processed data with metadata included.}
 Returns a \code{\link[=list]{list()}} object of 216 individual assays.
 }
 \description{
-Load ProteinGym DMS Substitutions Scores
+Load ProteinGym DMS Substitution Scores
 }
 \details{
 This function loads in the ProteinGym deep mutational scanning assays (DMS)

@@ -1,4 +1,4 @@
-#' Load ProteinGym DMS Substitutions Scores
+#' Load ProteinGym DMS Substitution Scores
 #'
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
@@ -28,7 +28,7 @@
 #'    above the fitness cutoff (1 is fit, 0 is not fit).}
 #'}
 #'
-#'@author Tram Nguyen
+#' @author Tram Nguyen
 #'
 #' @references
 #' Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., Spinner, H., 

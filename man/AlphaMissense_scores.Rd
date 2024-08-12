@@ -17,9 +17,9 @@ Returns a \code{\link[=data.frame]{data.frame()}} object.
 Load AlphaMissense scores for ProteinGym variants
 }
 \details{
-This function loads in the AlphaMissense information for variants in
-ProteinGym. Data table from the AlphaMissense publication by
-Cheng et al.
+This function loads in the AlphaMissense information for substitutions
+matching those in the ProteinGym DMS assays. The table is taken from the
+AlphaMissense Supplementary Data by Cheng et al.
 (\href{https://www.science.org/doi/10.1126/science.adg7492}{2023}).
 The columns contain:
 \describe{
