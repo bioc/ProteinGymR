@@ -15,7 +15,7 @@ suppressMessages(library(UniProt.ws))
 suppressMessages(library(org.Hs.eg.db))
 ```
 
-# Download processed data
+# Download data
 
 All datasets were downloaded from
 [ProteinGym.org](%22ProteinGym.org%22). Specifically, the substitution
