@@ -29,39 +29,37 @@ data were accessed from
 ProteinGym is a collection of benchmarks aiming at comparing the ability
 of models to predict the effects of protein mutations, and were curated by 
 Notin et al. 
-[2023](https://www.biorxiv.org/content/10.1101/2023.12.07.570727v1.full). 
+[2023](https://papers.nips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html). 
 One component of ProteinGym is the Deep Mutational Scanning (DMS) assays that 
 can serve as ground truth for assessing variant predictions.
 
 The substitution benchmark consists of more than 2.5M variants from 217 assays.
 We provide these assays in a list object, with the exception of the 
-"ANCSZ_Hobbs_2022" assay, which comprised a manual reconstruction by the authors 
-and thus had no matching UniProt accession. Thus, the object is a with 216 
-elements, each corresponding to a data.frame for the single DMS assay. Each 
-table contains the following variables:
+"ANCSZ_Hobbs_2022" assay, which comprised a manual protein reconstruction by the 
+original authors and thus had no matching UniProt accession. Therefore, this 
+list contains a total of 216 elements, each corresponding to a data.frame for 
+a single DMS assay. Each data.frame contains the following columns:
+
+**UniProt_id (str):** UniProt accession identifier for the protein.
+
+**DMS_id (str):** DMS assay identifier, describing the protein and original
+authors generating the experiment data. This field matches the names of the 
+original .csv files downloaded from ProteinGym.org for each corresponding assay.
 
 **mutant (str):** describes the set of substitutions to apply on the
 reference sequence to obtain the mutated sequence (eg., A1P:D2N implies
 the amino acid 'A' at position 1 should be replaced by 'P', and 'D' at
-position 2 should be replaced by 'N'). Present in the the ProteinGym
-substitution benchmark only (not indels).
+position 2 should be replaced by 'N').
 
 **mutated_sequence (str):** represents the full amino acid sequence for
 the mutated protein.
 
 **DMS_score (float):** corresponds to the experimental measurement in
-the DMS assay. Across all assays, the higher the DMS_score value, the
-higher the fitness of the mutated protein. This column is not present in
-the clinical files, since they are classified as benign/pathogenic, and
-do not have continuous scores DMS_score_bin
+the DMS assay. Higher DMS_score values are associated with higher fitness of 
+the mutated protein.
 
--   Higher DMS_score = more pathogenic. Affects fitness more.
-
-**DMS_score_bin (int):** indicates whether the DMS_score is above the fitness cutoff
-(1 is fit (pathogenic for clinical variants), 0 is not fit (benign for
-clinical variants))
-
--   Binary based on cutoff whether impacts fitness or not.
+**DMS_score_bin (int):** indicates whether the DMS_score is above the fitness 
+cutoff defined by ProteinGym (1 is fit, 0 is not fit).
 
 
 # Load in all ProteinGym assays
@@ -131,12 +129,12 @@ cdf$entry[which(cdf$pg_names == "PSAE_SYNP2")] <- "PSAE_SYNP2"
 ```
 
 The "ANCSZ_Hobbs" assay is a DMS of an ancestral reconstruction of the
-Syk-family kinases, AncSZ, that the [Hobbs et al.
+Syk-family kinases, AncSZ, that [Hobbs et al.
 2022](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9601881/) manually
 curated. It is an ancestral sequence reconstruction to generate a spleen
 tyrosine kinase (Syk), and therefore does not have an established
-UniProt accession ID. For this dataset, we will remove this assay from
-our data.
+UniProt accession ID. For this protein, we will remove this assay from
+our data, resulting in 216 total DMS assays for this resource.
 
 ```{r}
 # Remove it from the accession list
