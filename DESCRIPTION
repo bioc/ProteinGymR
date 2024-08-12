@@ -7,9 +7,13 @@ Authors@R:
         email = "Tram_Nguyen@hms.harvard.edu",
         comment = c(ORCID = "0000-0003-4809-6227"))
 Description: The ProteinGymR package provides analysis-ready data
-    resources from ProteinGym, a database of benchmarks and deep mutational 
-    scanning assays curated and processed by Notin et al. 2023. This package
-    provides programmatic access of ProteinGym resources through ExperimentHub.
+    resources related to ProteinGym, a database of benchmarks and deep 
+    mutational scanning assays (DMS) curated and processed by Notin et al. 2023. 
+    This package provides programmatic access of ProteinGym resources through 
+    ExperimentHub. Currently, this package contains 1. Deep mutational 
+    scanning (DMS) scores generated from single substitution mutations across 
+    216 assays and 2. predicted AlphaMissense pathogenicity scores for ~1.6M 
+    substitutions matching those in the ProteinGym DMS data.
 License: Artistic-2.0
 URL: https://github.com/ccb-hms/ProteinGymR
 BugReports: https://github.com/ccb-hms/ProteinGymR/issues
