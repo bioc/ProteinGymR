@@ -1,0 +1,15 @@
+---
+title: "NEWS"
+author: "Tram Nguyen"
+date: "2024-08-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# ProteinGymR 0.99.0
+- DMS substitution scores for 216 assays added to ExperimentHub
+- AlphaMissense pathogenicity scores for ProteinGym mutations added to 
+ExperimentHub
