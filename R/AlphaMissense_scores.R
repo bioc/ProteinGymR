@@ -22,7 +22,7 @@
 #' \item{\code{AlphaMissense}:}{Numeric, AlphaMissense pathogenicity score.}
 #'}
 #'
-#'@author Tram Nguyen
+#' @author Tram Nguyen
 #'
 #' @references
 #' Cheng et al. (2023)
