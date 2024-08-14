@@ -27,41 +27,18 @@ data were accessed from
 # ProteinGym information
 
 ProteinGym is a collection of benchmarks aiming at comparing the ability
-of models to predict the effects of protein mutations, and were curated by 
-Notin et al. 
+of models to predict the effects of protein mutations, and were curated
+by Notin et al. 
 [2023](https://papers.nips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html). 
 One component of ProteinGym is the Deep Mutational Scanning (DMS) assays
 that can serve as ground truth for assessing variant predictions.
 
 The substitution benchmark consists of more than 2.5M variants from 217
-assays.
-We provide these assays in a list object, with the exception of the 
-"ANCSZ_Hobbs_2022" assay, which comprised a manual protein reconstruction by
-the original authors and thus had no matching UniProt accession. Therefore,
-this list contains a total of 216 elements, each corresponding to a
-data.frame for a single DMS assay. Each data.frame contains the following
-columns:
-
-**UniProt_id (str):** UniProt accession identifier for the protein.
-
-**DMS_id (str):** DMS assay identifier, describing the protein and original
-authors generating the experiment data. This field matches the names of the 
-original .csv files downloaded from ProteinGym.org for each corresponding assay.
-
-**mutant (str):** describes the set of substitutions to apply on the
-reference sequence to obtain the mutated sequence (eg., A1P:D2N implies
-the amino acid 'A' at position 1 should be replaced by 'P', and 'D' at
-position 2 should be replaced by 'N').
-
-**mutated_sequence (str):** represents the full amino acid sequence for
-the mutated protein.
-
-**DMS_score (float):** corresponds to the experimental measurement in
-the DMS assay. Higher DMS_score values are associated with higher fitness of
-the mutated protein.
-
-**DMS_score_bin (int):** indicates whether the DMS_score is above the
-fitness cutoff defined by ProteinGym (1 is fit, 0 is not fit).
+assays.We provide these assays in a list object, with the exception of
+the "ANCSZ_Hobbs_2022" assay, which comprised a manual protein
+reconstruction by the original authors and thus had no matching UniProt
+accession. Therefore, this list contains a total of 216 elements, each
+corresponding to a data.frame for a single DMS assay. 
 
 # Load in all ProteinGym assays
 
@@ -77,7 +54,7 @@ ProGym_files <- list.files(path=MAVE.dir, full.names=F)
 ProGym_names <- sub(".csv", "", ProGym_files) 
 
 # Load in all the files as tables in a list
-ProGym_tables <- suppressMessages(lapply(paste0(MAVE.dir, ProGym_files), 
+ProGym_tables <- suppressMessages(lapply(paste0(MAVE.dir, ProGym_files),
                                          read_csv, show_col_types = FALSE))
 
 # Assign respective MAVE study names to each list element
@@ -184,14 +161,40 @@ ProGym_tables <- lapply(ProGym_tables, function(df) {
 })
 ```
 
+Changed tibble to data.frames.
+```{r}
+ProGym_tables <- lapply(ProGym_tables, as.data.frame)
+```
+
 Returns a list of 216 unique DMS assays, each with 6 columns:
 "UniProt_id","DMS_id","mutant","mutated_sequence","DMS_score","DMS_score_bin".
+
+**UniProt_id (str):** UniProt accession identifier for the protein.
+
+**DMS_id (str):** DMS assay identifier, describing the protein and original
+authors generating the experiment data. This field matches the names of the 
+original .csv files downloaded from ProteinGym.org for each corresponding assay.
+
+**mutant (str):** describes the set of substitutions to apply on the
+reference sequence to obtain the mutated sequence (eg., A1P:D2N implies
+the amino acid 'A' at position 1 should be replaced by 'P', and 'D' at
+position 2 should be replaced by 'N').
+
+**mutated_sequence (str):** represents the full amino acid sequence for
+the mutated protein.
+
+**DMS_score (float):** corresponds to the experimental measurement in
+the DMS assay. Higher DMS_score values are associated with higher fitness of
+the mutated protein.
+
+**DMS_score_bin (int):** indicates whether the DMS_score is above the
+fitness cutoff defined by ProteinGym (1 is fit, 0 is not fit).
 
 
 # Write ProteinGym DMS list to RDS object
 
 ```{r, eval=FALSE}
-saveRDS(ProGym_tables, "ProteinGym/ProGym216_DMS_subs_v1.rds"))
+saveRDS(ProGym_tables, "ProGym216_DMS_subs_v1.rds")
 ```
 
 # SessionInfo
