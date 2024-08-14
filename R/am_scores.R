@@ -30,11 +30,11 @@
 #' \emph{Science} 391, eadg7492. DOI:10.1126/science.adg7492.
 #' 
 #' @examples
-#' data <- AlphaMissense_scores()
-#' data_meta <- AlphaMissense_scores(metadata = TRUE)
+#' data <- am_scores()
+#' data_meta <- am_scores(metadata = TRUE)
 #' 
 #' @export
-AlphaMissense_scores <- function (metadata = FALSE)
+am_scores <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()
     title <- "ProteinGymR"
