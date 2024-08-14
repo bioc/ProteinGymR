@@ -1,4 +1,6 @@
-#' ProteinGym Deep Mutational Scanning (DMS) Scores for Substitutions
+#' @rdname ProteinGym_DMS
+#' 
+#' @title ProteinGym Deep Mutational Scanning (DMS) Scores for Substitutions
 #'
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
@@ -42,7 +44,7 @@
 #' data_meta <- dms_substitution(metadata = TRUE)
 #' 
 #' @export
-dms_substitution <- function (metadata = FALSE)
+dms_substitutions <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()
     title <- "ProteinGymR"
