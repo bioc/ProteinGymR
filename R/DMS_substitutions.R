@@ -40,11 +40,11 @@
 #' Curran Associates, Inc.
 #'
 #' @examples
-#' data <- ProteinGym_DMS_subs()
-#' data_meta <- ProteinGym_DMS_subs(metadata = TRUE)
+#' data <- dms_substitutions()
+#' data_meta <- dms_substitutions(metadata = TRUE)
 #' 
 #' @export
-DMS_substitutions <- function (metadata = FALSE)
+dms_substitutions <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()
     title <- "ProteinGymR"
