@@ -7,8 +7,8 @@
 AlphaMissense_Supplementary <- data.frame(
     Title = "AlphaMissense pathogenicity scores for variants in ProteinGym",
     Description = paste("Supplementary table from Cheng et al. 2023 containing",
-                        "AlphaMissense pathogenicity scores for variants",
-                        "found in ProteinGym"),
+                        "AlphaMissense pathogenicity scores for mutations",
+                        "found in ProteinGym DMS substitution data"),
     BiocVersion = "3.20",
     Genome = NA,
     SourceType = "RDS",
