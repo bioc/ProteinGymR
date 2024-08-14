@@ -3,14 +3,11 @@
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
 #'
-#' @return 
-#' Returns a [list()] object of 216 individual assays.
-#' 
 #' @details 
 #' This function loads in the ProteinGym deep mutational scanning assays (DMS) 
 #' scores for substitutions in 216 studies. The data is provided by Notin et. al
 #' 2023. See reference for details.
-#'
+#' 
 #' Each assay includes 6 columns:
 #' \describe{
 #' \item{\code{UniProt_id}:}{Character, UniProt accession identifier.}
@@ -27,6 +24,8 @@
 #'    above the fitness cutoff (1 is fit, 0 is not fit).}
 #'}
 #'
+#' @return Returns a [list()] object of 216 individual assays.
+#' 
 #' @author Tram Nguyen
 #'
 #' @references
@@ -37,13 +36,13 @@
 #' A. Globerson, K. Saenko, M. Hardt, & S. Levine (Eds.), Advances in Neural 
 #' Information Processing Systems (Vol. 36, pp. 64331-64379). 
 #' Curran Associates, Inc.
-#'
+#' 
 #' @examples
-#' data <- dms_substitutions()
-#' data_meta <- dms_substitutions(metadata = TRUE)
+#' data <- dms_substitution()
+#' data_meta <- dms_substitution(metadata = TRUE)
 #' 
 #' @export
-dms_substitutions <- function (metadata = FALSE)
+dms_substitution <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()
     title <- "ProteinGymR"
