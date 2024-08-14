@@ -1,4 +1,4 @@
-#' Load AlphaMissense scores for ProteinGym variants
+#' AlphaMissense scores for ProteinGym variants
 #'
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
