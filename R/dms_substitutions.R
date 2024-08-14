@@ -1,4 +1,4 @@
-#' Load ProteinGym DMS Substitution Scores
+#' ProteinGym Deep Mutational Scanning (DMS) Scores for Substitutions
 #'
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
