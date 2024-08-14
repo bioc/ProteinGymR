@@ -9,8 +9,7 @@
 #' @details 
 #' This function loads in the ProteinGym deep mutational scanning assays (DMS) 
 #' scores for substitutions in 216 studies. The data is provided by Notin et. al
-#' [(2023)](https://papers.nips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html).
-#'
+#' 2023. See reference for details.
 #'
 #' Each assay includes 6 columns:
 #' \describe{

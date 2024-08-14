@@ -9,9 +9,9 @@
 #' @details 
 #' This function loads in the AlphaMissense information for substitutions 
 #' matching those in the ProteinGym DMS assays. The table is taken from the 
-#' AlphaMissense Supplementary Data by Cheng et al.
-#' ([2023](https://www.science.org/doi/10.1126/science.adg7492)).
-
+#' AlphaMissense Supplementary Data by Cheng et al. 2023. See reference for 
+#' details.
+#'
 #' The columns contain:
 #' \describe{
 #' \item{\code{DMS_id}:}{Character, ProteinGym assay identifier.}
