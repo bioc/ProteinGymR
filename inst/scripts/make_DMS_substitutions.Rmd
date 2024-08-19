@@ -1,7 +1,7 @@
 ---
 title: "make_ProteinGym_DMS_substitutions"
 author: "Tram Nguyen"
-date: "2024-08-12"
+date: "2024-08-19"
 output: html_document
 editor_options: 
   markdown: 
@@ -62,23 +62,16 @@ names(ProGym_tables) <- ProGym_names
 
 # Combine all of the dataframes together with each df name as a new column:
 # `DMS_id` is the protein entry name with ProteinGym experiment names
-add_name_column <- function(df, name) {
-  df %>% mutate(DMS_id = name)
-}
-
-# Apply the function to each data frame in the list
-ProGym_tables <- lapply(names(ProGym_tables), function(name) {
-  add_name_column(ProGym_tables[[name]], name)
+ProGym_tables <- purrr::map2(ProGym_tables, ProGym_names, ~ {
+  .x %>%
+    mutate(DMS_id = .y)
 })
-
-# Reassign the names to the list
-names(ProGym_tables) <- ProGym_names
 ```
 
 # Convert ProteinGym's Entry Names to UniProt Accession
 
 ```{r}
-# Grab the protein Entry Name from ProteinGym assays by extracting only the 
+# Grab the protein Entry Name from ProteinGym assays by extracting only the
 entryNames <- strsplit(names(ProGym_tables), split = "_", fixed = TRUE)
 
 # Function to grab SwissProt ID from DMS names (first and second elements)
@@ -121,31 +114,21 @@ cdf <- na.omit(cdf)
 # Remove ANCSZ_Hobbs
 ProGym_tables[["ANCSZ_Hobbs_2022"]] <- NULL
 
-# update the PG study names without Hobbs -- Used later
+# Grab PG study names without Hobbs -- Used later
 ProGym_names <- names(ProGym_tables)
 ```
 
 # Add a column in the ProteinGym data with UniProt Accession
 
 ```{r}
-# Assign respective UniProt names to each list element - to do next function
-names(ProGym_tables) <- cdf$accessions
-
 # For each assay, mutate a new UniProt ID column
-add_name_column <- function(df, name) {
-  df %>% mutate(UniProt_id = name)
-}
+uniprot_vec <- cdf$accessions
 
-# Apply the function to each data frame in the list
-ProGym_tables <- lapply(names(ProGym_tables), function(name) {
-  add_name_column(ProGym_tables[[name]], name)
+ProGym_tables <- purrr::map2(ProGym_tables, uniprot_vec, ~ {
+    .x %>%
+    mutate(UniProt_id = .y)
 })
 
-# Reassign the DMS study names to the list elements
-names(ProGym_tables) <- ProGym_names
-```
-
-```{r}
 # Reorder the columns
 cols <- c("UniProt_id", "DMS_id", "mutant", "mutated_sequence", 
           "DMS_score", "DMS_score_bin")
@@ -156,7 +139,7 @@ ProGym_tables <- lapply(ProGym_tables, function(df) {
 
 # Make "DMS_score_bin" factor
 ProGym_tables <- lapply(ProGym_tables, function(df) {
-  df %>%
+    df %>%
     mutate(DMS_score_bin = factor(DMS_score_bin))
 })
 ```
@@ -194,7 +177,7 @@ fitness cutoff defined by ProteinGym (1 is fit, 0 is not fit).
 # Write ProteinGym DMS list to RDS object
 
 ```{r, eval=FALSE}
-saveRDS(ProGym_tables, "ProGym216_DMS_subs_v1.rds")
+saveRDS(ProGym_tables, "ProGym216_DMS_subs_v2.rds")
 ```
 
 # SessionInfo
