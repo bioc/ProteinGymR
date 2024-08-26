@@ -17,11 +17,13 @@ Returns a \code{\link[=list]{list()}} object of 216 individual assays.
 ProteinGym Deep Mutational Scanning (DMS) Scores for Substitutions
 }
 \details{
-This function loads in the ProteinGym deep mutational scanning assays (DMS)
-scores for substitutions in 216 studies. The data is provided by Notin et. al
-2023. See reference for details.
+\code{dms_substitutions()} loads in ProteinGym deep mutational scanning
+assays (DMS) scores for substitutions in 216 studies. The data is
+provided by Notin et. al 2023. See reference for details.
 
-Each assay includes 6 columns:
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Each assay includes 6 columns:
+}\if{html}{\out{</div>}}
+
 \describe{
 \item{\code{UniProt_id}:}{Character, UniProt accession identifier.}
 \item{\code{DMS_id}:}{Character, ProteinGym assay identifier.}
@@ -38,8 +40,8 @@ above the fitness cutoff (1 is fit, 0 is not fit).}
 }
 }
 \examples{
-data <- dms_substitution()
-data_meta <- dms_substitution(metadata = TRUE)
+data <- dms_substitutions()
+data_meta <- dms_substitutions(metadata = TRUE)
 
 }
 \references{
@@ -50,7 +52,4 @@ Benchmarks for Protein Fitness Prediction and Design. In A. Oh, T. Neumann,
 A. Globerson, K. Saenko, M. Hardt, & S. Levine (Eds.), Advances in Neural
 Information Processing Systems (Vol. 36, pp. 64331-64379).
 Curran Associates, Inc.
-}
-\author{
-Tram Nguyen
 }

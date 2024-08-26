@@ -11,16 +11,16 @@ am_scores(metadata = FALSE)
 Default behavior is to return processed data with metadata included.}
 }
 \value{
-Returns a \code{\link[=data.frame]{data.frame()}} object.
+Returns a \code{\link[=data.frame]{data.frame()}}.
 }
 \description{
 AlphaMissense scores for ProteinGym variants
 }
 \details{
-This function loads in the AlphaMissense information for substitutions
-matching those in the ProteinGym DMS assays. The table is taken from the
-AlphaMissense Supplementary Data by Cheng et al. 2023. See reference for
-details.
+\code{am_scores()} loads in the AlphaMissense pathogencity scores for
+substitutions matching those in the ProteinGym DMS assays. The table is taken
+from the AlphaMissense Supplementary Data by Cheng et al. 2023.
+See reference for details.
 
 The columns contain:
 \describe{
@@ -41,7 +41,4 @@ data_meta <- am_scores(metadata = TRUE)
 Cheng et al. (2023)
 Accurate proteome-wide missense variant effect prediction with AlphaMissense.
 \emph{Science} 391, eadg7492. DOI:10.1126/science.adg7492.
-}
-\author{
-Tram Nguyen
 }

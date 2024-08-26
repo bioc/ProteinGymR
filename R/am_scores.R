@@ -2,15 +2,11 @@
 #'
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
-#'
-#' @return 
-#' Returns a [data.frame()] object.
 #' 
-#' @details 
-#' This function loads in the AlphaMissense information for substitutions 
-#' matching those in the ProteinGym DMS assays. The table is taken from the 
-#' AlphaMissense Supplementary Data by Cheng et al. 2023. See reference for 
-#' details.
+#' @details `am_scores()` loads in the AlphaMissense pathogencity scores for 
+#' substitutions matching those in the ProteinGym DMS assays. The table is taken 
+#' from the AlphaMissense Supplementary Data by Cheng et al. 2023. 
+#' See reference for details.
 #'
 #' The columns contain:
 #' \describe{
@@ -22,8 +18,8 @@
 #' \item{\code{AlphaMissense}:}{Numeric, AlphaMissense pathogenicity score.}
 #'}
 #'
-#' @author Tram Nguyen
-#'
+#' @return Returns a [data.frame()].
+#' 
 #' @references
 #' Cheng et al. (2023)
 #' Accurate proteome-wide missense variant effect prediction with AlphaMissense. 
@@ -37,9 +33,6 @@
 am_scores <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()
-    title <- "ProteinGymR"
-    
-    eh <- AnnotationHub::query(eh, title)
     ehid <- "EH9554"
     
     if (metadata == TRUE) {

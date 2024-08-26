@@ -5,12 +5,11 @@
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
 #'
-#' @details 
-#' This function loads in the ProteinGym deep mutational scanning assays (DMS) 
-#' scores for substitutions in 216 studies. The data is provided by Notin et. al
-#' 2023. See reference for details.
+#' @details `dms_substitutions()` loads in ProteinGym deep mutational scanning 
+#'     assays (DMS) scores for substitutions in 216 studies. The data is 
+#'     provided by Notin et. al 2023. See reference for details.
 #' 
-#' Each assay includes 6 columns:
+#'     Each assay includes 6 columns:
 #' \describe{
 #' \item{\code{UniProt_id}:}{Character, UniProt accession identifier.}
 #' \item{\code{DMS_id}:}{Character, ProteinGym assay identifier.}
@@ -27,8 +26,6 @@
 #'}
 #'
 #' @return Returns a [list()] object of 216 individual assays.
-#' 
-#' @author Tram Nguyen
 #'
 #' @references
 #' Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., Spinner, H., 
@@ -40,16 +37,13 @@
 #' Curran Associates, Inc.
 #' 
 #' @examples
-#' data <- dms_substitution()
-#' data_meta <- dms_substitution(metadata = TRUE)
+#' data <- dms_substitutions()
+#' data_meta <- dms_substitutions(metadata = TRUE)
 #' 
 #' @export
 dms_substitutions <- function (metadata = FALSE)
 {
     eh <- ExperimentHub::ExperimentHub()
-    title <- "ProteinGymR"
-    
-    eh <- AnnotationHub::query(eh, title)
     ehid <- "EH9555"
     
     if (metadata == TRUE) {
