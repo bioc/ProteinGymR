@@ -128,9 +128,9 @@ ACE2 <-
 # Create the heatmap
 ACE2 |> ggplot(aes(x = pos, y = alt, fill = DMS_score)) +
     geom_tile() +
-    scale_fill_gradient2(low = "blue", 
+    scale_fill_gradient2(low = "#2166AC", 
         mid = "white", 
-        high = "red", 
+        high = "#B2182B", 
         midpoint = 0,
         na.value = "grey") +
     theme_minimal() +
@@ -165,9 +165,9 @@ ADRB2 <-
 # Create the heatmap
 ADRB2 |> ggplot(aes(x = pos, y = alt, fill = DMS_score)) +
     geom_tile() +
-    scale_fill_gradient2(low = "blue", 
+    scale_fill_gradient2(low = "#2166AC", 
         mid = "white", 
-        high = "red", 
+        high = "#B2182B", 
         midpoint = 0,
         na.value = "grey") +
     theme_minimal() +
