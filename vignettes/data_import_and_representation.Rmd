@@ -1,15 +1,15 @@
 ---
-title: "Importation and representation of ProteinGym data"
+title: "Importation and visualization of ProteinGym DMS data"
 author: 
     - name: Tram Nguyen
-      affiliation: Center for Computational Biomedicine, Harvard Medical School
+      affiliation: Core for Computational Biomedicine, Harvard Medical School
       email: Tram_Nguyen@hms.harvard.edu
     - name: Pascal Notin
       affiliation: Computer Science, University of Oxford
     - name: Aaron W Kollasch
       affiliation: Systems Biology, Harvard Medical School
     - name: Ludwig Geistlinger
-      affiliation: Center for Computational Biomedicine, Harvard Medical School
+      affiliation: Core for Computational Biomedicine, Harvard Medical School
 package: ProteinGymR
 output:
     BiocStyle::html_document:
@@ -52,6 +52,10 @@ Now, load the package and dependencies used in the vignette.
 
 ```{r, message = FALSE}
 library(ProteinGymR)
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
 ```
 
 # Introduction
@@ -103,6 +107,84 @@ View an example of one DMS assay.
 ```{r view assay}
 head(dms_data[[1]])
 ```
+
+# Exploration and visualization
+
+Explore an assay and create a heatmap of the DMS scores.
+```{r ACE2, warning=FALSE, fig.wide = TRUE}
+ACE2 <- dms_data[["ACE2_HUMAN_Chan_2020"]]
+
+# Grab the reference amino acid
+ACE2 <- 
+    ACE2 |>
+    dplyr::mutate(
+        ref = str_sub(ACE2$mutant, 1, 1),
+        pos = as.integer(
+            gsub(".*?([0-9]+).*", "\\1", ACE2$mutant)
+            ),
+        alt = str_sub(ACE2$mutant, -1)
+    )
+
+# Create the heatmap
+ACE2 |> ggplot(aes(x = pos, y = alt, fill = DMS_score)) +
+    geom_tile() +
+    scale_fill_gradient2(low = "blue", 
+        mid = "white", 
+        high = "red", 
+        midpoint = 0,
+        na.value = "grey") +
+    theme_minimal() +
+    xlim(20, 60) +
+    xlab("Position") + ylab("Mutant residue") +
+    labs(title = paste0("UniProt ID: ", unique(ACE2$UniProt_id))) +
+    theme(
+            axis.text.x = element_text(size = 16),
+            axis.text.y = element_text(size = 16),
+            axis.title.y = element_text(size = 16, vjust = 2),
+            axis.title.x = element_text(size = 16, vjust = 0),
+            legend.title = element_text(size = 16),
+            legend.text = element_text(size = 16)
+        )
+
+```
+
+```{r ADRB2, warning=FALSE, fig.wide = TRUE}
+ADRB2 <- dms_data[["ADRB2_HUMAN_Jones_2020"]]
+
+# Grab the reference amino acid
+ADRB2 <- 
+    ADRB2 |>
+    dplyr::mutate(
+        ref = str_sub(ADRB2$mutant, 1, 1),
+        pos = as.integer(
+            gsub(".*?([0-9]+).*", "\\1", ADRB2$mutant)
+            ),
+        alt = str_sub(ADRB2$mutant, -1)
+    )
+
+# Create the heatmap
+ADRB2 |> ggplot(aes(x = pos, y = alt, fill = DMS_score)) +
+    geom_tile() +
+    scale_fill_gradient2(low = "blue", 
+        mid = "white", 
+        high = "red", 
+        midpoint = 0,
+        na.value = "grey") +
+    theme_minimal() +
+    xlim(0, 50) +
+    xlab("Position") + ylab("Mutant residue") +
+    labs(title = paste0("UniProt ID: ", unique(ADRB2$UniProt_id))) +
+    theme(
+            axis.text.x = element_text(size = 16),
+            axis.text.y = element_text(size = 16),
+            axis.title.y = element_text(size = 16, vjust = 2),
+            axis.title.x = element_text(size = 16, vjust = 0),
+            legend.title = element_text(size = 16),
+            legend.text = element_text(size = 16)
+        )
+    
+```
+
 
 # Reference
 
