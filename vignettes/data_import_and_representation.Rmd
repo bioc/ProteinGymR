@@ -130,7 +130,7 @@ ACE2 |> ggplot(aes(x = pos, y = alt, fill = DMS_score)) +
     geom_tile() +
     scale_fill_gradient2(low = "#2166AC", 
         mid = "white", 
-        high = "#B2182B", 
+        high = "#c60a00", 
         midpoint = 0,
         na.value = "grey") +
     theme_minimal() +
@@ -167,7 +167,7 @@ ADRB2 |> ggplot(aes(x = pos, y = alt, fill = DMS_score)) +
     geom_tile() +
     scale_fill_gradient2(low = "#2166AC", 
         mid = "white", 
-        high = "#B2182B", 
+        high = "#c60a00", 
         midpoint = 0,
         na.value = "grey") +
     theme_minimal() +
