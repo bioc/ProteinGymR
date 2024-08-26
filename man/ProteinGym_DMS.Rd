@@ -21,9 +21,7 @@ ProteinGym Deep Mutational Scanning (DMS) Scores for Substitutions
 assays (DMS) scores for substitutions in 216 studies. The data is
 provided by Notin et. al 2023. See reference for details.
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{Each assay includes 6 columns:
-}\if{html}{\out{</div>}}
-
+Each assay includes 6 columns:
 \describe{
 \item{\code{UniProt_id}:}{Character, UniProt accession identifier.}
 \item{\code{DMS_id}:}{Character, ProteinGym assay identifier.}

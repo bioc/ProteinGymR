@@ -1,3 +1,5 @@
+#' @rdname am_scores
+#' 
 #' @title AlphaMissense scores for ProteinGym variants
 #'
 #' @param metadata Logical, whether only experiment metadata should be returned.

@@ -9,7 +9,7 @@
 #'     assays (DMS) scores for substitutions in 216 studies. The data is 
 #'     provided by Notin et. al 2023. See reference for details.
 #' 
-#'     Each assay includes 6 columns:
+#' Each assay includes 6 columns:
 #' \describe{
 #' \item{\code{UniProt_id}:}{Character, UniProt accession identifier.}
 #' \item{\code{DMS_id}:}{Character, ProteinGym assay identifier.}
