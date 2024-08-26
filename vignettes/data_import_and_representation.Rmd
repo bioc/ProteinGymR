@@ -77,6 +77,7 @@ Furthermore, ProteinGym reports the performance of a diverse set of over 40
 high-performing models from various subfields (eg., mutation effects,
 inverse folding) into a unified benchmark.
 
+
 # Data
 
 The `ProteinGymR` package provides analysis-ready from and related to 
@@ -91,6 +92,21 @@ the impact of all possible amino acid substitutions across 186 proteins.
 2.  AlphaMissense pathogenicity scores for ~1.6 M substitutions in the
 ProteinGym DMS data.
 
+This vignette explores and visualizes the DMS scores from ProteinGym. On the
+simplest level, the large-scale mutational data that result from a deep
+mutational scan reveal the functional consequences of all possible single
+mutations. These data can be organized into a sequence-function map.
+Such a map can be viewed as an all-residue scan, in which each position has been
+mutated to every other amino acid. These maps are dense with information, with
+each position having a unique pattern of functional effects; most substitutions
+are likely to be deleterious, but a few may enhance activity. In addition to
+characterizing the effects of single mutations, deep mutational scanning can
+also examine the effects of multiple mutations. Collectively, these data can
+yield insights into protein structure and function, but gleaning these insights
+is a challenge for both experimental and computational biologists.
+
+We will create a sequence-function map for two assays from the ProteinGym 
+database. 
 
 # Load the DMS data from ExperimentHub
 
