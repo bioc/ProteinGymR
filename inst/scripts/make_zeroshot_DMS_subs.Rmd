@@ -9,6 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r, warning=FALSE}
+suppressMessages(library(purrr))
+```
+
 # Zero-shot benchmarking information
 
 In the zero-shot setting, experimental phenotypical measurements from
@@ -45,8 +49,8 @@ model if it gives its highest scores to sequences with the highest DMS value.
 Finally, we also calculate Top K Recall, where we select K to be the top 10% 
 of DMS values.
 
-For each metric, we provide a corresponding a .csv file. One loaded, each 
-data.frame contains the corrected average values for 67 models (columns) across 
+For each metric, we provide a corresponding data.frame. Each 
+data.frame contains the corrected average values for 62 models (columns) across 
 217 assays (rows) calculated on the DMS substitution provided in ProteinGym.
 
 # Download and process data
@@ -59,63 +63,51 @@ are downloaded from [ProteinGym](https://marks.hms.harvard.edu/proteingym/zero_s
 The script to run the calculation is provided [here](https://github.com/OATML-Markslab/ProteinGym/tree/main/scripts/scoring_DMS_zero_shot/performance_substitutions.sh).
 
 ```{r, eval = FALSE}
+# Load in datasets from ProteinGym Github repo
+AUC <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/AUC/DMS_substitutions_AUC_DMS_level.csv")
 
-url_prefix <- "https://github.com/OATML-Markslab/ProteinGym/blob/main/benchmarks/DMS_zero_shot/substitutions/"
+MCC <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/MCC/DMS_substitutions_MCC_DMS_level.csv")
 
-## AUC
-file_name <- "DMS_substitutions_AUC_DMS_level.csv"
+NDCG <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/NDCG/DMS_substitutions_NDCG_DMS_level.csv")
 
-download.file(
-    url = paste0(
-        url_prefix, "AUC/", file_name
-        ), 
-    destfile = paste0("/home/rstudio/ProteinGym_data/DMS_sub_benchmark_scores/", 
-        file_name)
-)
-
-## MCC
-file_name <- "DMS_substitutions_MCC_DMS_level.csv"
-
-download.file(
-    url = paste0(
-        url_prefix, "MCC/", file_name
-        ), 
-    destfile = paste0("/home/rstudio/ProteinGym_data/DMS_sub_benchmark_scores/", 
-        file_name)
-)
+Spearman <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/Spearman/DMS_substitutions_Spearman_DMS_level.csv")
     
-## NDCG
-file_name <- "DMS_substitutions_NDCG_DMS_level.csv"
+Top_recall <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/Top_recall/DMS_substitutions_Top_recall_DMS_level.csv")
 
-download.file(
-    url = paste0(
-        url_prefix, "NDCG/", file_name
-        ), 
-    destfile = paste0("/home/rstudio/ProteinGym_data/DMS_sub_benchmark_scores/", 
-        file_name)
-)   
+# Combine into a list object
+score_list <- list(AUC, MCC, NDCG, Spearman, Top_recall)
 
-## Spearman
-file_name <- "DMS_substitutions_Spearman_DMS_level.csv"
+# Change column names to underscores
+score_list <- map(score_list, ~ {
+  names(.x) <- gsub("\\.", "_", names(.x))
+  .x
+})
 
-download.file(
-    url = paste0(
-        url_prefix, "Spearman/", file_name
-        ), 
-    destfile = paste0("/home/rstudio/ProteinGym_data/DMS_sub_benchmark_scores/", 
-        file_name)
-)
+score_list <- map(score_list, ~ {
+  names(.x) <- gsub("__", "_", names(.x))
+  .x
+})
 
-## Top_recall
-file_name <- "DMS_substitutions_Top_recall_DMS_level.csv"
+score_list <- lapply(score_list, function(df) {
+  names(df) <- gsub("_$", "", names(df))
+  return(df)
+})
 
-download.file(
-    url = paste0(
-        url_prefix, "Top_recall/", file_name
-        ), 
-    destfile = paste0("/home/rstudio/ProteinGym_data/DMS_sub_benchmark_scores/", 
-        file_name)
-)
+# Check that each dataframe has same column and row names
+all(sapply(score_list[-1], 
+    function(df) identical(names(df), names(score_list[[1]]))))
+all(sapply(score_list[-1], 
+    function(df) identical(df[,1], score_list[[1]][,1])))
+
+# Add list element names
+names(score_list) <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
+```
+
+# Write model score for DMS list to RDS object
+
+```{r, eval=FALSE}
+saveRDS(score_list, 
+    "./ProteinGym_data/DMS_sub_benchmark_scores/zeroshot_DMS_subs_v1.rds")
 ```
 
 # Reference
