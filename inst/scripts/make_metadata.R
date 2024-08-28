@@ -25,8 +25,8 @@ AlphaMissense_Supplementary <- data.frame(
     stringsAsFactors = FALSE
 )
 
-# ProteinGym_DMS_substitutions
-ProteinGym_DMS_subs <- data.frame(
+# DMS_substitutions_scores
+DMS_substitutions_scores <- data.frame(
     Title = "ProteinGym deep mutational scanning (DMS) assays for substitutions",
     Description = paste("ProteinGym DMS information for 216 assays",
                          "from Notin et al. 2023"),
@@ -46,10 +46,33 @@ ProteinGym_DMS_subs <- data.frame(
     stringsAsFactors = FALSE
 )
 
+# Model_scores_DMS_subs
+Model_scores_DMS_subs <- data.frame(
+    Title = "ProteinGym zero-shot DMS substitution benchmarks",
+    Description = paste("Zero-shot DMS substitution benchmarks from Notin et",  
+                        "al. 2023 using Spearman, NDCG, AUC, MCC, and Top-K",
+                        "recall metrics"),
+    BiocVersion = "3.20",
+    Genome = NA,
+    SourceType = "RDS",
+    SourceUrl = "https://proteingym.org/",
+    SourceVersion = NA,
+    Species = NA,
+    TaxonomyId = NA,
+    Coordinate_1_based = TRUE,
+    DataProvider = "Marks Lab at Harvard Medical School",
+    Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",
+    RDataClass = "List",
+    DispatchClass = "RDS",
+    RDataPath = "ProteinGymR/zeroshot_DMS_subs_v1.rds",
+    stringsAsFactors = FALSE
+)
+
 # Combined meta-data
 df_all <- base::rbind(
     AlphaMissense_Supplementary, 
-    ProteinGym_DMS_subs
+    DMS_substitutions_scores,
+    Model_scores_DMS_subs
 )
 
 # Save .csv file
