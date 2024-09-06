@@ -1,0 +1,131 @@
+---
+title: "make_zeroshot_DMS_subs"
+author: "Tram Nguyen"
+date: "2024-08-28"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(width = 80)
+```
+
+```{r, warning=FALSE}
+suppressMessages(library(purrr))
+```
+
+# Zero-shot benchmarking information
+
+In the zero-shot setting, experimental phenotypical measurements from
+a given assay are predicted without having access to the labels at training
+time. Model performance was evaluted across 5 metrics:
+
+1. Spearman's rank correlation coefficient (primary metric)
+2. Area Under the ROC Curve (AUC)
+3. Matthews Correlation Coefficient (MCC) for bimodal DMS measurements
+4. Normalized Discounted Cumulative Gains (NDCG) for identifying the most 
+functional protein variants
+5. Top K Recall (top 10% of DMS values)
+
+To avoid placing too much weight on properties with many assays 
+(e.g., thermostability), these metrics were first calculated within groups 
+of assays that measure similar functions. The final value of the metric
+is then the average of these averages, giving each functional group equal 
+weight. The final values are referred to as the ‘corrected average’.
+
+Due to the often non-linear relationship between protein function and 
+organism fitness [Boucher et al., 2016](https://pubmed.ncbi.nlm.nih.gov/27010590/), 
+the Spearman’s rank correlation coefficient is the most generally appropriate 
+metric for model performance on experimental measurements. However, in 
+situations where DMS measurements exhibit a bimodal profile, rank correlations 
+may not be the optimal choice. Therefore, additional metrics are also provided, 
+such as the Area Under the ROC Curve (AUC) and the Matthews Correlation 
+Coefficient (MCC), which compare model scores with binarized experimental 
+measurements. Furthermore, for certain goals (e.g., optimizing functional 
+properties of designed proteins), it is more important that a model is able to 
+correctly identify the most functional protein variants, rather than properly 
+capture the overall distribution of all assayed variants. Thus, we also 
+calculate the Normalized Discounted Cumulative Gains (NDCG), which up-weights a 
+model if it gives its highest scores to sequences with the highest DMS value. 
+Finally, we also calculate Top K Recall, where we select K to be the top 10% 
+of DMS values.
+
+For each metric, we provide a corresponding data.frame. Each 
+data.frame contains the corrected average values for 62 models (columns) across 
+217 assays (rows) calculated on the DMS substitution provided in ProteinGym.
+
+# Download and process data
+
+The .csv files of benchmarking scores were downloaded from [the ProteinGym Github repo](https://github.com/OATML-Markslab/ProteinGym/tree/main/benchmarks/DMS_zero_shot/substitutions)
+(accessed 2024-08-28).
+
+Briefly, to calculate the DMS substitution benchmark metrics, the model scores 
+are downloaded from [ProteinGym](https://marks.hms.harvard.edu/proteingym/zero_shot_substitutions_scores.zip).
+The script to run the calculation is provided [here](https://github.com/OATML-Markslab/ProteinGym/tree/main/scripts/scoring_DMS_zero_shot/performance_substitutions.sh).
+
+```{r, eval = FALSE}
+# Load in datasets from ProteinGym Github repo
+AUC <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/AUC/DMS_substitutions_AUC_DMS_level.csv")
+
+MCC <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/MCC/DMS_substitutions_MCC_DMS_level.csv")
+
+NDCG <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/NDCG/DMS_substitutions_NDCG_DMS_level.csv")
+
+Spearman <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/Spearman/DMS_substitutions_Spearman_DMS_level.csv")
+    
+Top_recall <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/Top_recall/DMS_substitutions_Top_recall_DMS_level.csv")
+
+# Combine into a list object
+score_list <- list(AUC, MCC, NDCG, Spearman, Top_recall)
+
+# Change column names to underscores
+score_list <- map(score_list, ~ {
+  names(.x) <- gsub("\\.", "_", names(.x))
+  .x
+})
+
+score_list <- map(score_list, ~ {
+  names(.x) <- gsub("__", "_", names(.x))
+  .x
+})
+
+score_list <- lapply(score_list, function(df) {
+  names(df) <- gsub("_$", "", names(df))
+  return(df)
+})
+
+# Check that each dataframe has same column and row names
+all(sapply(score_list[-1], 
+    function(df) identical(names(df), names(score_list[[1]]))))
+all(sapply(score_list[-1], 
+    function(df) identical(df[,1], score_list[[1]][,1])))
+
+# Add list element names
+names(score_list) <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
+```
+
+# Write model score for DMS list to RDS object
+
+```{r, eval=FALSE}
+saveRDS(score_list, 
+    "./ProteinGym_data/DMS_sub_benchmark_scores/zeroshot_DMS_subs_v1.rds")
+```
+
+# Reference
+
+Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., Spinner, H., 
+Rollins, N., Shaw, A., Orenbuch, R., Weitzman, R., Frazer, J., Dias, M., 
+Franceschi, D., Gal, Y., & Marks, D. (2023). ProteinGym: Large-Scale 
+Benchmarks for Protein Fitness Prediction and Design. In A. Oh, T. Neumann, 
+A. Globerson, K. Saenko, M. Hardt, & S. Levine (Eds.), Advances in Neural 
+Information Processing Systems (Vol. 36, pp. 64331-64379). 
+Curran Associates, Inc.
+
+Boucher, J. I., Bolon, D. N., and Tawfik, D. S. Quantifying and understanding 
+the fitness effects of protein mutations: Laboratory versus nature. 
+Protein Science, 25(7):12191226, 2016.
+
+# SessionInfo
+
+```{r}
+sessionInfo()
+```
