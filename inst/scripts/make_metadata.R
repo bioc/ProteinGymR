@@ -46,8 +46,8 @@ DMS_substitutions_scores <- data.frame(
     stringsAsFactors = FALSE
 )
 
-# Model_scores_DMS_subs
-Model_scores_DMS_subs <- data.frame(
+# Zeroshot_scores_DMS_subs
+zeroshot_scores_DMS_subs <- data.frame(
     Title = "ProteinGym zero-shot DMS substitution benchmarks",
     Description = paste("Zero-shot DMS substitution benchmarks from Notin et",  
                         "al. 2023 using Spearman, NDCG, AUC, MCC, and Top-K",
@@ -72,7 +72,7 @@ Model_scores_DMS_subs <- data.frame(
 df_all <- base::rbind(
     AlphaMissense_Supplementary, 
     DMS_substitutions_scores,
-    Model_scores_DMS_subs
+    zeroshot_scores_DMS_subs
 )
 
 # Save .csv file
