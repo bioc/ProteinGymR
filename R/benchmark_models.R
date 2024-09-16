@@ -109,13 +109,13 @@ check_model_argument <- function(models){
 #' 
 #' @importFrom ggplot2 ggplot geom_bin2d aes element_text labs xlab ylab
 #'     scale_fill_continuous theme_classic annotate theme
+#'     
 #' @importFrom dplyr select
 #' 
 #' @export
 benchmark_models <- function(
         metric = NULL, 
-        models = NULL
-){
+        models = NULL) {
     
     # Check valid arguments
     check_model_argument(models = models)
@@ -126,7 +126,7 @@ benchmark_models <- function(
     
     # Pull relevant metric and models
     selected_table <- metric_tables[[metric]]
-    
     selected_table <- selected_table |> select(all_of(c("DMS_ID", models)))
+    
     
 }
