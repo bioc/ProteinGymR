@@ -26,8 +26,8 @@ details about the metrics and models.
 }
 \examples{
 
-benchmark_models(metric = "Spearman", models = c("AlphaMissense", "EVE", 
-"DeepSequence_single")
+benchmark_models(metric = "Spearman", models = c("Site_Independent", 
+"DeepSequence_single", "ESM2_15B", "GEMME", "CARP_640M"))
 
 }
 \references{
