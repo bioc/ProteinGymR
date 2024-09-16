@@ -47,7 +47,27 @@ benchmark_models <- function(
     
     # Check valid metric argument
     valid_metric <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
-    valid_model <- c()
+    models <- c("Site_Independent", "EVmutation", "DeepSequence_single",
+        "DeepSequence_ensemble", "EVE_single", "EVE_ensemble", "Unirep", 
+        "Unirep_evotuned", "MSA_Transformer_single", "MSA_Transformer_ensemble",
+        "ESM_1b",  "ESM_1v_single", "ESM_1v_ensemble", "ESM2_8M", "ESM2_35M", 
+        "ESM2_150M", "ESM2_650M", "ESM2_3B", "ESM2_15B", "Wavenet", 
+        "RITA_S", "RITA_M", "RITA_L", "RITA_XL", "Progen2_S", "Progen2_M",
+        "Progen2_Base", "Progen2_L", "Progen2_XL", "GEMME", "VESPA", "VESPAl", 
+        "ProtGPT2", "Tranception_S_no_retrieval", "Tranception_M_no_retrieval", 
+        "Tranception_L_no_retrieval", "Tranception_S", "Tranception_M", 
+        "Tranception_L", "TranceptEVE_S", "TranceptEVE_M",  "TranceptEVE_L", 
+        "CARP_38M", "CARP_600K", "CARP_640M", "CARP_76M", "MIF", "MIF_ST",
+        "ESM_IF1", "ProteinMPNN", "ProtSSN_k_10_h_512", "ProtSSN_k_10_h_768", 
+        "ProtSSN_k_10_h_1280", "ProtSSN_k_20_h_512", "ProtSSN_k_20_h_768", 
+        "ProtSSN_k_20_h_1280", "ProtSSN_k_30_h_512", "ProtSSN_k_30_h_768", 
+        "ProtSSN_k_30_h_1280", "ProtSSN_ensemble","SaProt_650M",
+        "SaProt_35M")
+    
+    
+    
+    # Load in benchmark scores
+    EH9593
     
     
     
