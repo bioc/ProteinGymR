@@ -5,63 +5,24 @@
 #' @description `benchmark_models()` plots one of the five model performance 
 #'    metrics ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") for up to 
 #'    5 user-specified variant effect prediction tools. See reference for more
-#'    details.
+#'    details about the metrics and models. 
 #'    
-#' @param metric `character()` one of the five model performance 
-#'    metrics ("AUC", "MCC", "NDCG", "Spearman", "Top_recall").
+#' @param metric `character()` the model performance metric to
+#'    compare ("AUC", "MCC", "NDCG", "Spearman", "Top_recall").
 #'    
-#' @param models `character()` a character vector of up to five models assessed
-#'    in ProteinGym.
-#' 
-#' @param alphamissense_table a table containing AlphaMissense predictions 
-#'    for variants matching ProteinGym substitution mutants. The default is 
-#'    the supplemental table from the AlphaMissense paper. 
-#'    Alternatively, a user-defined [`tibble::tbl_df`] or [`data.frame`]
-#'    can be supplied.
-#'
-#' @param dms_table a table containing deep mutational scanning (DMS) 
-#'    assay scores for mutations. The default table loads substitutions from 
-#'    [ProteinGym](https://proteingym.org/download).
-#'    Alternatively, a user-defined [`tibble::tbl_df`] or [`data.frame`]
-#'    can be supplied.
+#' @param models `character()` a character vector listing up to five effect
+#'    prediction models to compare. If no model specified, the top five highest
+#'    performing models are displayed.
 #'
 #' @details
 #'
-#' For `ProteinGym_correlation_plot()`, 
-#'    `alphamissense_table` columns must include:
-#'
-#' - `UniProt_id`: UniProt accession identifier.
-#' - `mutant`: Mutant identifier string matching the dms_table format. 
-#'    Protein position in the middle, and the reference and mutant 
-#'    amino acid residues to the left and right of the position, respectively.
-#' - `AlphaMissense`: AlphaMissense pathogenicity score.
-#'
-#'
-#' `dms_table` columns must include:
-#'
-#' - `UniProt_id`: UniProt accession identifier.
-#' - `mutant`: Mutant identifier string matching AlphaMissense variants. 
-#'    Specifically, the set of substitutions to apply on the reference sequence 
-#'    to obtain the mutated sequence (e.g., A1P:D2N implies the amino acid 'A' 
-#'    at position 1 should be replaced by 'P', and 'D' at position 2 should be 
-#'    replaced by 'N').
-#' - `DMS_score`: Experimental measurement in the DMS assay. 
-#'    Higher values indicate higher fitness of the mutated protein.
-#'
-#' @return `ProteinGym_correlation_plot()` returns a `ggplot` object visualizing 
-#'    the Spearman correlation between experimental DMS scores and AlphaMissense 
-#'    predicted scores and prints the r and p-value of the analysis to console. 
-#'    Generally, a stronger negative correlation corresponds to a tighter 
-#'    relationship between the two measures.
+#' @return `benchmark_models()` returns a `ggplot` object visualizing a chosen
+#'    model performance metric between several variant effect prediction models.
 #'
 #' @examples
 #' 
-#' ProteinGym_correlation_plot(uniprotId = "Q9NV35")
-#' 
-#' 
-#' @references Cheng et al.,
-#' Accurate proteome-wide missense variant effect prediction with AlphaMissense.
-#' \emph{Science} 381, eadg7492. DOI:10.1126/science.adg7492.
+#' benchmark_models(metric = "Spearman", models = c("AlphaMissense", "EVE", 
+#' "DeepSequence")
 #' 
 #' @references Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., 
 #' Spinner, H., Rollins, N., Shaw, A., Orenbuch, R., Weitzman, R., Frazer, J., 
@@ -76,17 +37,44 @@
 #'     scale_fill_continuous theme_classic annotate theme
 #' 
 #' @export
-#' 
-#' 
-#' 
-#' 
-benchmark_models <- # The user can specify, otherwise NULL = default 
-    function(
-        metric = c("AUC", "MCC", "NDCG", "Spearman", "Top_recall"), 
-        models = c("AlphaMissense", "DeepSequence", "ESM")) {
+benchmark_models <- function(
+        metric = NULL, 
+        models = NULL
+){
     
-            print(metric)
-            print(models)
+    # Valid argument check function
+    # check_argument()
+    
+    # Check valid metric argument
+    valid_metric <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
+    valid_model <- c()
+    
+    
+    
+}
+        
+    ) {
+
+       
+  
+  # Default behavior: use first three models if no argument is provided
+  if (is.null(model)) {
+    model <- valid_options[1:3]
+    cat("No models specified. Using default models:", paste(model, collapse = ", "), "\n")
+  } else {
+    # Check if provided models are valid
+    if (!all(model %in% valid_options)) {
+      invalid_models <- model[!model %in% valid_options]
+      stop(paste("Invalid model(s) specified:", paste(invalid_models, collapse = ", ")))
+    }
+    
+    # Check if number of models is within limit
+    if (length(model) > 5) {
+      stop("You can select up to 5 models")
+    }
+  }
+  
+        
     
     }
  
