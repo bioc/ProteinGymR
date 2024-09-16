@@ -1,7 +1,7 @@
 #' @rdname benchmark_models
 #' 
 #' @noRd
-# Metric argument check
+# Check metric argument
 check_metric_argument <- function(metric){
     
     # Check whether models specified or NULL
@@ -28,7 +28,7 @@ check_metric_argument <- function(metric){
 }
 #'    
 #' @noRd
-# Models argument check
+# Check models argument
 check_model_argument <- function(models){
     
     # Check whether models specified or NULL
@@ -67,6 +67,16 @@ check_model_argument <- function(models){
         }
     }
 }
+
+#'
+#' @noRd
+# Calculate AlphaMissense scores
+#' calc_alphamissense_metric <- function(models){
+    
+    # Load in AlphaMissense. Needed for separate calculation
+#    am_metric <- am_scores()
+#} 
+#'
 #' @title Benchmark effect prediction models
 #' 
 #' @description `benchmark_models()` plots one of the five model performance 
@@ -99,6 +109,7 @@ check_model_argument <- function(models){
 #' 
 #' @importFrom ggplot2 ggplot geom_bin2d aes element_text labs xlab ylab
 #'     scale_fill_continuous theme_classic annotate theme
+#' @importFrom dplyr select
 #' 
 #' @export
 benchmark_models <- function(
@@ -112,5 +123,10 @@ benchmark_models <- function(
     
     # Load in benchmark scores
     metric_tables <- zeroshot_DMS_metrics()
+    
+    # Pull relevant metric and models
+    selected_table <- metric_tables[[metric]]
+    
+    selected_table <- selected_table |> select(all_of(c("DMS_ID", models)))
     
 }
