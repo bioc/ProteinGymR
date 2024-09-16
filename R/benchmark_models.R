@@ -1,5 +1,28 @@
 #' @rdname benchmark_models
 #' 
+#' @noRd
+# Model metric argument check
+check_model_argument <- function(models){
+    
+    # Check whether models specified or NULL
+    if (is.null(models)) {
+        cat("No models specified. Using default models.")
+    } else {
+    
+    # Check if provided models are valid
+    if (!all(models %in% valid_models)) {
+      invalid_models <- models[!models %in% valid_models]
+      stop(paste("Invalid model(s) specified:", 
+          paste(invalid_models, collapse = ", ")))
+    }
+    
+    # Check if number of models is within limit
+    if (length(models) > 5) {
+      stop("Select up to 5 models for comparison.")
+        }
+    }
+}
+#' 
 #' @title Benchmark effect prediction models
 #' 
 #' @description `benchmark_models()` plots one of the five model performance 
@@ -14,24 +37,21 @@
 #'    prediction models to compare. If no model specified, the top five highest
 #'    performing models are displayed.
 #'
-#' @details
-#'
 #' @return `benchmark_models()` returns a `ggplot` object visualizing a chosen
 #'    model performance metric between several variant effect prediction models.
 #'
 #' @examples
 #' 
 #' benchmark_models(metric = "Spearman", models = c("AlphaMissense", "EVE", 
-#' "DeepSequence")
+#' "DeepSequence_single")
 #' 
 #' @references Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., 
 #' Spinner, H., Rollins, N., Shaw, A., Orenbuch, R., Weitzman, R., Frazer, J., 
 #' Dias, M., Franceschi, D., Gal, Y., & Marks, D. (2023). 
-#' ProteinGym: Large-Scale 
-#' Benchmarks for Protein Fitness Prediction and Design. In A. Oh, T. Neumann, 
-#' A. Globerson, K. Saenko, M. Hardt, & S. Levine (Eds.), \emph{Advances in 
-#' Neural Information Processing Systems} (Vol. 36, pp. 64331-64379). 
-#' Curran Associates, Inc.
+#' ProteinGym: Large-Scale Benchmarks for Protein Fitness Prediction and 
+#' Design. In A. Oh, T. Neumann, A. Globerson, K. Saenko, M. Hardt, & 
+#' S. Levine (Eds.), \emph{Advances in Neural Information Processing Systems} 
+#' (Vol. 36, pp. 64331-64379). Curran Associates, Inc.
 #' 
 #' @importFrom ggplot2 ggplot geom_bin2d aes element_text labs xlab ylab
 #'     scale_fill_continuous theme_classic annotate theme
@@ -42,12 +62,9 @@ benchmark_models <- function(
         models = NULL
 ){
     
-    # Valid argument check function
-    # check_argument()
-    
-    # Check valid metric argument
+    # Check valid arguments
     valid_metric <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
-    models <- c("Site_Independent", "EVmutation", "DeepSequence_single",
+    valid_models <- c("Site_Independent", "EVmutation", "DeepSequence_single",
         "DeepSequence_ensemble", "EVE_single", "EVE_ensemble", "Unirep", 
         "Unirep_evotuned", "MSA_Transformer_single", "MSA_Transformer_ensemble",
         "ESM_1b",  "ESM_1v_single", "ESM_1v_ensemble", "ESM2_8M", "ESM2_35M", 
@@ -61,40 +78,12 @@ benchmark_models <- function(
         "ESM_IF1", "ProteinMPNN", "ProtSSN_k_10_h_512", "ProtSSN_k_10_h_768", 
         "ProtSSN_k_10_h_1280", "ProtSSN_k_20_h_512", "ProtSSN_k_20_h_768", 
         "ProtSSN_k_20_h_1280", "ProtSSN_k_30_h_512", "ProtSSN_k_30_h_768", 
-        "ProtSSN_k_30_h_1280", "ProtSSN_ensemble","SaProt_650M",
+        "ProtSSN_k_30_h_1280", "ProtSSN_ensemble", "SaProt_650M",
         "SaProt_35M")
     
-    
+    check_model_argument(models = models)
     
     # Load in benchmark scores
-    EH9593
-    
-    
+    metric_tables <- zeroshot_DMS_metrics()
     
 }
-        
-    ) {
-
-       
-  
-  # Default behavior: use first three models if no argument is provided
-  if (is.null(model)) {
-    model <- valid_options[1:3]
-    cat("No models specified. Using default models:", paste(model, collapse = ", "), "\n")
-  } else {
-    # Check if provided models are valid
-    if (!all(model %in% valid_options)) {
-      invalid_models <- model[!model %in% valid_options]
-      stop(paste("Invalid model(s) specified:", paste(invalid_models, collapse = ", ")))
-    }
-    
-    # Check if number of models is within limit
-    if (length(model) > 5) {
-      stop("You can select up to 5 models")
-    }
-  }
-  
-        
-    
-    }
- 
