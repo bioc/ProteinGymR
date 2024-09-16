@@ -9,16 +9,18 @@ check_model_argument <- function(models){
         cat("No models specified. Using default models.")
     } else {
     
-    # Check if provided models are valid
-    if (!all(models %in% valid_models)) {
-      invalid_models <- models[!models %in% valid_models]
-      stop(paste("Invalid model(s) specified:", 
-          paste(invalid_models, collapse = ", ")))
-    }
+        # Check if provided models are valid
+        if (!all(models %in% valid_models)) {
+            
+            invalid_models <- models[!models %in% valid_models]
+            
+            stop(paste("Invalid model(s) specified:", 
+            paste(invalid_models, collapse = ", ")))
+        }
     
-    # Check if number of models is within limit
-    if (length(models) > 5) {
-      stop("Select up to 5 models for comparison.")
+        # Check if number of models is within limit
+        if (length(models) > 5) {
+            stop("Select up to 5 models for comparison.")
         }
     }
 }
@@ -78,8 +80,7 @@ benchmark_models <- function(
         "ESM_IF1", "ProteinMPNN", "ProtSSN_k_10_h_512", "ProtSSN_k_10_h_768", 
         "ProtSSN_k_10_h_1280", "ProtSSN_k_20_h_512", "ProtSSN_k_20_h_768", 
         "ProtSSN_k_20_h_1280", "ProtSSN_k_30_h_512", "ProtSSN_k_30_h_768", 
-        "ProtSSN_k_30_h_1280", "ProtSSN_ensemble", "SaProt_650M",
-        "SaProt_35M")
+        "ProtSSN_k_30_h_1280", "ProtSSN_ensemble", "SaProt_650M", "SaProt_35M")
     
     check_model_argument(models = models)
     
