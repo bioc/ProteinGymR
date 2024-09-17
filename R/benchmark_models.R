@@ -70,12 +70,29 @@ check_model_argument <- function(models){
 
 #'
 #' @noRd
-# Calculate AlphaMissense scores
-#' calc_alphamissense_metric <- function(models){
+# Average model performance scores for plotting
+avg_model_scores <- function(DMS_table, metric){
     
-    # Load in AlphaMissense. Needed for separate calculation
-#    am_metric <- am_scores()
-#} 
+    # Spearman -- Absolute value
+    if (metric == "Spearman"){ # -1 neg corr, 1 pos corr. Take abs value
+        
+        res <- DMS_table |> 
+            select(2:length(DMS_table)) 
+        res <- abs(res)
+        res <- cbind(DMS_table$DMS_ID, res)
+        colnames(res)[1] <- "DMS_ID"
+        
+    } else if (metric == "AUC"){ # 0 to 1
+        res <- DMS_table
+    } else if (metric == "MCC"){ # -1 worst; 1 best
+        res <- DMS_table
+    } else if (metric == "NDCG") { # 0 to 1
+        res <- DMS_table
+    } else # topk 0 to 1
+        res <- DMS_table
+    res
+}
+
 #'
 #' @title Benchmark effect prediction models
 #' 
@@ -108,9 +125,15 @@ check_model_argument <- function(models){
 #' (Vol. 36, pp. 64331-64379). Curran Associates, Inc.
 #' 
 #' @importFrom ggplot2 ggplot geom_bin2d aes element_text labs xlab ylab
-#'     scale_fill_continuous theme_classic annotate theme
+#'     scale_fill_continuous theme_classic annotate theme geom_boxplot
 #'     
 #' @importFrom dplyr select
+#' 
+#' @importFrom tidyr pivot_longer
+#' 
+#' @importFrom ggdist stat_halfeye stat_dots
+#' 
+#' @importFrom gghalves geom_half_point
 #' 
 #' @export
 benchmark_models <- function(
@@ -128,5 +151,71 @@ benchmark_models <- function(
     selected_table <- metric_tables[[metric]]
     selected_table <- selected_table |> select(all_of(c("DMS_ID", models)))
     
+    # Prepare scores for plotting
+    res <- selected_table |> 
+            select(2:length(selected_table)) 
     
+    res <- abs(res)
+    
+    res_long <- res |> 
+        pivot_longer(cols = everything(), 
+               names_to = "model", 
+               values_to = "score")
+    
+    # Reorder models in descending mean scores
+    res_long <- res_long |> 
+        group_by(model) |> 
+        mutate(model_mean = mean(score)) |> 
+        ungroup() |> 
+        mutate(model = fct_reorder(model, model_mean, .desc = TRUE))
+
+    # Raincloud plot
+    res_long |> 
+        ggplot(aes(x = model, y = score, fill = model, group = model)) + 
+        ggdist::stat_halfeye(
+            adjust = .5, 
+            width = .6, 
+            .width = 0, 
+            justification = -.2, 
+            point_colour = NA
+        ) + 
+        geom_boxplot(
+            width = .15, 
+            outlier.shape = NA
+        ) +
+        
+        # add justified jitter from the {gghalves} package
+        gghalves::geom_half_point(
+            side = "l", 
+            range_scale = .4, 
+            alpha = .2
+        ) +
+        
+        # add theme and fonts
+        coord_cartesian(clip = "off") +
+        theme_minimal() +
+        xlab("Models") +
+        ylab(paste(metric, "score")) +
+        theme_classic() +
+        theme(
+            axis.text.x = element_text(size = 16),
+            axis.text.y = element_text(size = 16),
+            axis.title.y = element_text(size = 16),
+            axis.title.x = element_text(size = 16),
+            legend.title = element_blank(),
+            legend.text = element_text(size = 11)
+        ) 
+        
+        # # Add mean annotations
+        # geom_text(
+        #     data = order(unique(res_long$model_mean), decreasing = TRUE),
+        #     aes(y = mean_value, label = sprintf("Mean: %.2f", mean_value)),
+        #     vjust = -1,
+        #     size = 3.5,
+        #     fontface = "bold"
+        # ) +
+        # 
+        # # Customize the plot
+        # scale_fill_brewer(palette = "Set2")
 }
+    
