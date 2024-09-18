@@ -1,7 +1,7 @@
 ---
 title: "make_zeroshot_DMS_subs"
 author: "Tram Nguyen"
-date: "2024-08-28"
+date: "2024-09-13"
 output: html_document
 ---
 ```{r setup, include=FALSE}
@@ -11,6 +11,7 @@ options(width = 80)
 
 ```{r, warning=FALSE}
 suppressMessages(library(purrr))
+suppressMessages(library(readr))
 ```
 
 # Zero-shot benchmarking information
@@ -49,11 +50,19 @@ model if it gives its highest scores to sequences with the highest DMS value.
 Finally, we also calculate Top K Recall, where we select K to be the top 10% 
 of DMS values.
 
-For each metric, we provide a corresponding data.frame. Each 
-data.frame contains the corrected average values for 62 models (columns) across 
-217 assays (rows) calculated on the DMS substitution provided in ProteinGym.
+In this script, we produce two RDS objects:
 
-# Download and process data
+1. A `list` object with 5 data.frames, each corresponding to one of the five 
+model performance metrics for the zero-shot setting. Each data.frame contains 
+the corrected average values for 62 models (columns) across 
+217 assays (rows) calculated on DMS substitutions.
+
+2. A `list` object with 217 data.frames, each corresponding to one of the 217 
+DMS assays. Each data.frame contains the zero-shot mutation scores outputted 
+by the 62 models for DMS mutations in that given assay. 
+
+
+# Download and process model performance metric data
 
 The .csv files of benchmarking scores were downloaded from [the ProteinGym Github repo](https://github.com/OATML-Markslab/ProteinGym/tree/main/benchmarks/DMS_zero_shot/substitutions)
 (accessed 2024-08-28).
@@ -108,6 +117,50 @@ names(score_list) <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
 ```{r, eval=FALSE}
 saveRDS(score_list, 
     "./ProteinGym_data/DMS_sub_benchmark_scores/zeroshot_DMS_subs_v1.rds")
+```
+
+
+
+# Download and process zero-shot DMS assay scores 
+
+Data were downloaded from [ProteinGym](https://marks.hms.harvard.edu/proteingym/zero_shot_substitutions_scores.zip). 
+
+```{r}
+# Define current assay name
+file_paths <- list.files(path = 
+    "/home/rstudio/ProteinGym_data/zero_shot_substitutions_scores", 
+                         pattern = "^YNZC_BACSU_Tsuboyama_2023_2JVD\\.csv$", 
+                         recursive = TRUE, 
+                         full.names = TRUE)
+
+# Load in all the files as tables in a list
+pg_tables <- suppressMessages(lapply(file_paths,
+                                         read_csv, show_col_types = FALSE))
+
+# Extract the model name from file_paths
+model_dirs <- dirname(file_paths)
+model_names <- basename(model_dirs)
+names(pg_tables) <- model_names
+
+# Check that protein mutations are identical across assays loaded
+mutant_columns <- lapply(pg_tables, function(df) df$mutant)
+
+# Remove NULL entries
+mutant_columns <- mutant_columns[!sapply(mutant_columns, is.null)]
+
+# Check if all "mutant" columns are identical
+all_identical <- all(sapply(mutant_columns[-1], identical, mutant_columns[[1]]))
+all_identical
+
+# Assuming your list is called 'my_list'
+mutant_columns <- lapply(mutant_columns, as.data.frame)
+
+sorted_list <- lapply(mutant_columns, function(df) {
+  df %>% arrange('X[[i]]')
+})
+
+result <- as.data.frame(do.call(cbind, sorted_list))
+#### Mutants are not matching across models...
 ```
 
 # Reference
