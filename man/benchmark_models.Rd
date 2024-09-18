@@ -24,7 +24,7 @@ are displayed.}
 }
 \value{
 \code{benchmark_models()} returns a \code{ggplot} object visualizing a chosen
-model performance metric between several variant effect prediction models.
+model performance metric across several variant effect prediction models.
 }
 \description{
 \code{benchmark_models()} plots one of the five model performance
@@ -38,6 +38,8 @@ available_models()
 
 benchmark_models(metric = "Spearman", models = c("Site_Independent", 
 "DeepSequence_single", "ESM2_15B", "GEMME", "CARP_640M"))
+
+benchmark_models(models = "GEMME")
 
 }
 \references{

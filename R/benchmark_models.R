@@ -17,47 +17,42 @@ available_models <- function()
         "ProtSSN_k_10_h_1280", "ProtSSN_k_20_h_512", "ProtSSN_k_20_h_768", 
         "ProtSSN_k_20_h_1280", "ProtSSN_k_30_h_512", "ProtSSN_k_30_h_768", 
         "ProtSSN_k_30_h_1280", "ProtSSN_ensemble", "SaProt_650M", "SaProt_35M")
-#'
+
 #'
 #' @noRd
 # Check metric argument
-check_metric_argument <- function(metric){
-    
-    # Check whether models specified or NULL
-    if (is.null(metric)) {
-        cat("No metric specified. Using default Spearman correlation. \n")
-    } else {
-    
-        # Check if provided models are valid
-        valid_metrics <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
+check_metric_argument <- function(user_metric){
+
+    ## Check if provided models are valid
+    valid_metrics <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
         
-        if (!all(metric %in% valid_metrics)) {
+    if (!all(user_metric %in% valid_metrics)) {
             
-            invalid_metric <- metric[!metric %in% valid_metrics]
+        invalid_metric <- user_metric[!user_metric %in% valid_metrics]
             
-            stop(paste("Invalid model(s) specified:", 
-            paste(invalid_metric, collapse = ", ")))
-        }
+        stop(paste("Invalid model(s) specified:", 
+        paste(invalid_metric, collapse = ", ")))
+    }
     
-        # Check that only metric passed
-        if (length(metric) > 1) {
-            stop("Select only one metric for comparison.")
-        }
+    ## Check that only one metric passed
+    if (length(user_metric) > 1) {
+        stop("Select only one metric for comparison.")
     }
 }
+
 #'    
 #' @noRd
 # Check models argument
 check_model_argument <- function(models){
     
-    # Check whether models specified or NULL
-    if (is.null(models)) {
-        cat("No models specified. Using default models. \n")
+    ## Check whether model is valid
+    if (missing(models)) {
+        spdl::info("No models specified. Using default models. \n")
     } else {
     
-    # Check if provided models are valid
-    valid_models <- available_models()
-    
+        ## Check if provided models are valid
+        valid_models <- available_models()
+        
         if (!all(models %in% valid_models)) {
             
             invalid_models <- models[!models %in% valid_models]
@@ -66,7 +61,7 @@ check_model_argument <- function(models){
             paste(invalid_models, collapse = ", ")))
         }
     
-        # Check if number of models is within limit
+        ## Check if number of models is within limit
         if (length(models) > 5) {
             stop("Select up to 5 models for comparison.")
         }
@@ -90,7 +85,7 @@ check_model_argument <- function(models){
 #'    are displayed.
 #'
 #' @return `benchmark_models()` returns a `ggplot` object visualizing a chosen
-#'    model performance metric between several variant effect prediction models.
+#'    model performance metric across several variant effect prediction models.
 #'
 #' @examples
 #' # Currently support models
@@ -98,6 +93,8 @@ check_model_argument <- function(models){
 #' 
 #' benchmark_models(metric = "Spearman", models = c("Site_Independent", 
 #' "DeepSequence_single", "ESM2_15B", "GEMME", "CARP_640M"))
+#' 
+#' benchmark_models(models = "GEMME")
 #' 
 #' @references Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., 
 #' Spinner, H., Rollins, N., Shaw, A., Orenbuch, R., Weitzman, R., Frazer, J., 
@@ -120,30 +117,38 @@ check_model_argument <- function(models){
 #' 
 #' @importFrom gghalves geom_half_point
 #' 
+#' @importFrom spdl info
+#' 
 #' @export
 benchmark_models <- function(
-    metric = c("AUC", "MCC", "NDCG", "Spearman", "Top_recall"), 
-    models = available_models()) {
+    metric = c("AUC", "MCC", "NDCG", "Spearman", "Top_recall"),
+    models = available_models()){
+
+    ## If metric not provided, use Spearman
+    if (missing(metric)){
+        
+        spdl::info("No metric specified. Using default Spearman correlation.")
+        metric <- "Spearman"
+        
+    } else {
+        check_metric_argument(user_metric = metric)
+    }
     
-    # Check valid arguments
+    ## If model not provided, show top 5
     check_model_argument(models = models)
-    check_metric_argument(metric = metric)
     
-    # Load in benchmark scores
+    ## Load in benchmark scores
     metric_tables <- zeroshot_DMS_metrics()
     
-    # Pull relevant metric and models
+    ## Pull relevant metric and models
     selected_table <- metric_tables[[metric]]
-    selected_table <- selected_table |> select(all_of(c("DMS_ID", models)))
+    selected_table <- selected_table |> select(all_of(models))
     
-    # If Spearman, take absolute value for plotting
-    res <- selected_table |> 
-        select(2:length(selected_table)) 
-    
+    ## If Spearman, take absolute value for plotting
     if (metric == "Spearman"){
-        res <- abs(res)
+        res <- abs(selected_table)
     } else {
-        res
+        selected_table
     }
     
     res_long <- res |> 
@@ -151,14 +156,14 @@ benchmark_models <- function(
                names_to = "model", 
                values_to = "score")
     
-    # Reorder models in descending mean scores
+    ## Reorder models in descending mean scores
     res_long <- res_long |> 
         group_by(model) |> 
         mutate(model_mean = mean(score)) |> 
         ungroup() |> 
         mutate(model = fct_reorder(model, model_mean, .desc = TRUE))
 
-    # Raincloud plot
+    ## Raincloud plot
     res_long |> 
         ggplot(aes(x = model, y = score, fill = model, group = model)) + 
         stat_halfeye(
@@ -177,7 +182,7 @@ benchmark_models <- function(
             range_scale = .4, 
             alpha = .2
         ) +
-        # add theme and fonts
+        ## add theme and fonts
         coord_cartesian(clip = "off") +
         scale_fill_discrete(name = "Models") +
         theme_classic() +
@@ -191,4 +196,3 @@ benchmark_models <- function(
             legend.text = element_text(size = 11)
         )
 }
-    
