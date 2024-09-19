@@ -20,30 +20,11 @@ DMS data.
 Install the package from Bioconductor or GitHub, ensuring correct
 *Bioconductor* dependencies.
 
-When the package is available on *Bioconductor*, use
-
 ``` r
 if (!"BiocManager" %in% rownames(installed.packages()))
     install.packages("BiocManager", repos = "https://cloud.R-project.org")
-if (BiocManager::version() >= "3.20") {
-    BiocManager::install("ProteinGymR")
-} else {
-    stop(
-        "'ProteinGymR' requires Bioconductor version 3.20 or later, ",
-        "install from GitHub?"
-    )
-}
-```
 
-Use the pre-release or development version with
-
-``` r
-if (!"remotes" %in% rownames(installed.packages()))
-    install.packages("remotes", repos = "https://cloud.R-project.org")
-remotes::install_github(
-    "hms-ccb/ProteinGymR",
-    repos = BiocManager::repositories()
-)
+BiocManager::install("ccb-hms/ProteinGymR")
 ```
 
 Load the library.
