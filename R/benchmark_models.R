@@ -30,13 +30,12 @@ check_metric_argument <- function(user_metric){
             
         invalid_metric <- user_metric[!user_metric %in% valid_metrics]
             
-        stop(paste("Invalid model(s) specified:", 
-        paste(invalid_metric, collapse = ", ")))
+        stop(paste("Invalid model(s) specified:", invalid_metric))
     }
     
     ## Check that only one metric passed
     if (length(user_metric) > 1) {
-        stop("Select only one metric for comparison.")
+        stop("Select only one metric for comparison")
     }
 }
 
@@ -46,25 +45,18 @@ check_metric_argument <- function(user_metric){
 check_model_argument <- function(models){
     
     ## Check whether model is valid
-    if (missing(models)) {
-        spdl::info("No models specified. Using default models. \n")
-    } else {
+    valid_models <- available_models()
     
-        ## Check if provided models are valid
-        valid_models <- available_models()
+    if (!all(models %in% valid_models)) {
         
-        if (!all(models %in% valid_models)) {
-            
-            invalid_models <- models[!models %in% valid_models]
-            
-            stop(paste("Invalid model(s) specified:", 
-            paste(invalid_models, collapse = ", ")))
-        }
-    
-        ## Check if number of models is within limit
-        if (length(models) > 5) {
-            stop("Select up to 5 models for comparison.")
-        }
+        invalid_models <- models[!models %in% valid_models]
+        
+        stop(paste("Invalid model(s) specified:", invalid_models))
+    }
+
+    ## Check if number of models is within limit
+    if (length(models) > 5) {
+        stop("Select up to 5 models for comparison")
     }
 }
 #' 
@@ -72,20 +64,20 @@ check_model_argument <- function(models){
 #' 
 #' @description `benchmark_models()` plots one of the five model performance 
 #'    metrics ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") for up to 
-#'    5 user-specified variant effect prediction tools. See reference for more
-#'    details about the metrics and models. 
+#'    5 user-specified variant effect prediction tools listed in 
+#'    `available_models()`. See reference for more details about the metrics 
+#'    and models. 
 #'    
 #' @param metric `character()` a model performance metric to
 #'    benchmark ("AUC", "MCC", "NDCG", "Spearman", "Top_recall").
 #'    
-#' @param models `character()` a character vector of up to five effect
+#' @param models `character()` a character vector of up to five variant effect
 #'    prediction models to compare. Valid models can be seen with 
-#'    `available_models()`. If no models are specified, the five 
-#'    highest performing models (based on the mean score across 217 assays) 
-#'    are displayed.
+#'    `available_models()`.
 #'
 #' @return `benchmark_models()` returns a `ggplot` object visualizing a chosen
-#'    model performance metric across several variant effect prediction models.
+#'    model performance metric across several variant effect prediction models, 
+#'    ordered by highest to lowest mean performance score. 
 #'
 #' @examples
 #' # Currently support models
@@ -110,8 +102,8 @@ check_model_argument <- function(models){
 #' 
 #' @importFrom forcats fct_reorder
 #' 
-#' @importFrom ggplot2 ggplot coord_cartesian aes element_text scale_fill_discrete
-#'     theme_classic annotate theme geom_boxplot element_blank ylab
+#' @importFrom ggplot2 ggplot coord_cartesian element_text scale_fill_discrete
+#'     theme_classic annotate theme geom_boxplot element_blank ylab aes
 #'     
 #' @importFrom ggdist stat_halfeye stat_dots
 #' 
@@ -126,16 +118,18 @@ benchmark_models <- function(
 
     ## If metric not provided, use Spearman
     if (missing(metric)){
-        
-        spdl::info("No metric specified. Using default Spearman correlation.")
+        message("No metric specified. Using default Spearman correlation")
         metric <- "Spearman"
-        
     } else {
         check_metric_argument(user_metric = metric)
     }
     
-    ## If model not provided, show top 5
+    ## If model not provided, give error
+    if (missing(models)) {
+        stop("Select at least one model from `available_models()`")
+    } else {
     check_model_argument(models = models)
+    }
     
     ## Load in benchmark scores
     metric_tables <- zeroshot_DMS_metrics()
@@ -148,7 +142,7 @@ benchmark_models <- function(
     if (metric == "Spearman"){
         res <- abs(selected_table)
     } else {
-        selected_table
+        res <- selected_table
     }
     
     res_long <- res |> 

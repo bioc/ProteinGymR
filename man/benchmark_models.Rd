@@ -16,21 +16,21 @@ benchmark_models(
 \item{metric}{\code{character()} a model performance metric to
 benchmark ("AUC", "MCC", "NDCG", "Spearman", "Top_recall").}
 
-\item{models}{\code{character()} a character vector of up to five effect
+\item{models}{\code{character()} a character vector of up to five variant effect
 prediction models to compare. Valid models can be seen with
-\code{available_models()}. If no models are specified, the five
-highest performing models (based on the mean score across 217 assays)
-are displayed.}
+\code{available_models()}.}
 }
 \value{
 \code{benchmark_models()} returns a \code{ggplot} object visualizing a chosen
-model performance metric across several variant effect prediction models.
+model performance metric across several variant effect prediction models,
+ordered by highest to lowest mean performance score.
 }
 \description{
 \code{benchmark_models()} plots one of the five model performance
 metrics ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") for up to
-5 user-specified variant effect prediction tools. See reference for more
-details about the metrics and models.
+5 user-specified variant effect prediction tools listed in
+\code{available_models()}. See reference for more details about the metrics
+and models.
 }
 \examples{
 # Currently support models
