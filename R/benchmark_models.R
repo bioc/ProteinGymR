@@ -60,7 +60,7 @@ check_model_argument <- function(models){
     }
 }
 #' 
-#' @title Benchmark effect prediction models
+#' @title Benchmark Variant Effect Prediction Models
 #' 
 #' @description `benchmark_models()` plots one of the five model performance 
 #'    metrics ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") for up to 

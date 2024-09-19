@@ -3,7 +3,7 @@
 \name{available_models}
 \alias{available_models}
 \alias{benchmark_models}
-\title{Benchmark effect prediction models}
+\title{Benchmark Variant Effect Prediction Models}
 \usage{
 available_models()
 
