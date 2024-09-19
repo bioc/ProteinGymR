@@ -46,7 +46,7 @@ corresponding to a data.frame for a single DMS assay.
 # Downloaded manually from ProteinGym website 
 # https://proteingym.org/download
 # Data stored locally
-MAVE.dir <- "/home/rstudio/AlphaMissense_data/DMS_ProteinGym_substitutions/"
+MAVE.dir <- "/home/rstudio/ProteinGym_data/DMS_ProteinGym_substitutions/"
 
 ProGym_files <- list.files(path=MAVE.dir, full.names=F)
 
