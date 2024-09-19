@@ -1,44 +1,12 @@
 #' @rdname dms_corr_plot
 #'
-#' Load in AlphaMissense DMS supplemental table via ExperimentHub 
-#' 
-#' @noRd
-#'
-#' @importFrom ExperimentHub ExperimentHub
-#'
-pg_am_data <-
-    function()
-{
-    ## Once available: am_table <- ProteinGymR::AlphaMissense_scores()
-
-    eh <- ExperimentHub::ExperimentHub()
-    am_table <- eh[['EH9554']]
-    return(am_table)
-}
-
-#' Load in ProteinGym DMS dataset via ExperimentHub
-#' Through ProteinGymR once available
-#' 
-#' @noRd
-#'
-#' @importFrom ExperimentHub ExperimentHub
-#' 
-pg_dms_data <-
-    function()
-{
-    ## Once available: dms_table <- ProteinGymR::dms_substitutions()
-        
-    eh <- ExperimentHub::ExperimentHub()
-    dms_table <- eh[['EH9555']]
-    return(dms_table)
-}
-
-#' Filter AlphaMissense table with uID
-#'
 #' @noRd
 #' 
 #' @importFrom dplyr filter pull as_tibble rename_with mutate case_when
+#' 
 #' @importFrom queryup query_uniprot
+#' 
+#' @importFrom ExperimentHub ExperimentHub
 #'
 pg_filter_am_table <-
     function(am_table, uID)
@@ -46,13 +14,13 @@ pg_filter_am_table <-
 
     ## Check if am_table is missing
     if (missing(am_table)) {
-        spdl::info(paste(
+        message(paste(
             "'alphamissense_table' not provided, using default table from",
             "`ProteinGymR::am_scores()`"
         ))
         
         ## Load default AlphaMissense data
-        am_table <- pg_am_data()
+        am_table <- am_scores()
         
         ## Rename columns to match default dms_table
         new_cols <- c('UniProt_id', 'mutant')
@@ -68,6 +36,12 @@ pg_filter_am_table <-
         query <- list("accession_id" = uID)
         res <- query_uniprot(query = query, show_progress = TRUE)
         swissID <- res |> pull(`Entry Name`)
+        
+        ## Check that UniProt/SwissID valid
+        if (NROW(res) != 1){
+            stop("UniProt: '", uID, "' is not valid; ",
+            "check that the UniProt ID is correct")
+        }
        
         ## Replace swissID observations with uID
         am_table <-
@@ -102,8 +76,9 @@ pg_filter_am_table <-
 #' Filter the ProteinGym DMS table with uID
 #'
 #' @noRd
-#'
+#' 
 #' @importFrom dplyr as_tibble bind_rows
+#' 
 #' @importFrom purrr keep
 #'
 pg_filter_dms_table <-
@@ -111,12 +86,12 @@ pg_filter_dms_table <-
 {
     ## Check if pg_table is missing
     if (missing(pg_table)) {
-        spdl::info(paste(
+        message(paste(
             "'dms_table' not provided, using default table from",
             "`ProteinGymR::dms_substitutions()`"
         ))
         
-        pg_table <- pg_dms_data()
+        pg_table <- dms_substitutions()
     }
     
     ## Filter pg_table for uID, rbind into one data.frame
@@ -268,7 +243,7 @@ dms_corr_plot <-
     function(uniprotId, alphamissense_table, dms_table)
 {
     ## Validate uniprotId
-    stopifnot(isCharacter(uniprotId))
+    stopifnot(is.character(uniprotId))
     
     ## Filter AM and DMS tables with uniprotId
     alphamissense_table <-
