@@ -1,8 +1,6 @@
 ---
 title: "NEWS"
 author: "Tram Nguyen"
-date: "2024-08-13"
-output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -13,3 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 - DMS substitution scores for 216 assays added to ExperimentHub
 - AlphaMissense pathogenicity scores for ProteinGym mutations added to 
 ExperimentHub
+- Added model performance metrics for DMS substitutions across 60 models in
+zero-shot setting
+- `benchmark_models()` for plotting performance scores aross 5 models
+- `dms_corr_plot()` for correlating AlphaMissense scores and DMS assay scores
