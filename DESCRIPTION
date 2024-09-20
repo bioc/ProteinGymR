@@ -21,7 +21,16 @@ Depends:
     R (>= 4.4.1)
 Imports: 
     AnnotationHub,
-    ExperimentHub
+    ExperimentHub,
+    dplyr,
+    forcats,
+    ggdist,
+    gghalves,
+    ggplot2,
+    purrr,
+    queryup,
+    spdl,
+    tidyr
 Suggests: 
     BiocStyle,
     knitr,
