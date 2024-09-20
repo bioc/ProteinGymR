@@ -92,6 +92,10 @@ the impact of all possible amino acid substitutions across 186 proteins.
 2.  AlphaMissense pathogenicity scores for ~1.6 M substitutions in the
 ProteinGym DMS data.
 
+3. Five model performance metrics ("AUC", "MCC", "NDCG", "Spearman", 
+"Top_recall") for 62 models across 217 assays calculated on DMS substitutions 
+in a zero-shot setting.
+
 This vignette explores and visualizes the DMS scores from ProteinGym. On the
 simplest level, the large-scale mutational data that result from a deep
 mutational scan reveal the functional consequences of all possible single
@@ -199,6 +203,26 @@ ADRB2 |> ggplot(aes(x = pos, y = alt, fill = DMS_score)) +
             legend.text = element_text(size = 16)
         )
     
+```
+
+<br>
+
+We will now use the built-in function `benchmark_models()` to compare 
+performance across several variant effect prediction models calculated on the 
+217 DMS assays in the zero-shot setting. This function takes in one of the five 
+available metrics, and up to 5 models to compare.
+
+To view all available models, use the function: `available_models()`
+
+```{r, available_models}
+available_models()
+```
+
+Plot the Spearman metric for 5 models.
+
+```{r, warning=FALSE, fig.wide = TRUE}
+benchmark_models(metric = "Spearman", 
+    models = c("GEMME", "CARP_600K", "ESM_1b", "EVmutation", "ProtGPT2"))
 ```
 
 
