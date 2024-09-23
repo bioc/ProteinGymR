@@ -20,7 +20,7 @@ output:
       code_folding: show
 date: "`r doc_date()`"
 vignette: >
-    %\VignetteIndexEntry{Accessing ProteinGymR Data}
+    %\VignetteIndexEntry{Data access and visualization}
     %\VignetteEncoding{UTF-8}
     %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -115,7 +115,7 @@ protein biology.
 
 ## Load and explore the DMS data from ExperimentHub
 
-Datasets in `ProteinGymR` can be easily loaded in with built-in functions.
+Datasets in `ProteinGymR` can be easily loaded with built-in functions.
 
 ```{r import dms}
 dms_data <- dms_substitutions()
@@ -205,9 +205,10 @@ ComplexHeatmap::Heatmap(heatmap_matrix,
         show_row_names = TRUE,
         show_column_names = TRUE)
 ```
+
 The heatmap shows the DMS score at each position along the given protein
 (x-axis) where a residue was mutated (alternate amino acid on y-axis). 
-For this vignette, we are subset to the first 100 positions. 
+For this demonstration, we subset to the first 100 positions. 
 
 Based on the "ACE2_HUMAN_Chan_2020" assay, we can see that at positions 90 and 
 92, almost any amino acid change resulted in a significant affect on fitness. 
@@ -215,12 +216,12 @@ This could represent an important region for protein function where any
 perturbation would likely be deleterious.
 
 
-# Bencharmarking across models
+# Benchmarking across models
 
 We will now use the built-in function `benchmark_models()` to compare 
 performance across several variant effect prediction models calculated on the 
 217 DMS assays in the zero-shot setting. This function takes in one of the five 
-available metrics, and up to 5 models to compare.
+available metrics, and compares up to 5 models of the 62 available.
 
 To view all available models, use the function: `available_models()`
 
@@ -228,18 +229,17 @@ To view all available models, use the function: `available_models()`
 available_models()
 ```
 
-Plot the Spearman metric for 5 models.
+Plot the AUC metric for 5 models.
 
 ```{r, warning=FALSE, fig.wide = TRUE}
 benchmark_models(metric = "AUC", 
     models = c("GEMME", "CARP_600K", "ESM_1b", "EVmutation", "ProtGPT2"))
 ```
 
-Based on the AUC metric of evaluation, GEMME performed the best while 
-CARP_600K performed the worst of the 5 selected models. If the `metric` argument
-is not defined, the default used is a Spearman correlation. For more information 
-about the models and metrics, see the function documentation 
-`?benchmark_models()`.
+Based on the AUC metric of evaluation, GEMME performed the best while of the 5 
+selected models. If the `metric` argument is not defined, the default used is 
+a Spearman correlation. For more information about the models and metrics, see 
+the function documentation `?benchmark_models()`.
 
 
 # References
