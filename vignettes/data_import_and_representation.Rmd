@@ -1,5 +1,5 @@
 ---
-title: "Importation and visualization of ProteinGym DMS data"
+title: "Import and visualization of ProteinGym DMS data"
 author: 
     - name: Tram Nguyen
       affiliation: Core for Computational Biomedicine, Harvard Medical School
@@ -32,7 +32,8 @@ editor_options:
 knitr::opts_chunk$set(
     collapse = TRUE,
     comment = "#>",
-    crop = NULL
+    crop = NULL,
+    message = FALSE
 )
 ```
 
