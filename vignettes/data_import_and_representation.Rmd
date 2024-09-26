@@ -1,5 +1,5 @@
 ---
-title: "Import and visualization of ProteinGym DMS data"
+title: "Import and visualization of ProteinGym data"
 author: 
     - name: Tram Nguyen
       affiliation: Core for Computational Biomedicine, Harvard Medical School
