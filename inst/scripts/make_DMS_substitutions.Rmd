@@ -190,6 +190,8 @@ ref_file$raw_DMS_mutant_column <- as.factor(ref_file$raw_DMS_mutant_column)
 ref_file$ProteinGym_version <- as.factor(ref_file$ProteinGym_version)
 ref_file$coarse_selection_type <- as.factor(ref_file$coarse_selection_type)
 
+ref_file <- as.data.frame(ref_file)
+
 saveRDS(ref_file, 
     "/home/rstudio/ProteinGym_data/EH_data/v1.1/ref_file_217_DMS_subs_v1.rds")
 ```

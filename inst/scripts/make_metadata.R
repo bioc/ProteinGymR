@@ -61,7 +61,7 @@ DMS_sub_reference <- data.frame(
     Coordinate_1_based = TRUE,
     DataProvider = "Marks Lab at Harvard Medical School",
     Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",
-    RDataClass = "List",
+    RDataClass = "Data.Frame",
     DispatchClass = "RDS",
     RDataPath = "ProteinGymR/ref_file_217_DMS_subs_v1.rds",
     stringsAsFactors = FALSE
