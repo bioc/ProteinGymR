@@ -2,14 +2,14 @@
 title: "Import and visualization of ProteinGym data"
 author: 
     - name: Tram Nguyen
-      affiliation: Core for Computational Biomedicine, Harvard Medical School
+      affiliation: Department of Biomedical Informatics, Harvard Medical School
       email: Tram_Nguyen@hms.harvard.edu
     - name: Pascal Notin
-      affiliation: Computer Science, University of Oxford
+      affiliation: Department of Systems Biology, Harvard Medical School
     - name: Aaron W Kollasch
-      affiliation: Systems Biology, Harvard Medical School
+      affiliation: Department of Systems Biology, Harvard Medical School
     - name: Ludwig Geistlinger
-      affiliation: Core for Computational Biomedicine, Harvard Medical School
+      affiliation: Department of Biomedical Informatics, Harvard Medical School
 package: ProteinGymR
 output:
     BiocStyle::html_document:
