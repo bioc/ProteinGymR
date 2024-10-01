@@ -23,6 +23,9 @@ data were accessed from
 <https://marks.hms.harvard.edu/tranception/ProteinGym_substitutions.zip>
 (2024-07-22).
 
+The reference file for these DMS assays (metadata) were downloaded at
+<https://marks.hms.harvard.edu/proteingym/DMS_substitutions.csv>
+(2024-10-01)
 
 # ProteinGym information
 
@@ -168,6 +171,27 @@ fitness cutoff defined by ProteinGym (1 is fit, 0 is not fit).
 ```{r, eval=FALSE}
 saveRDS(ProGym_tables, 
     "/home/rstudio/ProteinGym_data/EH_data/v1.1/ProGym217_DMS_subs_v1.rds")
+```
+
+
+# Load and write metadata table
+```{r, eval=FALSE}
+ref_file <- read_csv(
+    "/home/rstudio/ProteinGym_data/DMS_substitutions/DMS_substitutions.csv")
+
+ref_file$taxon <- as.factor(ref_file$taxon)
+ref_file$source_organism <- as.factor(ref_file$source_organism)
+ref_file$DMS_binarization_method <- as.factor(ref_file$DMS_binarization_method)
+ref_file$selection_type <- as.factor(ref_file$selection_type)
+ref_file$selection_assay <- as.factor(ref_file$selection_assay)
+ref_file$raw_DMS_phenotype_name <- as.factor(ref_file$raw_DMS_phenotype_name)
+ref_file$raw_DMS_directionality <- as.factor(ref_file$raw_DMS_directionality)
+ref_file$raw_DMS_mutant_column <- as.factor(ref_file$raw_DMS_mutant_column)
+ref_file$ProteinGym_version <- as.factor(ref_file$ProteinGym_version)
+ref_file$coarse_selection_type <- as.factor(ref_file$coarse_selection_type)
+
+saveRDS(ref_file, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.1/ref_file_217_DMS_subs_v1.rds")
 ```
 
 # SessionInfo
