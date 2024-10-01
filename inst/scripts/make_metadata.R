@@ -28,7 +28,7 @@ AlphaMissense_Supplementary <- data.frame(
 # DMS_substitutions_scores
 DMS_substitutions_scores <- data.frame(
     Title = "ProteinGym deep mutational scanning (DMS) assays for substitutions",
-    Description = paste("ProteinGym DMS information for 216 assays",
+    Description = paste("ProteinGym DMS information for 217 assays",
                          "from Notin et al. 2023"),
     BiocVersion = "3.20",
     Genome = NA,
@@ -42,7 +42,7 @@ DMS_substitutions_scores <- data.frame(
     Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",
     RDataClass = "List",
     DispatchClass = "RDS",
-    RDataPath = "ProteinGymR/ProGym216_DMS_subs_v1.rds",
+    RDataPath = "ProteinGymR/ProGym217_DMS_subs_v1.rds",
     stringsAsFactors = FALSE
 )
 
