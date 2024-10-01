@@ -1,7 +1,7 @@
 ---
 title: "make_ProteinGym_DMS_substitutions"
 author: "Tram Nguyen"
-date: "2024-08-19"
+date: "2024-10-01"
 output: html_document
 editor_options: 
   markdown: 
@@ -43,15 +43,15 @@ corresponding to a `data.frame` for each DMS assay.
 # Downloaded manually from ProteinGym website 
 # https://proteingym.org/download
 # Data stored locally
-MAVEdir <- "/home/rstudio/ProteinGym_data/DMS_substitutions/DMS_ProteinGym_substitutions/"
+MAVE_dir <- "/home/rstudio/ProteinGym_data/DMS_substitutions/DMS_ProteinGym_substitutions/"
 
-ProGym_files <- list.files(path=MAVE.dir, full.names=F)
+ProGym_files <- list.files(path=MAVE_dir, full.names=F)
 
 # Grab MAVE study names. These should match AlphaMissense.
 ProGym_names <- sub(".csv", "", ProGym_files) 
 
 # Load in all the files as tables in a list
-ProGym_tables <- suppressMessages(lapply(paste0(MAVE.dir, ProGym_files),
+ProGym_tables <- suppressMessages(lapply(paste0(MAVE_dir, ProGym_files),
                                          read_csv, show_col_types = FALSE))
 
 # Assign respective MAVE study names to each list element
@@ -92,6 +92,7 @@ colnames(cdf) <- c("pg_names", "entry", "accessions")
 ```
 
 # Two IDs not mapped: ANCSZ_Hobbs, PSAE_SYNP2
+# Manually map
 
 ```{r}
 # Manual curation of PSAE_SYNP2: to UniProt ID "P31969"
@@ -122,12 +123,12 @@ cols <- c("UniProt_id", "DMS_id", "mutant", "mutated_sequence",
           "DMS_score", "DMS_score_bin")
 
 ProGym_tables <- lapply(ProGym_tables, function(df) {
-   df %>% dplyr::select(all_of(cols))
+   df |>  dplyr::select(all_of(cols))
 })
 
 # Make "DMS_score_bin" factor
 ProGym_tables <- lapply(ProGym_tables, function(df) {
-    df |> |> 
+    df |>
     mutate(DMS_score_bin = factor(DMS_score_bin))
 })
 ```
@@ -165,7 +166,8 @@ fitness cutoff defined by ProteinGym (1 is fit, 0 is not fit).
 # Write ProteinGym DMS list to RDS object
 
 ```{r, eval=FALSE}
-saveRDS(ProGym_tables, "ProGym216_DMS_subs_v2.rds")
+saveRDS(ProGym_tables, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.1/ProGym217_DMS_subs_v1.rds")
 ```
 
 # SessionInfo
