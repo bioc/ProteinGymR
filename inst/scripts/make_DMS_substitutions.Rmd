@@ -34,11 +34,8 @@ One component of ProteinGym is the Deep Mutational Scanning (DMS) assays
 that can serve as ground truth for assessing variant predictions.
 
 The substitution benchmark consists of more than 2.5M variants from 217
-assays.We provide these assays in a list object, with the exception of
-the "ANCSZ_Hobbs_2022" assay, which comprised a manual protein
-reconstruction by the original authors and thus had no matching UniProt
-accession. Therefore, this list contains a total of 216 elements, each
-corresponding to a data.frame for a single DMS assay. 
+assays. We provide these assays in a `list` object with each element
+corresponding to a `data.frame` for each DMS assay. 
 
 # Load in all ProteinGym assays
 
@@ -46,7 +43,7 @@ corresponding to a data.frame for a single DMS assay.
 # Downloaded manually from ProteinGym website 
 # https://proteingym.org/download
 # Data stored locally
-MAVE.dir <- "/home/rstudio/ProteinGym_data/DMS_ProteinGym_substitutions/"
+MAVEdir <- "/home/rstudio/ProteinGym_data/DMS_substitutions/DMS_ProteinGym_substitutions/"
 
 ProGym_files <- list.files(path=MAVE.dir, full.names=F)
 
@@ -62,10 +59,13 @@ names(ProGym_tables) <- ProGym_names
 
 # Combine all of the dataframes together with each df name as a new column:
 # `DMS_id` is the protein entry name with ProteinGym experiment names
-ProGym_tables <- purrr::map2(ProGym_tables, ProGym_names, ~ {
-  .x %>%
-    mutate(DMS_id = .y)
-})
+ProGym_tables <- 
+    purrr::map2(
+        ProGym_tables, 
+        ProGym_names, ~ {.x |>
+            mutate(DMS_id = .y)
+        }
+    )
 ```
 
 # Convert ProteinGym's Entry Names to UniProt Accession
@@ -97,37 +97,25 @@ colnames(cdf) <- c("pg_names", "entry", "accessions")
 # Manual curation of PSAE_SYNP2: to UniProt ID "P31969"
 cdf$accessions[which(cdf$pg_names == "PSAE_SYNP2")] <- "P31969"
 cdf$entry[which(cdf$pg_names == "PSAE_SYNP2")] <- "PSAE_SYNP2"
-```
 
-The "ANCSZ_Hobbs" assay is a DMS of an ancestral reconstruction of the
-Syk-family kinases, AncSZ, that [Hobbs et al.
-2022](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9601881/) manually
-curated. It is an ancestral sequence reconstruction to generate a spleen
-tyrosine kinase (Syk), and therefore does not have an established
-UniProt accession ID. For this protein, we will remove this assay from
-our data, resulting in 216 total DMS assays for this resource.
-
-```{r}
-# Remove it from the accession list
-cdf <- na.omit(cdf)
-
-# Remove ANCSZ_Hobbs
-ProGym_tables[["ANCSZ_Hobbs_2022"]] <- NULL
-
-# Grab PG study names without Hobbs -- Used later
-ProGym_names <- names(ProGym_tables)
+# Manually curation of ANCZ -- leave UniProt accession as NA
+cdf$entry[which(cdf$pg_names == "ANCSZ_Hobbs")] <- NA
 ```
 
 # Add a column in the ProteinGym data with UniProt Accession
 
 ```{r}
+ProGym_names <- names(ProGym_tables)
+
 # For each assay, mutate a new UniProt ID column
 uniprot_vec <- cdf$accessions
 
-ProGym_tables <- purrr::map2(ProGym_tables, uniprot_vec, ~ {
-    .x %>%
-    mutate(UniProt_id = .y)
-})
+ProGym_tables <- 
+    purrr::map2(ProGym_tables, 
+        uniprot_vec, ~ { .x |>
+            mutate(UniProt_id = .y)
+        }
+    )
 
 # Reorder the columns
 cols <- c("UniProt_id", "DMS_id", "mutant", "mutated_sequence", 
@@ -139,7 +127,7 @@ ProGym_tables <- lapply(ProGym_tables, function(df) {
 
 # Make "DMS_score_bin" factor
 ProGym_tables <- lapply(ProGym_tables, function(df) {
-    df %>%
+    df |> |> 
     mutate(DMS_score_bin = factor(DMS_score_bin))
 })
 ```
