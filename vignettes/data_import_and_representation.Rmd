@@ -208,13 +208,17 @@ ComplexHeatmap::Heatmap(heatmap_matrix,
 ```
 
 The heatmap shows the DMS score at each position along the given protein
-(x-axis) where a residue was mutated (alternate amino acid on y-axis). 
-For this demonstration, we subset to the first 100 positions. 
+(x-axis) where a residue was mutated (alternate amino acid on y-axis). For this 
+demonstration, we subset to the first 100 positions. 
+
+A low DMS score indicates low fitness, while a higher DMS score indicates high 
+fitness.
 
 Based on the "ACE2_HUMAN_Chan_2020" assay, we can see that at positions 90 and 
-92, almost any amino acid change resulted in a significant affect on fitness. 
-This could represent an important region for protein function where any
-perturbation would likely be deleterious.
+92, fitness remained high despite across amino acid changes; possibly 
+suggestive of a benign region of the protein. However, several mutations at 
+position 48 resulted in low fitness. This could represent an important region 
+for protein function where any perturbation would likely be deleterious.
 
 
 # Benchmarking across models
