@@ -10,6 +10,8 @@ Authors@R:
             role = "aut"),
       person("Aaron", "Kollasch", 
             role = "aut"),
+      person("Debora", "Marks", 
+            role = "aut"),
       person("Ludwig", "Geistlinger", 
             role = "aut"))
 Description: The ProteinGymR package provides analysis-ready data resources from 
