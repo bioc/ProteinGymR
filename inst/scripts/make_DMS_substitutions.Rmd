@@ -1,7 +1,7 @@
 ---
 title: "make_ProteinGym_DMS_substitutions"
 author: "Tram Nguyen"
-date: "2024-10-01"
+date: "2024-10-16"
 output: html_document
 editor_options: 
   markdown: 
@@ -15,24 +15,22 @@ suppressMessages(library(UniProt.ws))
 suppressMessages(library(org.Hs.eg.db))
 ```
 
+[Zenodo]: https://zenodo.org/records/13936340
+[Notin_pub]: https://papers.nips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html
+
 # Download data
 
-All datasets were downloaded from
-[ProteinGym.org](%22ProteinGym.org%22). Specifically, the substitution
-data were accessed from
-<https://marks.hms.harvard.edu/tranception/ProteinGym_substitutions.zip>
-(2024-07-22).
+The 217 DMS substitution assays and the reference file for these assays 
+(metadata) were accessed from the [ProteinGym Zenodo][Zenodo] repository (v1.1).
+(accessed 2024-10-16).
 
-The reference file for these DMS assays (metadata) were downloaded at
-<https://marks.hms.harvard.edu/proteingym/DMS_substitutions.csv>
-(2024-10-01)
 
 # ProteinGym information
 
 ProteinGym is a collection of benchmarks aiming at comparing the ability
 of models to predict the effects of protein mutations, and were curated
-by Notin et al. 
-[2023](https://papers.nips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html). 
+by Notin et al. [2023][Notin_pub]. 
+
 One component of ProteinGym is the Deep Mutational Scanning (DMS) assays
 that can serve as ground truth for assessing variant predictions.
 
@@ -46,7 +44,7 @@ corresponding to a `data.frame` for each DMS assay.
 # Downloaded manually from ProteinGym website 
 # https://proteingym.org/download
 # Data stored locally
-MAVE_dir <- "/home/rstudio/ProteinGym_data/DMS_substitutions/DMS_ProteinGym_substitutions/"
+MAVE_dir <- "/home/rstudio/ProteinGym_data/ProteinGym_v1.1/DMS_ProteinGym_substitutions/"
 
 ProGym_files <- list.files(path=MAVE_dir, full.names=F)
 
@@ -98,10 +96,6 @@ colnames(cdf) <- c("pg_names", "entry", "accessions")
 # Manually map
 
 ```{r}
-# Manual curation of PSAE_SYNP2: to UniProt ID "P31969"
-cdf$accessions[which(cdf$pg_names == "PSAE_SYNP2")] <- "P31969"
-cdf$entry[which(cdf$pg_names == "PSAE_SYNP2")] <- "PSAE_SYNP2"
-
 # Manually curation of ANCZ -- leave UniProt accession as NA
 cdf$entry[which(cdf$pg_names == "ANCSZ_Hobbs")] <- NA
 ```
@@ -141,7 +135,7 @@ Changed tibble to data.frames.
 ProGym_tables <- lapply(ProGym_tables, as.data.frame)
 ```
 
-Returns a list of 216 unique DMS assays, each with 6 columns:
+Returns a list of 217 unique DMS assays, each with 6 columns:
 "UniProt_id","DMS_id","mutant","mutated_sequence","DMS_score","DMS_score_bin".
 
 **UniProt_id (str):** UniProt accession identifier for the protein.
@@ -170,14 +164,14 @@ fitness cutoff defined by ProteinGym (1 is fit, 0 is not fit).
 
 ```{r, eval=FALSE}
 saveRDS(ProGym_tables, 
-    "/home/rstudio/ProteinGym_data/EH_data/v1.1/ProGym217_DMS_subs_v1.rds")
+    "/home/rstudio/ProteinGym_data/EH_data/v1.1/ProGym217_DMS_subs_v1.1.rds")
 ```
 
 
 # Load and write metadata table
 ```{r, eval=FALSE}
-ref_file <- read_csv(
-    "/home/rstudio/ProteinGym_data/DMS_substitutions/DMS_substitutions.csv")
+ref_file <- 
+    read_csv("/home/rstudio/ProteinGym_data/ProteinGym_v1.1/DMS_substitutions.csv")
 
 ref_file$taxon <- as.factor(ref_file$taxon)
 ref_file$source_organism <- as.factor(ref_file$source_organism)
@@ -193,7 +187,7 @@ ref_file$coarse_selection_type <- as.factor(ref_file$coarse_selection_type)
 ref_file <- as.data.frame(ref_file)
 
 saveRDS(ref_file, 
-    "/home/rstudio/ProteinGym_data/EH_data/v1.1/ref_file_217_DMS_subs_v1.rds")
+    "/home/rstudio/ProteinGym_data/EH_data/v1.1/ref_file_217_DMS_subs_v1.1.rds")
 ```
 
 # SessionInfo

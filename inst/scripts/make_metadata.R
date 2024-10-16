@@ -42,7 +42,7 @@ DMS_substitutions_scores <- data.frame(
     Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",
     RDataClass = "List",
     DispatchClass = "RDS",
-    RDataPath = "ProteinGymR/ProGym217_DMS_subs_v1.rds",
+    RDataPath = "ProteinGymR/ProGym217_DMS_subs_v1.1.rds",
     stringsAsFactors = FALSE
 )
 
@@ -63,7 +63,7 @@ DMS_sub_reference <- data.frame(
     Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",
     RDataClass = "Data.Frame",
     DispatchClass = "RDS",
-    RDataPath = "ProteinGymR/ref_file_217_DMS_subs_v1.rds",
+    RDataPath = "ProteinGymR/ref_file_217_DMS_subs_v1.1.rds",
     stringsAsFactors = FALSE
 )
 
@@ -85,7 +85,7 @@ zeroshot_scores_DMS_subs <- data.frame(
     Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",
     RDataClass = "List",
     DispatchClass = "RDS",
-    RDataPath = "ProteinGymR/zeroshot_DMS_subs_v1.rds",
+    RDataPath = "ProteinGymR/zeroshot_DMS_subs_v1.1.rds",
     stringsAsFactors = FALSE
 )
 

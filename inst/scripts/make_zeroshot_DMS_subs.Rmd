@@ -1,7 +1,7 @@
 ---
 title: "make_zeroshot_DMS_subs"
 author: "Tram Nguyen"
-date: "2024-09-23"
+date: "2024-10-16"
 output: html_document
 ---
 ```{r setup, include=FALSE}
@@ -13,6 +13,10 @@ options(width = 80)
 suppressMessages(library(purrr))
 suppressMessages(library(readr))
 ```
+
+[Zenodo]: https://zenodo.org/records/13936340
+[git_benchmark]: https://github.com/OATML-Markslab/ProteinGym/tree/main/benchmarks/DMS_zero_shot/substitutions
+[model_script]: https://github.com/OATML-Markslab/ProteinGym/tree/main/scripts/scoring_DMS_zero_shot/performance_substitutions.sh
 
 # Zero-shot benchmarking information
 
@@ -61,17 +65,18 @@ the corrected average values for 62 models (columns) across
 # Download and process model performance metric data
 
 The .csv files of benchmarking scores for 5 performance metrics were downloaded 
-from [the ProteinGym Github repo](https://github.com/OATML-Markslab/ProteinGym/tree/main/benchmarks/DMS_zero_shot/substitutions)
-(accessed 2024-08-28).
+from [the ProteinGym Github repo][git_benchmark]
+(accessed 2024-10-16).
 
 Briefly, to calculate the DMS substitution benchmark metrics, the model scores 
-are downloaded from [ProteinGym](https://marks.hms.harvard.edu/proteingym/zero_shot_substitutions_scores.zip).
+are downloaded from [ProteinGym Zenodo repository][[Zenodo] 
+(accessed 2024-10-16).
 
-The script to run the calculation is provided [here](https://github.com/OATML-Markslab/ProteinGym/tree/main/scripts/scoring_DMS_zero_shot/performance_substitutions.sh).
+The script to run the calculation is provided [here][model_script].
 
 ```{r, eval = FALSE}
 # Load in datasets from ProteinGym Github repo
-AUC <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/AUC/DMS_substitutions_AUC_DMS_level.csv")
+AUC <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/refs/heads/main/benchmarks/DMS_zero_shot/substitutions/AUC/DMS_substitutions_AUC_DMS_level.csv")
 
 MCC <- read.csv("https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/benchmarks/DMS_zero_shot/substitutions/MCC/DMS_substitutions_MCC_DMS_level.csv")
 
@@ -108,13 +113,17 @@ all(sapply(score_list[-1],
 
 # Add list element names
 names(score_list) <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
+
+# Drop Mulan and PoET until it is finalized for v1.2
+score_list <- lapply(score_list, 
+    function(x) x[!(names(x) %in% c("MULAN_small", "PoET_200M"))])
 ```
 
 # Write model score for DMS list to RDS object
 
 ```{r, eval=FALSE}
 saveRDS(score_list, 
-    "./ProteinGym_data/DMS_sub_benchmark_scores/zeroshot_DMS_subs_v1.rds")
+    "../ProteinGym_data/DMS_sub_benchmark_scores/zeroshot_DMS_subs_v1.1.rds")
 ```
 
 
