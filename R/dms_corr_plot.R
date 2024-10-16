@@ -94,7 +94,9 @@ pg_filter_dms_table <-
         pg_table <- dms_substitutions()
     }
     
-    ## Filter pg_table for uID, rbind into one data.frame
+    ## Filter pg_table for uID, rbind into one data.frame. Remove NA UniProts
+    pg_table <- Filter(function(df) !any(is.na(df[["UniProt_id"]])), pg_table)
+    
     filtered_pg <- purrr::keep(pg_table, ~ any(.x$UniProt_id == uID))
     
     dms_table <-
