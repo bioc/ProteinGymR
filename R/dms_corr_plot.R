@@ -35,7 +35,7 @@ pg_filter_am_table <-
         ## Default am_table IDs are in SwissProt. Convert to UniProt
         query <- list("accession_id" = uID)
         res <- query_uniprot(query = query, show_progress = TRUE)
-        swissID <- res |> pull(`Entry Name`)
+        swissID <- res |> pull(.data$`Entry Name`)
         
         ## Check that UniProt/SwissID valid
         if (NROW(res) != 1){
@@ -49,7 +49,7 @@ pg_filter_am_table <-
             mutate(
                 UniProt_id = case_when(
                     (.data$UniProt_id) == swissID ~ uID,
-                    TRUE ~ as.character(UniProt_id)
+                    TRUE ~ as.character(.data$UniProt_id)
                 )
             )
         
@@ -136,16 +136,17 @@ pg_match_id <-
             by = c("UniProt_id", "mutant"),
             relationship = "many-to-many"
         ) |> 
-        select(UniProt_id, mutant, .data$AlphaMissense, .data$DMS_score) |> 
+        select(.data$UniProt_id, .data$mutant, 
+            .data$AlphaMissense, .data$DMS_score) |> 
         na.omit()
     
     ## Average am and dms scores across multiple studies per protein
     merged_table <-
         merged_table |> 
-        group_by(UniProt_id, mutant) |>    
+        group_by(.data$UniProt_id, .data$mutant) |>    
         summarise(
-            mean_am = mean(AlphaMissense),
-            mean_dms= mean(DMS_score)
+            mean_am = mean(.data$AlphaMissense),
+            mean_dms= mean(.data$DMS_score)
         )
     
     merged_table

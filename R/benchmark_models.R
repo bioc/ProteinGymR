@@ -138,7 +138,7 @@ benchmark_models <- function(
     
     ## Pull relevant metric and models
     selected_table <- metric_tables[[metric]]
-    selected_table <- selected_table |> select(all_of(.data$models))
+    selected_table <- selected_table |> select(all_of(models))
     
     ## If Spearman, take absolute value for plotting
     if (metric == "Spearman"){
