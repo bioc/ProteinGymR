@@ -138,7 +138,7 @@ benchmark_models <- function(
     
     ## Pull relevant metric and models
     selected_table <- metric_tables[[metric]]
-    selected_table <- selected_table |> select(all_of(models))
+    selected_table <- selected_table |> select(all_of(.data$models))
     
     ## If Spearman, take absolute value for plotting
     if (metric == "Spearman"){
@@ -155,13 +155,14 @@ benchmark_models <- function(
     ## Reorder models in descending mean scores
     res_long <- res_long |> 
         group_by(model) |> 
-        mutate(model_mean = mean(score)) |> 
+        mutate(model_mean = mean(.data$score)) |> 
         ungroup() |> 
-        mutate(model = fct_reorder(model, model_mean, .desc = TRUE))
+        mutate(model = fct_reorder(.data$model, .data$model_mean, .desc = TRUE))
 
     ## Raincloud plot
     res_long |> 
-        ggplot(aes(x = model, y = score, fill = model, group = model)) + 
+        ggplot(aes(x = .data$model, y = .data$score, 
+            fill = .data$model, group = .data$model)) + 
         stat_halfeye(
             adjust = .5, 
             width = .6, 
