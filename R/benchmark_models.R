@@ -100,6 +100,8 @@ check_model_argument <- function(models){
 #' 
 #' @importFrom tidyr pivot_longer
 #' 
+#' @importFrom tidyselect all_of everything
+#' 
 #' @importFrom forcats fct_reorder
 #' 
 #' @importFrom ggplot2 ggplot coord_cartesian element_text scale_fill_discrete

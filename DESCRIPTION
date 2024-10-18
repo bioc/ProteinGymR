@@ -38,7 +38,8 @@ Imports:
     purrr,
     queryup,
     spdl,
-    tidyr
+    tidyr,
+    tidyselect
 Suggests: 
     ComplexHeatmap,
     tibble,
