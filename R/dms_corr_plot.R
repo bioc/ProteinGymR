@@ -120,6 +120,7 @@ pg_filter_dms_table <-
 #' @noRd
 #'
 #' @importFrom dplyr left_join select group_by summarise
+#' @importFrom stats na.omit
 #' 
 pg_match_id <- 
     function(am_table, pg_table)
@@ -135,7 +136,7 @@ pg_match_id <-
             by = c("UniProt_id", "mutant"),
             relationship = "many-to-many"
         ) |> 
-        select(UniProt_id, mutant, AlphaMissense, DMS_score) |> 
+        select(UniProt_id, mutant, .data$AlphaMissense, .data$DMS_score) |> 
         na.omit()
     
     ## Average am and dms scores across multiple studies per protein
@@ -153,6 +154,7 @@ pg_match_id <-
 #' Average Spearman correlation per protein
 #'
 #' @noRd
+#' @importFrom stats cor.test
 #'
 pg_correlate <- 
     function(merged_table)
