@@ -195,11 +195,18 @@ rownames(heatmap_matrix) <- pos
 
 ## Transpose so position is x-axis
 heatmap_matrix <- t(heatmap_matrix)
+
+# Reorder rows based on physiochemical properties
+phyiochem_order <- "DEKRHNQSTPGAVILMCFYW"
+phyiochem_order <- unlist(strsplit(phyiochem_order, split = ""))
+
+reordered_matrix <- heatmap_matrix[order(phyiochem_order), ]
+
 ```
 
 ```{r ACE2 heatmap, warning=FALSE, fig.wide = TRUE}
 ## Create the heatmap
-ComplexHeatmap::Heatmap(heatmap_matrix,
+ComplexHeatmap::Heatmap(reordered_matrix,
         name = "DMS Score",
         cluster_rows = FALSE,
         cluster_columns = FALSE,
@@ -209,7 +216,9 @@ ComplexHeatmap::Heatmap(heatmap_matrix,
 
 The heatmap shows the DMS score at each position along the given protein
 (x-axis) where a residue was mutated (alternate amino acid on y-axis). For this 
-demonstration, we subset to the first 100 positions. 
+demonstration, we subset to the first 100 positions and grouped the amino
+acids by their physiochemical properties (DE,KRH,NQ,ST,PGAVIL,MC,FYW). See
+[here](https://biology.stackexchange.com/questions/105321/arrangement-of-amino-acids-in-the-protein-alphabet) for more information.
 
 A low DMS score indicates low fitness, while a higher DMS score indicates high 
 fitness.
