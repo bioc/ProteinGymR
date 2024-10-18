@@ -41,6 +41,7 @@ Imports:
     tidyr
 Suggests: 
     ComplexHeatmap,
+    tibble,
     stringr,
     BiocStyle,
     knitr,
