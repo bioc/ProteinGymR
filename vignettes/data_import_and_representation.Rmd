@@ -68,7 +68,7 @@ library(AnnotationHub)
 [zenodo]: https://zenodo.org/records/13936340
 [dms_paper]: https://www.nature.com/articles/nmeth.3027
 [physiochem]: https://biology.stackexchange.com/questions/105321/arrangement-of-amino-acids-in-the-protein-alphabet
-
+[boucher]: https://pubmed.ncbi.nlm.nih.gov/27010590/
 
 # Introduction
 
@@ -115,7 +115,7 @@ in a zero-shot setting. The data is provided with `zeroshot_DMS_metrics()`.
 
 # Explore and visualize data
 
-This vignette explores and visualizes the first dataset of DMS scores. 
+This vignette explores and visualizes the first dataset of DMS scores.
 
 Deep mutational scanning is an experimental technique that provides 
 comprehensive data on the functional effects of all possible single mutations 
@@ -264,6 +264,44 @@ performance across several variant effect prediction models calculated on the
 217 DMS assays in the zero-shot setting. This function takes in one of the five 
 available metrics, and compares up to 5 models of the 62 available.
 
+In the zero-shot setting, experimental phenotypical measurements from
+a given assay are predicted without having access to any ground-truth labels at 
+training time. Robust zero-shot performance is particularly informative when 
+labels are subject to several biases or scarcely available (e.g., labels for 
+rare genetic pathologies).
+
+Model performance was evaluted across 5 metrics:
+
+1. Spearman's rank correlation coefficient (primary metric)
+2. Area Under the ROC Curve (AUC)
+3. Matthews Correlation Coefficient (MCC) for bimodal DMS measurements
+4. Normalized Discounted Cumulative Gains (NDCG) for identifying the most 
+functional protein variants
+5. Top K Recall (top 10% of DMS values)
+
+To avoid placing too much weight on properties with many assays 
+(e.g., thermostability), these metrics were first calculated within groups 
+of assays that measure similar functions. The final value of the metric
+is then the average of these averages, giving each functional group equal 
+weight. The final values are referred to as the ‘corrected average’.
+
+Due to the often non-linear relationship between protein function and 
+organism fitness ([Boucher et al., 2016][boucher]), the Spearman’s rank 
+correlation coefficient is the most generally appropriate 
+metric for model performance on experimental measurements. However, in 
+situations where DMS measurements exhibit a bimodal profile, rank correlations 
+may not be the optimal choice. Therefore, additional metrics are also provided, 
+such as the Area Under the ROC Curve (AUC) and the Matthews Correlation 
+Coefficient (MCC), which compare model scores with binarized experimental 
+measurements. Furthermore, for certain goals (e.g., optimizing functional 
+properties of designed proteins), it is more important that a model is able to 
+correctly identify the most functional protein variants, rather than properly 
+capture the overall distribution of all assayed variants. Thus, we also 
+calculate the Normalized Discounted Cumulative Gains (NDCG), which up-weights a 
+model if it gives its highest scores to sequences with the highest DMS value. 
+Finally, we also calculate Top K Recall, where we select K to be the top 10% 
+of DMS values.
+
 To view all available models, use the function: `available_models()`
 
 ```{r, available_models}
@@ -282,6 +320,7 @@ selected models. If the `metric` argument is not defined, the default used is
 a Spearman correlation. For more information about the models and metrics, see 
 the function documentation `?benchmark_models()`.
 
+
 # Reference
 
 Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., Spinner, H., 
@@ -293,7 +332,12 @@ Information Processing Systems (Vol. 36, pp. 64331-64379).
 Curran Associates, Inc.
 
 Fowler, D., Fields, S. Deep mutational scanning: a new style of protein science. 
-Nat Methods 11, 801–807 (2014). https://doi.org/10.1038/nmeth.3027
+Nat Methods 11, 801–807 (2014). https://doi.org/10.1038/nmeth.3027.
+
+Boucher JI, Bolon DN, Tawfik DS. Quantifying and understanding the fitness 
+effects of protein mutations: Laboratory versus nature. Protein Sci. 2016 Jul;
+25(7):1219-26. doi: 10.1002/pro.2928.
+
 
 # Session Info
 ```{r, sesh info}
