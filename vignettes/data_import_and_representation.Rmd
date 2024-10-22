@@ -8,6 +8,8 @@ author:
       affiliation: Department of Systems Biology, Harvard Medical School
     - name: Aaron W Kollasch
       affiliation: Department of Systems Biology, Harvard Medical School
+    - name: Debora Marks
+      affiliation: Department of Systems Biology, Harvard Medical School
     - name: Ludwig Geistlinger
       affiliation: Department of Biomedical Informatics, Harvard Medical School
 package: ProteinGymR
@@ -58,7 +60,15 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 library(ComplexHeatmap)
+library(AnnotationHub)
 ```
+
+[ProteinGym]: https://proteingym.org/
+[pg_publication]: https://proceedings.neurips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html
+[zenodo]: https://zenodo.org/records/13936340
+[dms_paper]: https://www.nature.com/articles/nmeth.3027
+[physiochem]: https://biology.stackexchange.com/questions/105321/arrangement-of-amino-acids-in-the-protein-alphabet
+
 
 # Introduction
 
@@ -70,25 +80,28 @@ methods, assessing the effectiveness of these models is problematic due to
 the use of distinct, often contrived, experimental datasets and variable
 performance across different protein families.
 
-ProteinGym v1.0 is a large-scale and holistic set of benchmarks specifically
-designed for protein fitness prediction and design. It encompasses both a
-broad collection of over 250 standardized deep mutational scanning assays,
-spanning millions of mutated sequences, as well as curated clinical datasets
-providing high-quality expert annotations about mutation effects.
-Furthermore, ProteinGym reports the performance of a diverse set of over 60
-high-performing models from various subfields (eg., mutation effects,
-inverse folding) into a unified benchmark.
+[ProteinGym v1.1][ProteinGym] is a large-scale and holistic set of benchmarks 
+specifically designed for protein fitness prediction and design curated by
+([Notin et al. 2023][pg_publication]). It encompasses both a broad collection 
+of over 250 standardized deep mutational scanning (DMS) assays, spanning 
+millions of mutated sequences, as well as curated clinical datasets providing 
+high-quality expert annotations about mutation effects. Furthermore, ProteinGym 
+reports the performance of a diverse set of over 60 high-performing models from 
+various subfields (eg., mutation effects, inverse folding) into a unified 
+benchmark. 
+
+ProteinGym v1.1 datasets are openly available as a community resource both on
+[Zenodo][zenodo] and the official [ProteinGym website][ProteinGym].
 
 
 # Data
 
-The `ProteinGymR` package provides analysis-ready datasets from ProteinGym 
-(Notin et. al.,
-[2023](https://papers.nips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html)).
+The `ProteinGymR` package provides the following analysis-ready datasets from 
+ProteinGym v1.1:
 
-1.  Deep mutational scanning assay (DMS) scores from 216 assays measuring
-the impact of all possible amino acid substitutions across 186 proteins. The
-data is provided with `dms_substitutions()`.
+1.  DMS assay scores from 217 assays measuring the impact of all possible 
+amino acid substitutions across 186 proteins. The data is provided with 
+`dms_substitutions()`.
 
 2.  AlphaMissense pathogenicity scores for ~1.6 M substitutions in the
 ProteinGym DMS data. The data is provided with `am_scores()`.
@@ -97,6 +110,8 @@ ProteinGym DMS data. The data is provided with `am_scores()`.
 "Top_recall") for 62 models across 217 assays calculated on DMS substitutions 
 in a zero-shot setting. The data is provided with `zeroshot_DMS_metrics()`.
 
+4. Reference file containing metadata associated with the 217 DMS assays.
+
 
 # Explore and visualize data
 
@@ -104,14 +119,14 @@ This vignette explores and visualizes the first dataset of DMS scores.
 
 Deep mutational scanning is an experimental technique that provides 
 comprehensive data on the functional effects of all possible single mutations 
-in a protein. For each position in a protein, the amino acid residue is mutated 
-and the fitness effects are recorded. While most mutations tend to be 
-deleterious, some can enhance protein activity. In addition to analyzing single 
-mutations, this method can also examine the effects of multiple mutations, 
-yielding insights into protein structure and function. Overall, DMS scores 
-provide a detailed map of how changes in a protein's sequence affect its 
-function, offering valuable yet complex insights for researchers studying 
-protein biology.
+in a protein ([Fowler & Fields 2014][dms_paper]). For each position in a 
+protein, the amino acid residue is mutated and the fitness effects are recorded. 
+While most mutations tend to be deleterious, some can enhance protein activity. 
+In addition to analyzing single mutations, this method can also examine the 
+effects of multiple mutations, yielding insights into protein structure and 
+function. Overall, DMS scores provide a detailed map of how changes in a 
+protein's sequence affect its function, offering valuable yet complex insights 
+for researchers studying protein biology.
 
 
 ## Load and explore the DMS data from ExperimentHub
@@ -139,6 +154,21 @@ categorizing whether the mutation has an affect on fitness (1) or not (0). For
 more details, access the function documentation with `?dms_substitutions()` and
 the reference publication from Notin et al. 2023.
 
+To access the metadata associated with each DMS assay, we can load in the 
+reference table. Do this by querying all datasets on ExperimentHub affilitated
+with "ProteinGymR".
+
+```{r queryEH}
+eh <- ExperimentHub::ExperimentHub()
+AnnotationHub::query(eh, "ProteinGymR")
+
+dms_metadata <- eh[["EH9607"]]
+names(dms_metadata)
+```
+
+There are 45 columns representing metadata for DMS assays. For more information 
+about the information, see the [ProteinGym publication][pg_publication].
+
 
 ## Visualization of DMS data with ComplexHeatmap
 
@@ -150,7 +180,7 @@ ACE2 <- dms_data[["ACE2_HUMAN_Chan_2020"]]
 We want to grab the reference amino acid, protein position, and mutant residue 
 from the "mutant" column of the dataset.
 
-```{r ACE2 split mutant}
+```{r heatmap, warning = FALSE, fig.wide = TRUE}
 ACE2 <- 
     ACE2 |>
     dplyr::mutate(
@@ -164,9 +194,7 @@ ACE2 <-
 ACE2 <- ACE2 |> select("ref", "pos", "alt", "DMS_score")
 
 head(ACE2)
-```
 
-```{r reshape ACE2}
 ## Reshape the data to wide format
 ACE2_wide <- ACE2 |> 
     select(-ref) |> 
@@ -178,9 +206,7 @@ ACE2_wide <- ACE2_wide |>
     filter(pos <= 100)
 
 head(ACE2_wide)
-```
 
-```{r as matrix}
 ## Convert to matrix
 pos <- ACE2_wide$pos
 alt <- colnames(ACE2_wide)
@@ -196,15 +222,13 @@ rownames(heatmap_matrix) <- pos
 ## Transpose so position is x-axis
 heatmap_matrix <- t(heatmap_matrix)
 
-# Reorder rows based on physiochemical properties
+## Reorder rows based on physiochemical properties
 phyiochem_order <- "DEKRHNQSTPGAVILMCFYW"
 phyiochem_order <- unlist(strsplit(phyiochem_order, split = ""))
 
-reordered_matrix <- heatmap_matrix[order(phyiochem_order), ]
+reordered_matrix <- heatmap_matrix[match(phyiochem_order, 
+    rownames(heatmap_matrix)), ]
 
-```
-
-```{r ACE2 heatmap, warning=FALSE, fig.wide = TRUE}
 ## Create the heatmap
 ComplexHeatmap::Heatmap(reordered_matrix,
         name = "DMS Score",
@@ -218,7 +242,10 @@ The heatmap shows the DMS score at each position along the given protein
 (x-axis) where a residue was mutated (alternate amino acid on y-axis). For this 
 demonstration, we subset to the first 100 positions and grouped the amino
 acids by their physiochemical properties (DE,KRH,NQ,ST,PGAVIL,MC,FYW). See
-[here](https://biology.stackexchange.com/questions/105321/arrangement-of-amino-acids-in-the-protein-alphabet) for more information.
+[here][physiochem] for more information. As a note, not all positions along the 
+protein sequence may be subjected to mutation for every DMS assay. This results 
+from the specific research objectives, prioritization choices of the 
+investigators, or technical constraints inherent to the experimental design. 
 
 A low DMS score indicates low fitness, while a higher DMS score indicates high 
 fitness.
@@ -255,8 +282,7 @@ selected models. If the `metric` argument is not defined, the default used is
 a Spearman correlation. For more information about the models and metrics, see 
 the function documentation `?benchmark_models()`.
 
-
-# References
+# Reference
 
 Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., Spinner, H., 
 Rollins, N., Shaw, A., Orenbuch, R., Weitzman, R., Frazer, J., Dias, M., 
@@ -266,8 +292,10 @@ A. Globerson, K. Saenko, M. Hardt, & S. Levine (Eds.), Advances in Neural
 Information Processing Systems (Vol. 36, pp. 64331-64379). 
 Curran Associates, Inc.
 
-# Session Info
+Fowler, D., Fields, S. Deep mutational scanning: a new style of protein science. 
+Nat Methods 11, 801–807 (2014). https://doi.org/10.1038/nmeth.3027
 
+# Session Info
 ```{r, sesh info}
 sessionInfo()
 ```
