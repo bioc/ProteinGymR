@@ -332,7 +332,7 @@ Information Processing Systems (Vol. 36, pp. 64331-64379).
 Curran Associates, Inc.
 
 Fowler, D., Fields, S. Deep mutational scanning: a new style of protein science. 
-Nat Methods 11, 801–807 (2014). https://doi.org/10.1038/nmeth.3027.
+Nat Methods 11, 801–807 (2014). doi: 10.1038/nmeth.3027.
 
 Boucher JI, Bolon DN, Tawfik DS. Quantifying and understanding the fitness 
 effects of protein mutations: Laboratory versus nature. Protein Sci. 2016 Jul;
