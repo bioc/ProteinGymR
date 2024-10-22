@@ -42,6 +42,7 @@ Imports:
     tidyselect
 Suggests: 
     ComplexHeatmap,
+    AnnotationHub,
     tibble,
     stringr,
     BiocStyle,
@@ -50,7 +51,7 @@ Suggests:
 VignetteBuilder: knitr
 Encoding: UTF-8
 biocViews: ExperimentData, ExperimentHub, PackageTypeData, Homo_sapiens_Data,
-    ReproducibleResearch, CellCulture, SequencingData
+    ReproducibleResearch, CellCulture, SequencingData, Proteome
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Config/testthat/edition: 3
