@@ -8,10 +8,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # ProteinGymR 0.99.0
-- DMS substitution scores for 216 assays added to ExperimentHub
-- AlphaMissense pathogenicity scores for ProteinGym mutations added to 
-ExperimentHub
-- Added model performance metrics for DMS substitutions across 60 models in
-zero-shot setting
-- `benchmark_models()` for plotting performance scores aross 5 models
+- Added the following datasets to ExperimentHub:
+    1. DMS substitution scores for 217 assays
+    2. AlphaMissense pathogenicity scores for ProteinGym mutations
+    3. Zero-shot model performance metrics for DMS substitutions across 62 
+    models
+    4. Reference file with metadata for 217 DMS assays
+- `benchmark_models()` for plotting performance scores across 5 models
 - `dms_corr_plot()` for correlating AlphaMissense scores and DMS assay scores
