@@ -11,14 +11,14 @@ dms_substitutions(metadata = FALSE)
 Default behavior is to return processed data with metadata included.}
 }
 \value{
-Returns a \code{\link[=list]{list()}} object of 216 individual assays.
+Returns a \code{\link[=list]{list()}} object of 217 individual assays.
 }
 \description{
 ProteinGym Deep Mutational Scanning (DMS) Scores for Substitutions
 }
 \details{
 \code{dms_substitutions()} loads in ProteinGym deep mutational scanning
-assays (DMS) scores for substitutions in 216 studies. The data is
+assays (DMS) scores for substitutions in 217 studies. The data is
 provided by Notin et. al 2023. See reference for details.
 
 Each assay includes 6 columns:
