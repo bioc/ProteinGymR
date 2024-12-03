@@ -172,70 +172,12 @@ about the information, see the [ProteinGym publication][pg_publication].
 
 ## Visualization of DMS data with ComplexHeatmap
 
-Explore an assay and create a heatmap of the DMS scores.
-```{r ACE2}
-ACE2 <- dms_data[["ACE2_HUMAN_Chan_2020"]]
-```
+Explore an assay and create a heatmap of the DMS scores with 
+`plot_dms_heatmap()`.
 
-We want to grab the reference amino acid, protein position, and mutant residue 
-from the "mutant" column of the dataset.
-
-```{r heatmap, warning = FALSE, fig.wide = TRUE}
-ACE2 <- 
-    ACE2 |>
-    dplyr::mutate(
-        ref = str_sub(ACE2$mutant, 1, 1),
-        pos = as.integer(
-            gsub(".*?([0-9]+).*", "\\1", ACE2$mutant)
-            ),
-        alt = str_sub(ACE2$mutant, -1)
-    )
-
-ACE2 <- ACE2 |> select("ref", "pos", "alt", "DMS_score")
-
-head(ACE2)
-
-## Reshape the data to wide format
-ACE2_wide <- ACE2 |> 
-    select(-ref) |> 
-    pivot_wider(names_from = alt, values_from = DMS_score) |> 
-    arrange(pos)
-
-## Subset to first 100 position
-ACE2_wide <- ACE2_wide |> 
-    filter(pos <= 100)
-
-head(ACE2_wide)
-
-## Convert to matrix
-pos <- ACE2_wide$pos
-alt <- colnames(ACE2_wide)
-alt <- alt[-c(1)]
-
-heatmap_matrix <- ACE2_wide |> 
-    select(2:length(ACE2_wide)) |> 
-    as.matrix()
-
-## Set amino acid position as rownames of matrix
-rownames(heatmap_matrix) <- pos
-
-## Transpose so position is x-axis
-heatmap_matrix <- t(heatmap_matrix)
-
-## Reorder rows based on physiochemical properties
-phyiochem_order <- "DEKRHNQSTPGAVILMCFYW"
-phyiochem_order <- unlist(strsplit(phyiochem_order, split = ""))
-
-reordered_matrix <- heatmap_matrix[match(phyiochem_order, 
-    rownames(heatmap_matrix)), ]
-
-## Create the heatmap
-ComplexHeatmap::Heatmap(reordered_matrix,
-        name = "DMS Score",
-        cluster_rows = FALSE,
-        cluster_columns = FALSE,
-        show_row_names = TRUE,
-        show_column_names = TRUE)
+```{r ACE2 heatmap}
+plot_dms_heatmap(assay_name = "ACE2_HUMAN_Chan_2020", 
+    dms_data = dms_data, start_pos = 10, end_pos = 100)
 ```
 
 The heatmap shows the DMS score at each position along the given protein
