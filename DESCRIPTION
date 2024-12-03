@@ -39,12 +39,12 @@ Imports:
     queryup,
     spdl,
     tidyr,
-    tidyselect
-Suggests: 
+    tidyselect,
     ComplexHeatmap,
+    stringr
+Suggests: 
     AnnotationHub,
     tibble,
-    stringr,
     BiocStyle,
     knitr,
     testthat (>= 3.0.0)
