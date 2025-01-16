@@ -98,7 +98,7 @@ filter_by_pos <-
 #'              
 #' @importFrom tidyr pivot_wider
 #' 
-#' @importFrom ComplexHeatmap Heatmap
+#' @importFrom ComplexHeatmap Heatmap columnAnnotation
 #' 
 #' @importFrom circlize colorRamp2
 #' 
@@ -106,7 +106,13 @@ filter_by_pos <-
 #'
 #' @export
 plot_dms_heatmap <- 
-    function(assay_name, dms_data, start_pos, end_pos, ...) 
+    function(
+        assay_name, 
+        dms_data, 
+        start_pos, 
+        end_pos, 
+        exact_coord,
+        ...) 
 {
     ## Extract the specified assay
     assay_df <- dms_data[[assay_name]]
@@ -137,7 +143,7 @@ plot_dms_heatmap <-
     
     ## Reshape to wide format
     assay_wide <- assay_df |>
-        select(-ref) |>
+        #select(-ref) |>
         pivot_wider(names_from = alt, values_from = DMS_score) |>
         arrange(pos)
     
@@ -158,6 +164,9 @@ plot_dms_heatmap <-
         assay_pos <- filter_by_pos(
             df = assay_wide)
         
+        ref_df <- filter_by_pos(
+            df = assay_df)
+        
     } else {
     
     assay_pos <- filter_by_pos(
@@ -165,15 +174,66 @@ plot_dms_heatmap <-
         start_pos = start_pos, 
         end_pos = end_pos
         )
+    
+    ref_df <- filter_by_pos(
+        df = assay_df,
+        start_pos = start_pos, 
+        end_pos = end_pos)
+    
     }
+    
+    ## exact_coord
+    if (missing(exact_coord)) {
+     
+        message(paste(
+            "'exact_coord' not provided,",
+            "using only positions available in assay."
+        ))
+     
+        assay_pos
+     
+    } else if (exact_coord == FALSE) {
+    
+        assay_pos
+    
+    } else if (exact_coord == TRUE) {
+    
+        assay_pos
+        
+        # Create a sequence of consecutive positions
+        all_pos <- seq(start_pos, end_pos)
+        
+        # Merge with full sequence and fill missing values with NA
+        assay_pos <- merge(
+          data.frame(pos = all_pos),
+          assay_pos,
+          by = "pos",
+          all.x = TRUE
+        )
+        
+        assay_pos
+        
+    } else {
+        
+        assay_pos
+        
+    }
+    
+    # Define a text annotation for the columns
+    column_annotation <- assay_pos |> 
+        select(ref, pos) |> 
+        unique()
     
     ## Convert to matrix
     pos <- assay_pos$pos
     alt <- colnames(assay_pos)
     alt <- alt[-c(1)]
     
+    assay_pos <- assay_pos |>
+        select(-c(ref))
+    
     heatmap_matrix <- assay_pos |>
-    select(2:length(assay_pos)) |> as.matrix()
+        select(2:length(assay_pos)) |> as.matrix()
     
     ## Set aa pos as rownames of matrix and transpose
     rownames(heatmap_matrix) <- pos
@@ -186,6 +246,13 @@ plot_dms_heatmap <-
     reordered_matrix <- heatmap_matrix[match(phyiochem_order, 
                                                rownames(heatmap_matrix)), ]
     
+    
+    # Define a text annotation for the columns
+    column_annotation <- columnAnnotation(
+      text = anno_text(column_annotation$ref, 
+           rot = 90, just = "right", gp = gpar(fontsize = 10))
+    )
+
     ## Create the heatmap
     col_fun <- colorRamp2(c(
                     min(reordered_matrix, na.rm = TRUE), 0, 
@@ -198,8 +265,9 @@ plot_dms_heatmap <-
         cluster_rows = FALSE,
         cluster_columns = FALSE,
         show_row_names = TRUE,
-        show_column_names = TRUE,
         col = col_fun,
         na_col = "grey",
+        show_column_names = TRUE, top_annotation = column_annotation,
         ...)
+
 }
