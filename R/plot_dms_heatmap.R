@@ -100,6 +100,8 @@ filter_by_pos <-
 #' 
 #' @importFrom ComplexHeatmap Heatmap
 #' 
+#' @importFrom circlize colorRamp2
+#' 
 #' @importFrom stringr str_sub
 #'
 #' @export
@@ -250,11 +252,20 @@ plot_dms_heatmap <-
     )
 
     ## Create the heatmap
+    col_fun <- colorRamp2(c(
+                    min(reordered_matrix, na.rm = TRUE), 0, 
+                    max(reordered_matrix, na.rm = TRUE)), 
+                c("red", "white", "blue")
+                )
+    
     ComplexHeatmap::Heatmap(reordered_matrix,
         name = "DMS Score",
         cluster_rows = FALSE,
         cluster_columns = FALSE,
         show_row_names = TRUE,
-        show_column_names = TRUE, top_annotation = column_annotation)
+        col = col_fun,
+        na_col = "grey",
+        show_column_names = TRUE, top_annotation = column_annotation,
+        ...)
 
 }
