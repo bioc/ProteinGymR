@@ -4,7 +4,7 @@
 \alias{plot_dms_heatmap}
 \title{Visualize DMS Scores Along a Protein}
 \usage{
-plot_dms_heatmap(assay_name, dms_data, start_pos, end_pos, ...)
+plot_dms_heatmap(assay_name, dms_data, start_pos, end_pos, exact_coord, ...)
 }
 \arguments{
 \item{assay_name}{\code{character()} a valid DMS assay name. For the full list of
