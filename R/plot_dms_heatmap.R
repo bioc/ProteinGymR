@@ -98,7 +98,7 @@ filter_by_pos <-
 #'              
 #' @importFrom tidyr pivot_wider
 #' 
-#' @importFrom ComplexHeatmap Heatmap
+#' @importFrom ComplexHeatmap Heatmap columnAnnotation
 #' 
 #' @importFrom circlize colorRamp2
 #' 
@@ -114,7 +114,6 @@ plot_dms_heatmap <-
         exact_coord,
         ...) 
 {
-        browser()
     ## Extract the specified assay
     assay_df <- dms_data[[assay_name]]
     
@@ -230,8 +229,11 @@ plot_dms_heatmap <-
     alt <- colnames(assay_pos)
     alt <- alt[-c(1)]
     
+    assay_pos <- assay_pos |>
+        select(-c(ref))
+    
     heatmap_matrix <- assay_pos |>
-    select(2:length(assay_pos)) |> as.matrix()
+        select(2:length(assay_pos)) |> as.matrix()
     
     ## Set aa pos as rownames of matrix and transpose
     rownames(heatmap_matrix) <- pos
@@ -248,7 +250,7 @@ plot_dms_heatmap <-
     # Define a text annotation for the columns
     column_annotation <- columnAnnotation(
       text = anno_text(column_annotation$ref, 
-          rot = 45, just = "right", gp = gpar(fontsize = 10))
+           rot = 90, just = "right", gp = gpar(fontsize = 10))
     )
 
     ## Create the heatmap
