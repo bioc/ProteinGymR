@@ -1,6 +1,6 @@
 Package: ProteinGymR
 Title: Programmatic access to ProteinGym datasets in R/Bioconductor
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: 
     c(person("Tram", "Nguyen",
             role = c("aut", "cre"),
