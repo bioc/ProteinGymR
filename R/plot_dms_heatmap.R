@@ -17,21 +17,74 @@ filter_by_pos <-
         stop("The 'pos' column must be an integer vector.")
     }
     
-    ## If start_pos is NULL, default to the minimum value in "pos"
-    if (is.null(start_pos)) {
-        start_pos <- min(df$pos, na.rm = TRUE)
+    ## Grab minimum and maximum values of the pos column
+    min_pos <- min(df$pos, na.rm = TRUE)
+    max_pos <- max(df$pos, na.rm = TRUE)
+  
+    ## Check if user-provided start_pos or end_pos is within the range
+    if (!is.null(start_pos) && (start_pos > max_pos)) {
+        stop(sprintf("start_pos (%d) is outside the assay range (%d to %d)", 
+            start_pos, min_pos, max_pos))
+    }
+    if (!is.null(end_pos) && (end_pos < min_pos)) {
+        stop(sprintf("end_pos (%d) is outside the assay range (%d to %d)", 
+            end_pos, min_pos, max_pos))
     }
     
-    ## If end_pos is NULL, default to the maximum value in "pos"
-    if (is.null(end_pos)) {
-        end_pos <- max(df$pos, na.rm = TRUE)
-    }
+    ## If start or end is NULL, default to min or max "pos"
+    if (is.null(start_pos)) start_pos <- min_pos
+    if (is.null(end_pos)) end_pos <- max_pos
         
     ## Filter the dataframe based on the specified positions
     filtered_df <- df |> 
         filter(pos >= start_pos & pos <= end_pos)
   
     return(filtered_df)
+}
+
+#' @rdname plot_dms_heatmap
+#'
+#' @noRd
+#'
+
+filter_exact_coord <- 
+    function(assay_pos, start_pos = NULL, end_pos = NULL, exact_coord = NULL)
+{
+    if (missing(exact_coord)) {
+     
+        message(paste(
+            "'exact_coord' not provided,",
+            "using only positions available in assay."
+        ))
+     
+        assay_pos
+     
+    } else if (exact_coord == FALSE) {
+    
+        assay_pos
+    
+    } else if (exact_coord == TRUE) {
+        
+        if (is.null(start_pos)) start_pos <- min(assay_pos$pos)
+        if (is.null(end_pos)) end_pos <- max(assay_pos$pos)
+    
+        # Create a sequence of consecutive positions
+        all_pos <- seq(start_pos, end_pos)
+        
+        # Merge with full sequence and fill missing values with NA
+        assay_pos <- merge(
+          data.frame(pos = all_pos),
+          assay_pos,
+          by = "pos",
+          all.x = TRUE
+        )
+        
+        assay_pos
+        
+    } else {
+        
+        assay_pos
+    }
 }
 
 #' @rdname plot_dms_heatmap
@@ -91,14 +144,25 @@ filter_by_pos <-
 #'     dms_data = dms_data, 
 #'     start_pos = 10, 
 #'     end_pos = 80)
-#' 
+#'     
+#' plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
+#'     dms_data = dms_data, 
+#'     start_pos = 10, 
+#'     end_pos = 80, exact_coord = TRUE)
+#'     
+#' plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
+#'     dms_data = dms_data, 
+#'     start_pos = 50, 
+#'     end_pos = 100, cluster_rows = TRUE)
 #' 
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
 #'              arrange select
 #'              
 #' @importFrom tidyr pivot_wider
 #' 
-#' @importFrom ComplexHeatmap Heatmap columnAnnotation
+#' @importFrom ComplexHeatmap Heatmap columnAnnotation anno_text 
+#' 
+#' @importFrom grid gpar 
 #' 
 #' @importFrom circlize colorRamp2
 #' 
@@ -109,11 +173,14 @@ plot_dms_heatmap <-
     function(
         assay_name, 
         dms_data, 
-        start_pos, 
-        end_pos, 
+        start_pos = NULL, 
+        end_pos = NULL, 
         exact_coord,
+        cluster_rows = FALSE,
+        cluster_columns = FALSE,
         ...) 
 {
+
     ## Extract the specified assay
     assay_df <- dms_data[[assay_name]]
     
@@ -148,26 +215,19 @@ plot_dms_heatmap <-
         arrange(pos)
     
     ## Subset to start_pos and end_pos, or default to first and last sites.
-    if (missing(start_pos)) {
+    if (is.null(start_pos)) {
         message(paste(
             "'start_pos' not provided,",
             "using the first position in the protein."
         ))
-        
-        if (missing(end_pos)) {
+    }
+    
+    if (is.null(end_pos)) {
         message(paste(
             "'end_pos' not provided,",
-            "using the last data point in the protein."
+            "using the last position in the protein."
         ))
-        }
-        
-        assay_pos <- filter_by_pos(
-            df = assay_wide)
-        
-        ref_df <- filter_by_pos(
-            df = assay_df)
-        
-    } else {
+    }
     
     assay_pos <- filter_by_pos(
         df = assay_wide, 
@@ -180,49 +240,29 @@ plot_dms_heatmap <-
         start_pos = start_pos, 
         end_pos = end_pos)
     
-    }
-    
     ## exact_coord
-    if (missing(exact_coord)) {
-     
-        message(paste(
-            "'exact_coord' not provided,",
-            "using only positions available in assay."
-        ))
-     
-        assay_pos
-     
-    } else if (exact_coord == FALSE) {
-    
-        assay_pos
-    
-    } else if (exact_coord == TRUE) {
-    
-        assay_pos
-        
-        # Create a sequence of consecutive positions
-        all_pos <- seq(start_pos, end_pos)
-        
-        # Merge with full sequence and fill missing values with NA
-        assay_pos <- merge(
-          data.frame(pos = all_pos),
-          assay_pos,
-          by = "pos",
-          all.x = TRUE
-        )
-        
-        assay_pos
-        
-    } else {
-        
-        assay_pos
-        
-    }
+    assay_pos <- filter_exact_coord(
+        assay_pos, 
+        start_pos = start_pos, 
+        end_pos = end_pos,
+        exact_coord = exact_coord
+    )
     
     # Define a text annotation for the columns
     column_annotation <- assay_pos |> 
         select(ref, pos) |> 
         unique()
+    
+    ## cluster_columns with NA check
+    if (sum(is.na(column_annotation)) > 0 & cluster_columns == TRUE){
+            stop("Protein range includes missing values, preventing ", 
+                "clustering of columns. Try setting exact_coord argument ",
+                "to FALSE."
+            )
+    }
+    
+    column_annotation[is.na(column_annotation)] <- " "
+    
     
     ## Convert to matrix
     pos <- assay_pos$pos
@@ -250,7 +290,7 @@ plot_dms_heatmap <-
     # Define a text annotation for the columns
     column_annotation <- columnAnnotation(
       text = anno_text(column_annotation$ref, 
-           rot = 90, just = "right", gp = gpar(fontsize = 10))
+           rot = 0, just = "right", gp = gpar(fontsize = 10))
     )
 
     ## Create the heatmap
@@ -262,12 +302,11 @@ plot_dms_heatmap <-
     
     ComplexHeatmap::Heatmap(reordered_matrix,
         name = "DMS Score",
-        cluster_rows = FALSE,
-        cluster_columns = FALSE,
-        show_row_names = TRUE,
+        cluster_rows = cluster_rows,
+        cluster_columns = cluster_columns,
         col = col_fun,
         na_col = "grey",
-        show_column_names = TRUE, top_annotation = column_annotation,
+        top_annotation = column_annotation,
         ...)
 
 }

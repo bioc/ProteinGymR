@@ -4,7 +4,16 @@
 \alias{plot_dms_heatmap}
 \title{Visualize DMS Scores Along a Protein}
 \usage{
-plot_dms_heatmap(assay_name, dms_data, start_pos, end_pos, exact_coord, ...)
+plot_dms_heatmap(
+  assay_name,
+  dms_data,
+  start_pos = NULL,
+  end_pos = NULL,
+  exact_coord,
+  cluster_rows = FALSE,
+  cluster_columns = FALSE,
+  ...
+)
 }
 \arguments{
 \item{assay_name}{\code{character()} a valid DMS assay name. For the full list of
@@ -62,6 +71,15 @@ plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018",
     dms_data = dms_data, 
     start_pos = 10, 
     end_pos = 80)
-
+    
+plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
+    dms_data = dms_data, 
+    start_pos = 10, 
+    end_pos = 80, exact_coord = TRUE)
+    
+plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
+    dms_data = dms_data, 
+    start_pos = 50, 
+    end_pos = 100, cluster_rows = TRUE)
 
 }
