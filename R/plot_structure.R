@@ -33,6 +33,13 @@
 #'    and `end_pos` coordinates defined. By default, `exact_coord` is set to 
 #'    FALSE, plotting only amino acid positions with available data in the 
 #'    chosen assay.
+#'    
+#' @param aggregate_fun method for aggregating DMS scores for each residue. 
+#'    For example, give min, max, or var to return the minimum, maximum, or
+#'    variance of scores for each position, respectively. `aggregate_fun` can 
+#'    also take in a user-defined function with a numeric vector as input. 
+#'    By default, the mean score across DMS mutations at each position is
+#'    calculated.
 #'
 #' @details
 #'
@@ -66,82 +73,109 @@
 #'              
 #' @importFrom tidyr pivot_wider
 #' 
-#' @importFrom ComplexHeatmap Heatmap columnAnnotation anno_text 
-#' 
-#' @importFrom grid gpar 
-#' 
-#' @importFrom circlize colorRamp2
+#' @importFrom bio3d read.pdb
 #' 
 #' @importFrom stringr str_sub
 #' 
 #' @importFrom r3dmol r3dmol
-#'
+#' 
+#' @examples
+#' plot_3D(assay_name = "ACE2_HUMAN_Chan_2020", 
+#'    pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN_.pdb",
+#'    dms_data = dms_data, 
+#'    aggregate_fun = max)
+#'    
+#' plot_3D(assay_name = "ADRB2_HUMAN_Jones_2020", 
+#'    pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
+#'    dms_data = dms_data, 
+#'    aggregate_fun = mean)
+#'    
+#'    
 #' @export 
-plot_3D <- function(assay_name, pdb_data, dms_data) {
-  library(bio3d)
-  library(dplyr)
-  library(r3dmol)
+plot_3D <- function(assay_name, 
+                    pdb_file, 
+                    dms_data, 
+                    aggregate_fun = mean) {
+    
+    # Grab pdb path
+    
+    # Read the PDB file
+    pdb <- read.pdb(pdb_file)
+    
+    # Extract the DMS data for the given assay name
+    df <- dms_data[[assay_name]]
+    
+    # Split pos and amino acids
+    df <- df |>
+        mutate(
+          ref = str_sub(.data$mutant, 1, 1),
+          pos = as.integer(gsub(".*?([0-9]+).*", "\\1",
+                                .data$mutant)),
+          alt = str_sub(.data$mutant, -1)
+        )
+    
+    df <- df |>
+        group_by(pos) |>
+        summarise(
+          aggregate_dms = do.call(aggregate_fun, list(DMS_score)),
+          .groups = 'drop'
+        )
+    
+    # Normalize score between -1 and 1, centered around zero
+    max_abs <- max(abs(df$aggregate_dms))
+    
+    df <- df |> 
+        mutate(
+            norm_scores = .data$aggregate_dms / max_abs
+        )
+    
+    # Map normalized values to a color scale
+    color_func <- colorRampPalette(c("red", "white", "blue"))
+    
+    # Generate color palette
+    num_colors <- 100
+    color_palette <- color_func(num_colors)
+    
+    # Function to map values to color
+    value_to_color <- function(values, palette) {
+        scaled_index <- round((values + 1) / 2 * (length(palette) - 1) + 1)
+        palette[scaled_index]
+    }
   
-  # Read the PDB file
-  pdb <- read.pdb(pdb_file)
-  
-  # Extract the DMS data for the given assay name
-  df <- dms_data[[assay_name]]
-  
-  # Process the data
-  df <- df |>
-    mutate(
-      ref = str_sub(.data$mutant, 1, 1),
-      pos = as.integer(gsub(".*?([0-9]+).*", "\\1", .data$mutant)),
-      alt = str_sub(.data$mutant, -1)
-    ) |>
-    group_by(pos) |>
-    summarise(
-      avg_dms = mean(DMS_score),
-      .groups = 'drop'
-    )
-  
-  # Define a color gradient function for diverging scores
-  score_to_color <- colorRampPalette(c("blue", "white", "red"))
-  
-  # Normalize scores symmetrically around 0
-  max_abs_score <- max(abs(df$avg_dms))
-  df$normalized_score <- (df$avg_dms + max_abs_score) / (2 * max_abs_score)
-  
-  # Map normalized scores to colors
-  df$color <- score_to_color(100)[as.numeric(cut(df$normalized_score, breaks = 100))]
-  
-  # Initialize the 3Dmol.js viewer
-  viewer <- r3dmol() %>%
-    m_add_model(data = pdf_file, format = "pdb") %>%
-    m_zoom_to()
-  
-  # Get all residues in the PDB
-  pdb_residues <- unique(data.frame(
-    resi = pdb$atom$resno  # Residue numbers
-  ))
-  
-  # Identify residues without data
-  residues_without_data <- setdiff(pdb_residues$resi, df$pos)
-  
-  # Apply colors to residues with data
-  for (i in 1:nrow(df)) {
-    viewer <- viewer %>%
-      m_set_style(
-        sel = list(resi = df$pos[i]),
-        style = list(cartoon = list(color = df$color[i]))
-      )
-  }
-  
-  # Color residues without data as yellow
-  for (resi in residues_without_data) {
-    viewer <- viewer %>%
-      m_set_style(
-        sel = list(resi = resi),
-        style = list(cartoon = list(color = "yellow"))
-      )
-  }
-  
-  # Return the viewer object
-  return(viewer)
+    # Map normalized scores to colors
+    df$color <- value_to_color(df$norm_scores, color_palette)
+
+    # Initialize the 3Dmol.js viewer
+    viewer <- r3dmol() |>
+        m_add_model(data = pdb_file, format = "pdb") |> 
+        m_zoom_to()
+    
+    # Get all residues in the PDB
+    pdb_residues <- unique(data.frame(
+        resi = pdb$atom$resno  # Residue numbers
+        ))
+    
+    # Identify residues without data
+    residues_without_data <- setdiff(pdb_residues$resi, df$pos)
+    
+    # Apply colors to residues with data
+    for (i in 1:nrow(df)) {
+    viewer <- viewer |>
+        m_set_style(
+            sel = list(resi = df$pos[i]),
+            style = list(cartoon = list(color = df$color[i]))
+          )
+    }
+    
+    # Color residues without data as yellow
+    for (resi in residues_without_data) {
+    viewer <- viewer |>
+        m_set_style(
+            sel = list(resi = resi),
+            style = list(cartoon = list(color = "#46444C"))
+        )
+    }
+    
+    # Return the viewer object
+    return(viewer)
 }
