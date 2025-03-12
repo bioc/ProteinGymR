@@ -42,51 +42,6 @@ filter_by_pos <-
     return(filtered_df)
 }
 
-#' @rdname plot_dms_heatmap
-#'
-#' @noRd
-#'
-
-filter_exact_coord <- 
-    function(assay_pos, start_pos = NULL, end_pos = NULL, exact_coord = NULL)
-{
-    if (missing(exact_coord)) {
-     
-        message(paste(
-            "'exact_coord' not provided,",
-            "using only positions available in assay."
-        ))
-     
-        assay_pos
-     
-    } else if (exact_coord == FALSE) {
-    
-        assay_pos
-    
-    } else if (exact_coord == TRUE) {
-        
-        if (is.null(start_pos)) start_pos <- min(assay_pos$pos)
-        if (is.null(end_pos)) end_pos <- max(assay_pos$pos)
-    
-        # Create a sequence of consecutive positions
-        all_pos <- seq(start_pos, end_pos)
-        
-        # Merge with full sequence and fill missing values with NA
-        assay_pos <- merge(
-          data.frame(pos = all_pos),
-          assay_pos,
-          by = "pos",
-          all.x = TRUE
-        )
-        
-        assay_pos
-        
-    } else {
-        
-        assay_pos
-    }
-}
-
 #' @rdname plot_structure
 #' 
 #' @title Visualize DMS and Model Scores on 3D Protein Structures
@@ -104,6 +59,8 @@ filter_exact_coord <-
 #'    with ProteinGym data can be loaded in with `ProteinGymR::pdb_files()`.
 #'    Alternatively, a user-defined list of pdb data.frames with names 
 #'    matching the `assay_name` param.
+#'    
+#' @param pdb_file `string()` input path to PBD file.
 #' 
 #' @param dms_data `list()` object of DMS assays loaded with 
 #'   `ProteinGymR::dms_substitutions()`.
@@ -111,18 +68,21 @@ filter_exact_coord <-
 #'    to `assay_name` param.
 #'
 #' @param start_pos `integer()` first amino acid position to plot. If missing, 
-#'    default start is at the first position along the protein in the PDB file.
+#'    default start is the first position along the protein in the PDB file.
 #'    
 #' @param end_pos `integer()` last amino acid position to plot. If missing, 
-#'    default end is at the last position along the protein in the PDB file.
+#'    default end is the last position along the protein in the PDB file.
 #'    
-#' @param exact_coord `logical()` TRUE will plot the precise `start_pos` 
-#'    and `end_pos` coordinates defined. By default, `exact_coord` is set to 
-#'    FALSE, plotting all positions along the protein in the PDB file.
+#' @param full_structure `logical()` defaults to FALSE and will only plot 
+#'    protein regions where there is DMS data available in the assay. If 
+#'    `start_pos` and `end_pos` coordinates are specified, plotting is 
+#'    restricted to this defined region. Setting `full_structure()` to TRUE 
+#'    will display full protein structure in the PBD file, and grey out regions
+#'    where no DMS data is available.
 #'    
 #' @param aggregate_fun method for aggregating DMS scores for each residue. 
-#'    For example, give min, max, or var to return the minimum, maximum, or
-#'    variance of scores for each position, respectively. `aggregate_fun` can 
+#'    For example, give [min], [max], or [var] to return the minimum, maximum, 
+#'    or variance of scores for each position, respectively. `aggregate_fun` can 
 #'    also take in a user-defined function with a numeric vector as input. 
 #'    By default, the mean DMS score across mutations at each position is
 #'    calculated.
@@ -164,47 +124,68 @@ filter_exact_coord <-
 #' @importFrom stringr str_sub
 #' 
 #' @importFrom r3dmol r3dmol m_zoom_to m_add_model m_remove_all_models
+#'              m_style_cartoon m_set_style
 #' 
 #' @examples
-#' plot_3D(assay_name = "ACE2_HUMAN_Chan_2020", 
-#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb", 
-#'    aggregate_fun = max)
+#' 
+#' # Using default dms_data
+#' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb")
 #'    
-#' plot_3D(assay_name = "ADRB2_HUMAN_Jones_2020", 
+#' plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
 #'    pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-#'    dms_data = dms_data, 
 #'    aggregate_fun = mean)
 #'    
-#' plot_3D(assay_name = "ADRB2_HUMAN_Jones_2020", 
+#' plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
 #'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-#'    dms_data = dms_data, 
 #'    start_pos = 20, 
 #'    end_pos = 50,
-#'    exact_coord = TRUE,
+#'    full_structure = TRUE,
+#'    aggregate_fun = min)
+#'    
+#' plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
+#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
+#'    start_pos = 20, 
+#'    end_pos = 50,
+#'    full_structure = FALSE,
 #'    aggregate_fun = min)
 #'
-#' plot_3D(assay_name = "C6KNH7_9INFA_Lee_2018", 
+#' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018", 
 #'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",
 #'    dms_data = dms_data, 
-#'    exact_coord = FALSE,
+#'    full_structure = TRUE,
 #'    aggregate_fun = mean)
 #'    
-#'    
-#'    
 #' @export 
-plot_3D <- function(assay_name, 
+plot_structure <- function(assay_name, 
                     pdb_file, 
                     dms_data, 
                     start_pos = NULL,
                     end_pos = NULL,
-                    exact_coord = FALSE,
+                    full_structure = FALSE,
                     aggregate_fun = mean) {
     
-    ## TO DO: Grab pdb path using pdb_structure()
+    ## TO DO: Grab pdb path using pdb_structure() from ExperimentHub
     
     ## Read the PDB file
     pdb <- read.pdb(pdb_file)
     
+    ## If dms_data argument missing
+    if (missing(dms_data)) {
+ 
+    message(paste(
+        "'dms_data' not provided,",
+        "using DMS data loaded with dms_substitutions()"
+    ))
+ 
+    dms_data <- dms_substitutions()
+ 
+    } else {
+        
+        dms_data
+        
+    }
+ 
     ## Extract the DMS data for the given assay name
     df <- dms_data[[assay_name]]
     
@@ -217,7 +198,7 @@ plot_3D <- function(assay_name,
           alt = str_sub(.data$mutant, -1)
         )
     
-    ## Aggregate DMS_scores
+    ## Aggregate DMS_scores by position
     df <- df |>
         group_by(pos) |>
         summarise(
@@ -225,39 +206,21 @@ plot_3D <- function(assay_name,
           .groups = 'drop'
         )
     
-    ## Select protein range and apply exact_coord
+    ## Select user-defined protein range
     filtered_df <- filter_by_pos(
         df = df, 
         start_pos = start_pos, 
         end_pos = end_pos
         )
     
-    exact_df <- filter_exact_coord(
-        assay_pos = filtered_df, 
-        start_pos = start_pos, 
-        end_pos = end_pos,
-        exact_coord = exact_coord
-        )
-    
-    start_pos <- min(exact_df$pos)
-    end_pos <- max(exact_df$pos)
-    
-    ## Assume we want to keep only residues 10 to 50
+    start_pos <- min(filtered_df$pos)
+    end_pos <- max(filtered_df$pos)
     selected_residues <- list(resi = c(start_pos:end_pos))
     
-    ## Initialize the 3D viewer, hide everything first, then show only selected regions
-    viewer <- r3dmol() |>
-        m_remove_all_models() |> # Remove all models
-        m_add_model(data = pdb_file, format = "pdb") |>  # Load the PDB file
-        m_set_style(style = m_style_cartoon(), 
-            sel = list(resi =  start_pos:end_pos)) |>  # Show selected residues
-        m_zoom_to(sel = list(resi = start_pos:end_pos)) 
-    
-    
     ## Normalize score between -1 and 1, centered around zero
-    max_abs <- max(abs(df$aggregate_dms))
+    max_abs <- max(abs(filtered_df$aggregate_dms))
     
-    df <- df |> 
+    filtered_df <- filtered_df |> 
         mutate(
             norm_scores = .data$aggregate_dms / max_abs
         )
@@ -276,39 +239,69 @@ plot_3D <- function(assay_name,
     }
   
     ## Map normalized scores to colors
-    df$color <- value_to_color(df$norm_scores, color_palette)
-
-    ## Initialize the 3Dmol.js viewer
-    viewer <- r3dmol() |>
-        m_add_model(data = pdb_file, format = "pdb") |> 
-        m_zoom_to()
+    filtered_df$color <- value_to_color(filtered_df$norm_scores, color_palette)
     
-    ## Get all residues in the PDB
-    pdb_residues <- unique(data.frame(
-        resi = pdb$atom$resno  # Residue numbers
+    ## If full_structure missing or set to TRUE, display complete protein
+    if (missing(full_structure) | full_structure == FALSE) {
+         
+        ## Initialize the 3D viewer, hide all but except selected regions
+        viewer <- r3dmol() |>
+            m_remove_all_models() |>
+            m_add_model(data = pdb_file, format = "pdb") |>
+            m_set_style(style = m_style_cartoon(), 
+                sel = list(resi =  start_pos:end_pos)) |>
+            m_zoom_to(sel = list(resi = start_pos:end_pos)) 
+        
+        ## Apply colors to residues with data
+        for (i in 1:nrow(filtered_df)) {
+        viewer <- viewer |>
+            m_set_style(
+                sel = list(resi = filtered_df$pos[i]),
+                style = list(cartoon = list(color = filtered_df$color[i]))
+              )
+        }
+        
+        return(viewer)
+    
+    } else {
+        
+         message(paste(
+            "'full_structure' is set to TRUE by default,",
+            "displaying complete protein structure."
         ))
-    
-    ## Identify residues without data
-    residues_without_data <- setdiff(pdb_residues$resi, df$pos)
-    
-    ## Apply colors to residues with data
-    for (i in 1:nrow(df)) {
-    viewer <- viewer |>
-        m_set_style(
-            sel = list(resi = df$pos[i]),
-            style = list(cartoon = list(color = df$color[i]))
-          )
-    }
-    
-    ## Color residues without data as yellow
-    for (resi in residues_without_data) {
-    viewer <- viewer |>
-        m_set_style(
-            sel = list(resi = resi),
-            style = list(cartoon = list(color = "yellow"))
-        )
-    }
-    
-    # Return the viewer object
-    return(viewer)
+     
+        ## Code to show full protein
+        full_viewer <- r3dmol() |>
+            m_remove_all_models() |> 
+            m_add_model(data = pdb_file, format = "pdb") |> 
+            m_set_style(style = m_style_cartoon())
+         
+        ## Get all residues in the PDB
+        pdb_residues <- unique(data.frame(
+             resi = pdb$atom$resno  # Residue numbers
+             ))
+        
+        ## Identify residues without data
+        residues_without_data <- setdiff(pdb_residues$resi, filtered_df$pos)
+ 
+        ## Apply colors to residues with data
+        for (i in 1:nrow(filtered_df)) {
+        full_viewer <- full_viewer |>
+            m_set_style(
+                sel = list(resi = filtered_df$pos[i]),
+                style = list(cartoon = list(color = filtered_df$color[i]))
+              )
+        }
+        
+        ## Color residues without data as yellow
+        for (resi in residues_without_data) {
+         full_viewer <- full_viewer |>
+             m_set_style(
+                 sel = list(resi = resi),
+                 style = list(cartoon = list(color = "#3f3f3f"))
+             )
+        }
+        
+        return(full_viewer)
+    }  
 }
