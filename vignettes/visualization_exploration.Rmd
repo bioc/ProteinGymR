@@ -1,0 +1,136 @@
+---
+title: "3D Protein Structure Exploration"
+author: 
+    - name: Tram Nguyen
+      affiliation: Department of Biomedical Informatics, Harvard Medical School
+      email: Tram_Nguyen@hms.harvard.edu
+    - name: Pascal Notin
+      affiliation: Department of Systems Biology, Harvard Medical School
+    - name: Aaron W Kollasch
+      affiliation: Department of Systems Biology, Harvard Medical School
+    - name: Debora Marks
+      affiliation: Department of Systems Biology, Harvard Medical School
+    - name: Ludwig Geistlinger
+      affiliation: Department of Biomedical Informatics, Harvard Medical School
+package: ProteinGymR
+output:
+    BiocStyle::html_document:
+      self_contained: yes 
+      toc: true
+      toc_float: true
+      toc_depth: 2
+      code_folding: show
+date: "`r doc_date()`"
+vignette: >
+    %\VignetteIndexEntry{3D Protein Structure}
+    %\VignetteEncoding{UTF-8}
+    %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+    markdown: 
+      wrap: 80
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 3D protein structure
+
+This vignette demonstrates how to explore and visualize DMS scores on a 3D 
+protein structure using the package r3dmol under the hood. The function requires
+a file path to a PBD file contain protein structure coordinates and a DMS assay
+to aggregate DMS scores that will be projected onto the 3D structure.
+
+```{r, message=FALSE, warning=FALSE}
+library(ProteinGymR)
+```
+
+By default, if no `dms_data` argument is provided, the DMS subsitutions from 
+`ProteinGymR::dms_substitutions()` are loaded in. Alternatively, a user can 
+specify their own dms list to project. The user may also specify what
+aggregation method to use for calucating the statistic at each residue position.
+By default, the mean DMS score is calculated for each position. See the function
+documentation for details: `?plot_structure()`
+
+First, let's plot using all default settings. The only required arguments are
+the `assay_name` and the `pdb_file` path.
+
+Importantly, the function normalizes the aggregated DMS scores so that a score
+of zero will always be represented as white and the range of scores will be
+scaled relatively to -1 and 1 in that assay, with 1 being the maximum 
+aggregated DMS score within that assay region.
+
+```{r}
+plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb")
+```
+
+<br>
+
+In this example, we are plotting the 3D structure of the ACE2_HUMAN protein and
+overlaying the mean DMS score across all mutants in a given position. Chan et 
+al. 2020 who generated the DMS assay data only experimentally assessed a subset
+of the entire ACE2_HUMAN protein. By default the function only displayed the 
+regions where there is information available in the assay. Red colors represent
+more pathogenic (lower DMS scores) and blue colors show more benign positions
+(higher DMS scores). Regions that appear white indicate closer to no change 
+before and after the DMS perturbation.
+
+If we want to visualize the complete protein structure, but simple grey out the
+regions we do not have DMS assay information for, we can set the argument
+`full_structure == TRUE`
+
+```{r}
+plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb",
+    full_structure = TRUE)
+```
+
+<br>
+
+Now we can more clearly see the entire protein structure for ACE2_HUMAN. 
+
+Some assays extensively assessed nearly every position of the complete protein, 
+for example: the C6KNH7_9INFA protein from Lee et al. 2018. Let's visualize 
+this protein and set the aggregation method to view the minimum DMS score across
+all mutants at each position by setting `aggregation_fun = min`.
+
+```{r}
+plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018", 
+    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",
+    aggregate_fun = min)
+```
+
+<br>
+
+For this protein, it looks like 
+
+```{r}
+dms_data <- dms_substitutions()
+df <- dms_data[["C6KNH7_9INFA_Lee_2018"]]
+hist(df$DMS_score)
+```
+
+We can see that for this DMS assay, most values of the minimum DMS score at each
+position are negative and are thus represented as red.
+
+<br>
+
+Finally, the user can also zoom into a specific region of the protein by
+defining residue position coordinates with `start_pos` and `end_pos`. 
+
+Let's just visualize the mean DMS scores of the protein from position 10:50.
+
+```{r}
+plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb",
+    start_pos = 10,
+    end_pos = 50)
+```
+
+
+## Session Info
+```{r}
+sessionInfo()
+```
+
