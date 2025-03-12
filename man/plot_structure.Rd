@@ -4,7 +4,15 @@
 \alias{plot_3D}
 \title{Visualize DMS and Model Scores on 3D Protein Structures}
 \usage{
-plot_3D(assay_name, pdb_file, dms_data, aggregate_fun = mean)
+plot_3D(
+  assay_name,
+  pdb_file,
+  dms_data,
+  start_pos = NULL,
+  end_pos = NULL,
+  exact_coord = FALSE,
+  aggregate_fun = mean
+)
 }
 \arguments{
 \item{assay_name}{\code{character()} a valid DMS assay name. For the full list of
@@ -17,11 +25,21 @@ user-defined DMS assay.}
 Alternatively, a user-defined list of DMS assays with names corresponding
 to \code{assay_name} param.}
 
+\item{start_pos}{\code{integer()} first amino acid position to plot. If missing,
+default start is at the first position along the protein in the PDB file.}
+
+\item{end_pos}{\code{integer()} last amino acid position to plot. If missing,
+default end is at the last position along the protein in the PDB file.}
+
+\item{exact_coord}{\code{logical()} TRUE will plot the precise \code{start_pos}
+and \code{end_pos} coordinates defined. By default, \code{exact_coord} is set to
+FALSE, plotting all positions along the protein in the PDB file.}
+
 \item{aggregate_fun}{method for aggregating DMS scores for each residue.
 For example, give min, max, or var to return the minimum, maximum, or
 variance of scores for each position, respectively. \code{aggregate_fun} can
 also take in a user-defined function with a numeric vector as input.
-By default, the mean score across DMS mutations at each position is
+By default, the mean DMS score across mutations at each position is
 calculated.}
 
 \item{pdb_data}{\code{list()} object of protein structure coordinates in a
@@ -29,19 +47,6 @@ Protein Data Bank format.  By default, pdb files for proteins associated
 with ProteinGym data can be loaded in with \code{ProteinGymR::pdb_files()}.
 Alternatively, a user-defined list of pdb data.frames with names
 matching the \code{assay_name} param.}
-
-\item{start_pos}{\code{integer()} first amino acid position to plot. If missing,
-default start is at the first position along the protein where DMS scores
-are available.}
-
-\item{end_pos}{\code{integer()} last amino acid position to plot. If missing,
-default end is at the last position along the protein where DMS scores
-are available.}
-
-\item{exact_coord}{\code{logical()} TRUE will plot the precise \code{start_pos}
-and \code{end_pos} coordinates defined. By default, \code{exact_coord} is set to
-FALSE, plotting only amino acid positions with available data in the
-chosen assay.}
 }
 \value{
 \code{plot_structure()} returns a \code{\link[r3dmol:init]{r3dmol::r3dmol}}
@@ -76,14 +81,28 @@ Each PBD table in \code{pdb_data()} must include the following columns:
 }
 \examples{
 plot_3D(assay_name = "ACE2_HUMAN_Chan_2020", 
-   pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN_.pdb",
-   dms_data = dms_data, 
+   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb", 
    aggregate_fun = max)
    
 plot_3D(assay_name = "ADRB2_HUMAN_Jones_2020", 
    pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
    dms_data = dms_data, 
    aggregate_fun = mean)
+   
+plot_3D(assay_name = "ADRB2_HUMAN_Jones_2020", 
+   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
+   dms_data = dms_data, 
+   start_pos = 20, 
+   end_pos = 50,
+   exact_coord = TRUE,
+   aggregate_fun = min)
+
+plot_3D(assay_name = "C6KNH7_9INFA_Lee_2018", 
+   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",
+   dms_data = dms_data, 
+   exact_coord = FALSE,
+   aggregate_fun = mean)
+   
    
    
 }

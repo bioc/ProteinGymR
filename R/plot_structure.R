@@ -1,4 +1,93 @@
 #' @rdname plot_structure
+#'
+#' @noRd
+#' 
+#' @importFrom dplyr filter
+#'
+
+filter_by_pos <- 
+    function(df, start_pos = NULL, end_pos = NULL)
+{
+    ## Check pos column
+    if (!"pos" %in% colnames(df)) {
+        stop("The dataframe must contain a 'pos' column.")
+    }
+        
+    if (!is.integer(df$pos)) {
+        stop("The 'pos' column must be an integer vector.")
+    }
+    
+    ## Grab minimum and maximum values of the pos column
+    min_pos <- min(df$pos, na.rm = TRUE)
+    max_pos <- max(df$pos, na.rm = TRUE)
+  
+    ## Check if user-provided start_pos or end_pos is within the range
+    if (!is.null(start_pos) && (start_pos > max_pos)) {
+        stop(sprintf("start_pos (%d) is outside the assay range (%d to %d)", 
+            start_pos, min_pos, max_pos))
+    }
+    if (!is.null(end_pos) && (end_pos < min_pos)) {
+        stop(sprintf("end_pos (%d) is outside the assay range (%d to %d)", 
+            end_pos, min_pos, max_pos))
+    }
+    
+    ## If start or end is NULL, default to min or max "pos"
+    if (is.null(start_pos)) start_pos <- min_pos
+    if (is.null(end_pos)) end_pos <- max_pos
+        
+    ## Filter the dataframe based on the specified positions
+    filtered_df <- df |> 
+        filter(pos >= start_pos & pos <= end_pos)
+  
+    return(filtered_df)
+}
+
+#' @rdname plot_dms_heatmap
+#'
+#' @noRd
+#'
+
+filter_exact_coord <- 
+    function(assay_pos, start_pos = NULL, end_pos = NULL, exact_coord = NULL)
+{
+    if (missing(exact_coord)) {
+     
+        message(paste(
+            "'exact_coord' not provided,",
+            "using only positions available in assay."
+        ))
+     
+        assay_pos
+     
+    } else if (exact_coord == FALSE) {
+    
+        assay_pos
+    
+    } else if (exact_coord == TRUE) {
+        
+        if (is.null(start_pos)) start_pos <- min(assay_pos$pos)
+        if (is.null(end_pos)) end_pos <- max(assay_pos$pos)
+    
+        # Create a sequence of consecutive positions
+        all_pos <- seq(start_pos, end_pos)
+        
+        # Merge with full sequence and fill missing values with NA
+        assay_pos <- merge(
+          data.frame(pos = all_pos),
+          assay_pos,
+          by = "pos",
+          all.x = TRUE
+        )
+        
+        assay_pos
+        
+    } else {
+        
+        assay_pos
+    }
+}
+
+#' @rdname plot_structure
 #' 
 #' @title Visualize DMS and Model Scores on 3D Protein Structures
 #' 
@@ -22,23 +111,20 @@
 #'    to `assay_name` param.
 #'
 #' @param start_pos `integer()` first amino acid position to plot. If missing, 
-#'    default start is at the first position along the protein where DMS scores 
-#'    are available.
+#'    default start is at the first position along the protein in the PDB file.
 #'    
 #' @param end_pos `integer()` last amino acid position to plot. If missing, 
-#'    default end is at the last position along the protein where DMS scores 
-#'    are available.
+#'    default end is at the last position along the protein in the PDB file.
 #'    
 #' @param exact_coord `logical()` TRUE will plot the precise `start_pos` 
 #'    and `end_pos` coordinates defined. By default, `exact_coord` is set to 
-#'    FALSE, plotting only amino acid positions with available data in the 
-#'    chosen assay.
+#'    FALSE, plotting all positions along the protein in the PDB file.
 #'    
 #' @param aggregate_fun method for aggregating DMS scores for each residue. 
 #'    For example, give min, max, or var to return the minimum, maximum, or
 #'    variance of scores for each position, respectively. `aggregate_fun` can 
 #'    also take in a user-defined function with a numeric vector as input. 
-#'    By default, the mean score across DMS mutations at each position is
+#'    By default, the mean DMS score across mutations at each position is
 #'    calculated.
 #'
 #' @details
@@ -77,12 +163,11 @@
 #' 
 #' @importFrom stringr str_sub
 #' 
-#' @importFrom r3dmol r3dmol
+#' @importFrom r3dmol r3dmol m_zoom_to m_add_model m_remove_all_models
 #' 
 #' @examples
 #' plot_3D(assay_name = "ACE2_HUMAN_Chan_2020", 
-#'    pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN_.pdb",
-#'    dms_data = dms_data, 
+#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb", 
 #'    aggregate_fun = max)
 #'    
 #' plot_3D(assay_name = "ADRB2_HUMAN_Jones_2020", 
@@ -90,22 +175,40 @@
 #'    dms_data = dms_data, 
 #'    aggregate_fun = mean)
 #'    
+#' plot_3D(assay_name = "ADRB2_HUMAN_Jones_2020", 
+#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
+#'    dms_data = dms_data, 
+#'    start_pos = 20, 
+#'    end_pos = 50,
+#'    exact_coord = TRUE,
+#'    aggregate_fun = min)
+#'
+#' plot_3D(assay_name = "C6KNH7_9INFA_Lee_2018", 
+#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",
+#'    dms_data = dms_data, 
+#'    exact_coord = FALSE,
+#'    aggregate_fun = mean)
+#'    
+#'    
 #'    
 #' @export 
 plot_3D <- function(assay_name, 
                     pdb_file, 
                     dms_data, 
+                    start_pos = NULL,
+                    end_pos = NULL,
+                    exact_coord = FALSE,
                     aggregate_fun = mean) {
     
-    # Grab pdb path
+    ## TO DO: Grab pdb path using pdb_structure()
     
-    # Read the PDB file
+    ## Read the PDB file
     pdb <- read.pdb(pdb_file)
     
-    # Extract the DMS data for the given assay name
+    ## Extract the DMS data for the given assay name
     df <- dms_data[[assay_name]]
     
-    # Split pos and amino acids
+    ## Split pos and amino acids
     df <- df |>
         mutate(
           ref = str_sub(.data$mutant, 1, 1),
@@ -114,6 +217,7 @@ plot_3D <- function(assay_name,
           alt = str_sub(.data$mutant, -1)
         )
     
+    ## Aggregate DMS_scores
     df <- df |>
         group_by(pos) |>
         summarise(
@@ -121,7 +225,36 @@ plot_3D <- function(assay_name,
           .groups = 'drop'
         )
     
-    # Normalize score between -1 and 1, centered around zero
+    ## Select protein range and apply exact_coord
+    filtered_df <- filter_by_pos(
+        df = df, 
+        start_pos = start_pos, 
+        end_pos = end_pos
+        )
+    
+    exact_df <- filter_exact_coord(
+        assay_pos = filtered_df, 
+        start_pos = start_pos, 
+        end_pos = end_pos,
+        exact_coord = exact_coord
+        )
+    
+    start_pos <- min(exact_df$pos)
+    end_pos <- max(exact_df$pos)
+    
+    ## Assume we want to keep only residues 10 to 50
+    selected_residues <- list(resi = c(start_pos:end_pos))
+    
+    ## Initialize the 3D viewer, hide everything first, then show only selected regions
+    viewer <- r3dmol() |>
+        m_remove_all_models() |> # Remove all models
+        m_add_model(data = pdb_file, format = "pdb") |>  # Load the PDB file
+        m_set_style(style = m_style_cartoon(), 
+            sel = list(resi =  start_pos:end_pos)) |>  # Show selected residues
+        m_zoom_to(sel = list(resi = start_pos:end_pos)) 
+    
+    
+    ## Normalize score between -1 and 1, centered around zero
     max_abs <- max(abs(df$aggregate_dms))
     
     df <- df |> 
@@ -129,36 +262,36 @@ plot_3D <- function(assay_name,
             norm_scores = .data$aggregate_dms / max_abs
         )
     
-    # Map normalized values to a color scale
+    ## Map normalized values to a color scale
     color_func <- colorRampPalette(c("red", "white", "blue"))
     
-    # Generate color palette
+    ## Generate color palette
     num_colors <- 100
     color_palette <- color_func(num_colors)
     
-    # Function to map values to color
+    ## Function to map values to color
     value_to_color <- function(values, palette) {
         scaled_index <- round((values + 1) / 2 * (length(palette) - 1) + 1)
         palette[scaled_index]
     }
   
-    # Map normalized scores to colors
+    ## Map normalized scores to colors
     df$color <- value_to_color(df$norm_scores, color_palette)
 
-    # Initialize the 3Dmol.js viewer
+    ## Initialize the 3Dmol.js viewer
     viewer <- r3dmol() |>
         m_add_model(data = pdb_file, format = "pdb") |> 
         m_zoom_to()
     
-    # Get all residues in the PDB
+    ## Get all residues in the PDB
     pdb_residues <- unique(data.frame(
         resi = pdb$atom$resno  # Residue numbers
         ))
     
-    # Identify residues without data
+    ## Identify residues without data
     residues_without_data <- setdiff(pdb_residues$resi, df$pos)
     
-    # Apply colors to residues with data
+    ## Apply colors to residues with data
     for (i in 1:nrow(df)) {
     viewer <- viewer |>
         m_set_style(
@@ -167,12 +300,12 @@ plot_3D <- function(assay_name,
           )
     }
     
-    # Color residues without data as yellow
+    ## Color residues without data as yellow
     for (resi in residues_without_data) {
     viewer <- viewer |>
         m_set_style(
             sel = list(resi = resi),
-            style = list(cartoon = list(color = "#46444C"))
+            style = list(cartoon = list(color = "yellow"))
         )
     }
     
