@@ -111,6 +111,11 @@ filter_exact_coord <-
 #' @param end_pos `integer()` last amino acid position to plot. If missing, 
 #'    default end is at the last position along the protein where DMS scores 
 #'    are available. 
+#'    
+#' @param exact_coord `logical()` TRUE will plot the precise `start_pos` 
+#'    and `end_pos` coordinates defined. By default, `exact_coord` is set to 
+#'    FALSE, plotting only amino acid positions with available data in the 
+#'    chosen assay.
 #'
 #' @details
 #'
@@ -128,7 +133,6 @@ filter_exact_coord <-
 #' - `DMS_score`: Experimental measurement in the DMS assay. 
 #'    Higher values indicate higher fitness of the mutated protein.
 #'
-#' @return `plot_dms_heatmap()` returns a [`ComplexHeatmap::Heatmap-class`] 
 #'    object of DMS scores for each position along a protein in a chosen DMS 
 #'    assay. The x-axis shows amino acid positions where a DMS mutation exist, 
 #'    and the y-axis represents possible amino acid residues, ordered by default
