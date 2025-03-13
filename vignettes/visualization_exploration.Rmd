@@ -41,7 +41,7 @@ protein structure using the package r3dmol under the hood. The function requires
 a file path to a PBD file contain protein structure coordinates and a DMS assay
 to aggregate DMS scores that will be projected onto the 3D structure.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, execute = FALSE}
 library(ProteinGymR)
 ```
 
