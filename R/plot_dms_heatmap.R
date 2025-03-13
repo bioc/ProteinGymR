@@ -73,10 +73,10 @@ filter_exact_coord <-
         
         # Merge with full sequence and fill missing values with NA
         assay_pos <- merge(
-          data.frame(pos = all_pos),
-          assay_pos,
-          by = "pos",
-          all.x = TRUE
+            data.frame(pos = all_pos),
+            assay_pos,
+            by = "pos",
+            all.x = TRUE
         )
         
         assay_pos
@@ -116,7 +116,13 @@ filter_exact_coord <-
 #'    and `end_pos` coordinates defined. By default, `exact_coord` is set to 
 #'    FALSE, plotting only amino acid positions with available data in the 
 #'    chosen assay.
-#'
+#'    
+#' @param cluster_rows `logical()` defaults to FALSE. See argument details in 
+#'    [ComplexHeatmap::Heatmap].
+#' 
+#' @param cluster_columns `logical()` defaults to FALSE. See argument details in 
+#'    [ComplexHeatmap::Heatmap].
+#' 
 #' @details
 #'
 #' For `plot_dms_heatmap()`, 
@@ -179,7 +185,7 @@ plot_dms_heatmap <-
         dms_data, 
         start_pos = NULL, 
         end_pos = NULL, 
-        exact_coord,
+        exact_coord = FALSE,
         cluster_rows = FALSE,
         cluster_columns = FALSE,
         ...) 

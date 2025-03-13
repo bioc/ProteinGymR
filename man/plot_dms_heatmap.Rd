@@ -9,7 +9,7 @@ plot_dms_heatmap(
   dms_data,
   start_pos = NULL,
   end_pos = NULL,
-  exact_coord,
+  exact_coord = FALSE,
   cluster_rows = FALSE,
   cluster_columns = FALSE,
   ...
@@ -33,15 +33,17 @@ are available.}
 \item{end_pos}{\code{integer()} last amino acid position to plot. If missing,
 default end is at the last position along the protein where DMS scores
 are available.}
-}
-\value{
-\code{plot_dms_heatmap()} returns a \code{\link[ComplexHeatmap:Heatmap-class]{ComplexHeatmap::Heatmap}}
-object of DMS scores for each position along a protein in a chosen DMS
-assay. The x-axis shows amino acid positions where a DMS mutation exist,
-and the y-axis represents possible amino acid residues, ordered by default
-based on the physiochemical groupings. Higher and lower DMS scores
-indicate a more positive or negative fitness effect after the mutation,
-respectively.
+
+\item{exact_coord}{\code{logical()} TRUE will plot the precise \code{start_pos}
+and \code{end_pos} coordinates defined. By default, \code{exact_coord} is set to
+FALSE, plotting only amino acid positions with available data in the
+chosen assay.}
+
+\item{cluster_rows}{\code{logical()} defaults to FALSE. See argument details in
+\link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap}.}
+
+\item{cluster_columns}{\code{logical()} defaults to FALSE. See argument details in
+\link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap}.}
 }
 \description{
 \code{plot_dms_heatmap()} plots DMS scores for amino acid
@@ -61,6 +63,13 @@ at position 1 should be replaced by 'P', and 'D' at position 2 should be
 replaced by 'N').
 \item \code{DMS_score}: Experimental measurement in the DMS assay.
 Higher values indicate higher fitness of the mutated protein.
+
+object of DMS scores for each position along a protein in a chosen DMS
+assay. The x-axis shows amino acid positions where a DMS mutation exist,
+and the y-axis represents possible amino acid residues, ordered by default
+based on the physiochemical groupings. Higher and lower DMS scores
+indicate a more positive or negative fitness effect after the mutation,
+respectively.
 }
 }
 \examples{
