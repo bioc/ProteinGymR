@@ -68,10 +68,10 @@ filter_exact_coord <-
         if (is.null(start_pos)) start_pos <- min(assay_pos$pos)
         if (is.null(end_pos)) end_pos <- max(assay_pos$pos)
     
-        # Create a sequence of consecutive positions
+        ## Create a sequence of consecutive positions
         all_pos <- seq(start_pos, end_pos)
         
-        # Merge with full sequence and fill missing values with NA
+        ## Merge with full sequence and fill missing values with NA
         assay_pos <- merge(
             data.frame(pos = all_pos),
             assay_pos,
@@ -139,12 +139,12 @@ filter_exact_coord <-
 #' - `DMS_score`: Experimental measurement in the DMS assay. 
 #'    Higher values indicate higher fitness of the mutated protein.
 #'
-#'    object of DMS scores for each position along a protein in a chosen DMS 
-#'    assay. The x-axis shows amino acid positions where a DMS mutation exist, 
-#'    and the y-axis represents possible amino acid residues, ordered by default
-#'    based on the physiochemical groupings. Higher and lower DMS scores 
-#'    indicate a more positive or negative fitness effect after the mutation, 
-#'    respectively.
+#' @return Returns a [ComplexHeatmap::Heatmap] plot of DMS scores for each 
+#'    position along a protein in a chosen DMS assay. The x-axis shows amino 
+#'    acid positions where a DMS mutation exist, and the y-axis represents 
+#'    possible amino acid residues, ordered by default based on the 
+#'    physiochemical groupings. Higher and lower DMS scores indicate a more 
+#'    positive or negative fitness effect after the mutation, respectively.
 #'
 #' @examples
 #' 
@@ -258,7 +258,7 @@ plot_dms_heatmap <-
         exact_coord = exact_coord
     )
     
-    # Define a text annotation for the columns
+    ## Define a text annotation for the columns
     column_annotation <- assay_pos |> 
         select(ref, pos) |> 
         unique()
@@ -297,7 +297,7 @@ plot_dms_heatmap <-
                                                rownames(heatmap_matrix)), ]
     
     
-    # Define a text annotation for the columns
+    ## Define a text annotation for the columns
     column_annotation <- columnAnnotation(
       text = anno_text(column_annotation$ref, 
            rot = 0, just = "right", gp = gpar(fontsize = 10))

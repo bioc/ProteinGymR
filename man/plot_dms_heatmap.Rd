@@ -45,6 +45,14 @@ chosen assay.}
 \item{cluster_columns}{\code{logical()} defaults to FALSE. See argument details in
 \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap}.}
 }
+\value{
+Returns a \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap} plot of DMS scores for each
+position along a protein in a chosen DMS assay. The x-axis shows amino
+acid positions where a DMS mutation exist, and the y-axis represents
+possible amino acid residues, ordered by default based on the
+physiochemical groupings. Higher and lower DMS scores indicate a more
+positive or negative fitness effect after the mutation, respectively.
+}
 \description{
 \code{plot_dms_heatmap()} plots DMS scores for amino acid
 substitutions along a protein in a defined DMS assay.
@@ -63,13 +71,6 @@ at position 1 should be replaced by 'P', and 'D' at position 2 should be
 replaced by 'N').
 \item \code{DMS_score}: Experimental measurement in the DMS assay.
 Higher values indicate higher fitness of the mutated protein.
-
-object of DMS scores for each position along a protein in a chosen DMS
-assay. The x-axis shows amino acid positions where a DMS mutation exist,
-and the y-axis represents possible amino acid residues, ordered by default
-based on the physiochemical groupings. Higher and lower DMS scores
-indicate a more positive or negative fitness effect after the mutation,
-respectively.
 }
 }
 \examples{
