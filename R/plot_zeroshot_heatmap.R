@@ -163,7 +163,7 @@ filter_exact_coord <-
 #'     
 #' plot_zeroshot_heatmap(assay_name = "SRC_HUMAN_Nguyen_2022",
 #'     model_data = model_data,
-#'     model = "ProtGPT2")
+#'     model = "CARP_38M")
 #'     
 #' plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
 #'     model_data = model_data, 
@@ -322,13 +322,13 @@ plot_zeroshot_heatmap <-
         
         ## Create the heatmap
         col_fun <- colorRamp2(c(
-                        min(reordered_matrix, na.rm = TRUE), 
+                        min(reordered_matrix, na.rm = TRUE), 0,
                         max(reordered_matrix, na.rm = TRUE)),
-                    c("red", "white")
+                    c("red", "white", "blue")
                     )
         
         ComplexHeatmap::Heatmap(reordered_matrix,
-            name = paste(model, "\nScore"),
+            name = paste(model),
             cluster_rows = cluster_rows,
             cluster_columns = cluster_columns,
             col = col_fun,

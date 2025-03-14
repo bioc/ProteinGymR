@@ -91,7 +91,7 @@ plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018",
     
 plot_zeroshot_heatmap(assay_name = "SRC_HUMAN_Nguyen_2022",
     model_data = model_data,
-    model = "ProtGPT2")
+    model = "CARP_38M")
     
 plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
     model_data = model_data, 
