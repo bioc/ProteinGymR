@@ -1,5 +1,5 @@
 ---
-title: "3D Protein Structure Exploration"
+title: "Visualization and Exploration"
 author: 
     - name: Tram Nguyen
       affiliation: Department of Biomedical Informatics, Harvard Medical School
@@ -22,7 +22,7 @@ output:
       code_folding: show
 date: "`r doc_date()`"
 vignette: >
-    %\VignetteIndexEntry{3D Protein Structure}
+    %\VignetteIndexEntry{Visualization and Exploration"}
     %\VignetteEncoding{UTF-8}
     %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -34,16 +34,130 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+[CH]: https://bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html
+[r3d]: https://cran.r-project.org/web/packages/r3dmol/vignettes/r3dmol.html
+[pg_publication]: https://proceedings.neurips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html
+
+# Setup
+
+```{r, message=FALSE, warning=FALSE}
+library(ProteinGymR)
+```
+
+
+# Introduction 
+
+This vignette demonstrates how to explore and visualize DMS and model scores 
+from the ProteinGym database v1.2. Specifically, it walks through the 
+functionality to generate heatmaps of all pairwise DMS substitution mutants and 
+projects these scores onto 3D protein structures. `ProteinGymR` uses 
+functionality from the Bioconductor package [ComplexHeatmap][CH] and 
+[r3dmol][r3d] from CRAN under the hood to generate the heatmaps and 3D protein 
+structures, respectively. 
+
+
+# Visualize DMS scores along a protein
+
+Explore the "ACE2_HUMAN" assay from Chan et al. 2020 and create a heatmap of 
+the DMS scores with `plot_dms_heatmap()`. If the argument `dms_data` is not 
+specified, the default will load the most recent DMS substitution data from 
+ProteinGym with `ProteinGymR::dms_substitutions()`. This function only requires
+a specific assay name. To obtain all assay names, run: 
+`names(dms_substitutions())`. By default, the function also plots the full range
+of positions where DMS data is available for this assay. To plot a specific 
+region of interest, use the arguments `start_pos()` and `end_pos()` which takes
+in an integer for the first and last residue position to plot in the protein.
+
+```{r ACE2 default heatmap, fig.wide = TRUE}
+ace2_dms <- plot_dms_heatmap(assay_name = "ACE2_HUMAN_Chan_2020")
+
+print(ace2_dms)
+```
+
+The heatmap shows the DMS score at each position along the given protein
+(x-axis) where a residue was mutated (alternate amino acid on y-axis). For this 
+demonstration, we subset to the first 100 positions and grouped the amino
+acids by their physiochemical properties (DE,KRH,NQ,ST,PGAVIL,MC,FYW). See
+[here][physiochem] for more information. As a note, not all positions along the 
+protein sequence may be subjected to mutation for every DMS assay. This results 
+from the specific research objectives, prioritization choices of the 
+investigators, or technical constraints inherent to the experimental design. 
+
+A low DMS score indicates low fitness, while a higher DMS score indicates high 
+fitness. We can think of higher DMS scores as being more benign, while lower DMS
+score indicates more pathogenic regions.
+
+Based on the "ACE2_HUMAN_Chan_2020" assay, we can see that at positions 90 and 
+92, fitness remained high despite across amino acid changes; possibly 
+suggestive of a benign region of the protein. However, several mutations at 
+position 48 resulted in low fitness. This could represent an important region 
+for protein function where any perturbation would likely be deleterious.
+
+Let's plot another assay, specifying a region and invoking the `ComplexHeatmap`
+row clustering under the hood. For more details about this clustering method or
+to view more function parameters, read the function documentation with 
+`?plot_dms_heatmap()`.
+
+```{r SHOC2 heatmap, fig.wide = TRUE}
+plot_dms_heatmap(assay_name = "SHOC2_HUMAN_Kwon_2022", 
+    start_pos = 10,
+    end_pos = 60,
+    cluster_rows = TRUE)
+```
+In this region of the SHOC2_HUMAN protein, mutating to a K seemed to have the 
+most benign affect across all positions.
+
+
+# Visualize model scores along a protein
+
+ProteinGymR Bioc 3.21 provides functionality to generate heatmaps of zero-shot
+mode scores for over 70 variant effect prediction models with the function
+`plot_zeroshot_heatmap()`. The only required arguments for this function are 
+the assay name to plot (same as for the DMS heatmap), and a model to plot. For
+a complete list of models, run `available_models()`. If `model_data` is not
+provided, the default model scores from ProteinGym will be loaded in from
+`ProteinGymR::zeroshot_substitutions()`.
+
+```{r}
+ace2_model <- plot_zeroshot_heatmap(
+    assay_name = "ACE2_HUMAN_Chan_2020", 
+    model = "GEMME")
+
+print(ace2_model)
+```
+
+As with the DMS scores, we are plotting the GEMME zero-shot scores for each 
+position available in the assay "ACE2_HUMAN_Chan_2020". Note that the model 
+score here are mostly negative and thus, the color scale is red. Model scores
+are not rescaled or normalized across the 78 models. For more information on
+model scores and how to interpret them, consult the original ProteinGym 
+[publication][pg_publication].
+
+It was useful to visualize the DMS and model scores side by side for a given 
+assay to compare the experimental DMS scores and predicted zero-shot scores 
+outputted from the model. This is easily done in the given way:
+
+```{r}
+ComplexHeatmap::draw(ace2_dms %v% ace2_model)
+```
+
+`%v%` stacks the heatmaps in one column, while `+` will display them in two
+columns, side by side. This can also be done with any output of class
+ComplexHeatmap::Heatmap().
+
+
 # 3D protein structure
+
+The function requires a file path to a PBD file contain protein structure 
+coordinates and a DMS assay to aggregate DMS scores that will be projected 
+onto the 3D structure.
 
 This vignette demonstrates how to explore and visualize DMS scores on a 3D 
 protein structure using the package r3dmol under the hood. The function requires
 a file path to a PBD file contain protein structure coordinates and a DMS assay
 to aggregate DMS scores that will be projected onto the 3D structure.
 
-```{r, message=FALSE, warning=FALSE, execute = FALSE}
-library(ProteinGymR)
-```
+
 
 By default, if no `dms_data` argument is provided, the DMS subsitutions from 
 `ProteinGymR::dms_substitutions()` are loaded in. Alternatively, a user can 
@@ -125,7 +239,7 @@ Let's just visualize the mean DMS scores of the protein from position 10:50.
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
     pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb",
     start_pos = 10,
-    end_pos = 50)
+    end_pos = 50, full_structure = FALSE)
 ```
 
 
