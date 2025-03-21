@@ -106,7 +106,7 @@ plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020",
    start_pos = 20, 
    end_pos = 50,
    full_structure = FALSE,
-   aggregate_fun = min)
+   aggregate_fun = mean)
 
 plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018", 
    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",

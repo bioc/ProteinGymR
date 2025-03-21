@@ -1,5 +1,5 @@
 ---
-title: "Import and visualization of ProteinGym data"
+title: "Import and representation of ProteinGym data"
 author: 
     - name: Tram Nguyen
       affiliation: Department of Biomedical Informatics, Harvard Medical School
@@ -22,7 +22,7 @@ output:
       code_folding: show
 date: "`r doc_date()`"
 vignette: >
-    %\VignetteIndexEntry{Data access and visualization}
+    %\VignetteIndexEntry{Data access and representation}
     %\VignetteEncoding{UTF-8}
     %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -59,13 +59,11 @@ library(tidyr)
 library(dplyr)
 library(stringr)
 library(ggplot2)
-library(ComplexHeatmap)
-library(AnnotationHub)
 ```
 
 [ProteinGym]: https://proteingym.org/
 [pg_publication]: https://proceedings.neurips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html
-[zenodo]: https://zenodo.org/records/13936340
+[zenodo]: https://zenodo.org/records/14997691
 [dms_paper]: https://www.nature.com/articles/nmeth.3027
 [physiochem]: https://biology.stackexchange.com/questions/105321/arrangement-of-amino-acids-in-the-protein-alphabet
 [boucher]: https://pubmed.ncbi.nlm.nih.gov/27010590/
@@ -80,24 +78,26 @@ methods, assessing the effectiveness of these models is problematic due to
 the use of distinct, often contrived, experimental datasets and variable
 performance across different protein families.
 
-[ProteinGym v1.1][ProteinGym] is a large-scale and holistic set of benchmarks 
+[ProteinGym][ProteinGym] is a large-scale and holistic set of benchmarks 
 specifically designed for protein fitness prediction and design curated by
 ([Notin et al. 2023][pg_publication]). It encompasses both a broad collection 
 of over 250 standardized deep mutational scanning (DMS) assays, spanning 
 millions of mutated sequences, as well as curated clinical datasets providing 
 high-quality expert annotations about mutation effects. Furthermore, ProteinGym 
-reports the performance of a diverse set of over 60 high-performing models from 
+reports the performance of a diverse set of over 70 high-performing models from 
 various subfields (eg., mutation effects, inverse folding) into a unified 
-benchmark. 
+benchmark.
 
-ProteinGym v1.1 datasets are openly available as a community resource both on
-[Zenodo][zenodo] and the official [ProteinGym website][ProteinGym].
+ProteinGym datasets are openly available as a community resource both on
+[Zenodo][zenodo] and the official [ProteinGym website][ProteinGym]. 
+ProteinGym v1.1 was released with Bioconductor 3.20 and v1.2 with 
+Bioconductor 3.21.
 
 
 # Data
 
 The `ProteinGymR` package provides the following analysis-ready datasets from 
-ProteinGym v1.1:
+ProteinGym:
 
 1.  DMS assay scores from 217 assays measuring the impact of all possible 
 amino acid substitutions across 186 proteins. The data is provided with 
@@ -107,15 +107,24 @@ amino acid substitutions across 186 proteins. The data is provided with
 ProteinGym DMS data. The data is provided with `am_scores()`.
 
 3. Five model performance metrics ("AUC", "MCC", "NDCG", "Spearman", 
-"Top_recall") for 62 models across 217 assays calculated on DMS substitutions 
+"Top_recall") for 79 models across 217 assays calculated on DMS substitutions 
 in a zero-shot setting. The data is provided with `zeroshot_DMS_metrics()`.
 
 4. Reference file containing metadata associated with the 217 DMS assays.
 
+5. Model scores on the DMS substitutions for 79 models in the zero-shot setting.
 
-# Explore and visualize data
+6. Model scores on the DMS substitutions for 11 semi-supervised models. 
 
-This vignette explores and visualizes the first dataset of DMS scores.
+
+# Import ProteinGym data
+
+In Bioc 3.20, ProteinGym data is accessed through ExperimentHub. Bioc 3.21 
+allows for dual importation, from ExperimentHub or through Zenodo's API which 
+accesses the current Zenodo database version.
+
+
+## Load and explore the DMS data
 
 Deep mutational scanning is an experimental technique that provides 
 comprehensive data on the functional effects of all possible single mutations 
@@ -127,9 +136,6 @@ effects of multiple mutations, yielding insights into protein structure and
 function. Overall, DMS scores provide a detailed map of how changes in a 
 protein's sequence affect its function, offering valuable yet complex insights 
 for researchers studying protein biology.
-
-
-## Load and explore the DMS data from ExperimentHub
 
 Datasets in `ProteinGymR` can be easily loaded with built-in functions.
 
@@ -169,34 +175,6 @@ names(dms_metadata)
 There are 45 columns representing metadata for DMS assays. For more information 
 about the information, see the [ProteinGym publication][pg_publication].
 
-
-## Visualization of DMS data with ComplexHeatmap
-
-Explore an assay and create a heatmap of the DMS scores with 
-`plot_dms_heatmap()`.
-
-```{r ACE2 heatmap}
-plot_dms_heatmap(assay_name = "ACE2_HUMAN_Chan_2020", 
-    dms_data = dms_data, start_pos = 10, end_pos = 100)
-```
-
-The heatmap shows the DMS score at each position along the given protein
-(x-axis) where a residue was mutated (alternate amino acid on y-axis). For this 
-demonstration, we subset to the first 100 positions and grouped the amino
-acids by their physiochemical properties (DE,KRH,NQ,ST,PGAVIL,MC,FYW). See
-[here][physiochem] for more information. As a note, not all positions along the 
-protein sequence may be subjected to mutation for every DMS assay. This results 
-from the specific research objectives, prioritization choices of the 
-investigators, or technical constraints inherent to the experimental design. 
-
-A low DMS score indicates low fitness, while a higher DMS score indicates high 
-fitness.
-
-Based on the "ACE2_HUMAN_Chan_2020" assay, we can see that at positions 90 and 
-92, fitness remained high despite across amino acid changes; possibly 
-suggestive of a benign region of the protein. However, several mutations at 
-position 48 resulted in low fitness. This could represent an important region 
-for protein function where any perturbation would likely be deleterious.
 
 
 # Benchmarking across models
@@ -254,7 +232,7 @@ Plot the AUC metric for 5 models.
 
 ```{r, warning=FALSE, fig.wide = TRUE}
 benchmark_models(metric = "AUC", 
-    models = c("GEMME", "CARP_600K", "ESM_1b", "EVmutation", "ProtGPT2"))
+    models = c("GEMME", "CARP_600K", "ESM1b", "EVmutation", "ProtGPT2"))
 ```
 
 Based on the AUC metric of evaluation, GEMME performed the best while of the 5 

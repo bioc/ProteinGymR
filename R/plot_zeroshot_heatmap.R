@@ -204,6 +204,22 @@ plot_zeroshot_heatmap <-
                 )
         }
         
+        ## If model_data argument missing
+        if (missing(model_data)) {
+     
+            message(paste(
+                "'model_data' not provided,",
+                "using default data loaded with zeroshot_substitutions()"
+            ))
+         
+            model_data <- readRDS("~/ProteinGym_data/EH_data/v1.2/ProGym217_zeroshot_scores_v1.2.rds")
+     
+        } else {
+            
+            model_data
+            
+        }
+        
         ## Extract the specified assay
         assay_df <- model_data[[assay_name]]
     
