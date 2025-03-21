@@ -22,7 +22,7 @@ available assays, run \code{names()} on the list object loaded with
 user-defined DMS assay.}
 
 \item{dms_data}{\code{list()} object of DMS assays loaded with
-\code{ProteinGymR::dms_substitutions()}.
+\code{ProteinGymR::dms_substitutions()} if not specified by user.
 Alternatively, a user-defined list of DMS assays with names corresponding
 to \code{assay_name} param.}
 
@@ -78,17 +78,14 @@ Higher values indicate higher fitness of the mutated protein.
 dms_data <- dms_substitutions()
 
 plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-    dms_data = dms_data, 
     start_pos = 10, 
     end_pos = 80)
     
 plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-    dms_data = dms_data, 
     start_pos = 10, 
     end_pos = 80, exact_coord = TRUE)
     
 plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-    dms_data = dms_data, 
     start_pos = 50, 
     end_pos = 100, cluster_rows = TRUE)
 

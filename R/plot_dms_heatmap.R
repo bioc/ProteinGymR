@@ -100,7 +100,7 @@ filter_exact_coord <-
 #'    user-defined DMS assay.
 #' 
 #' @param dms_data `list()` object of DMS assays loaded with 
-#'   `ProteinGymR::dms_substitutions()`.
+#'   `ProteinGymR::dms_substitutions()` if not specified by user.
 #'    Alternatively, a user-defined list of DMS assays with names corresponding
 #'    to `assay_name` param.
 #'
@@ -151,17 +151,14 @@ filter_exact_coord <-
 #' dms_data <- dms_substitutions()
 #' 
 #' plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-#'     dms_data = dms_data, 
 #'     start_pos = 10, 
 #'     end_pos = 80)
 #'     
 #' plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-#'     dms_data = dms_data, 
 #'     start_pos = 10, 
 #'     end_pos = 80, exact_coord = TRUE)
 #'     
 #' plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-#'     dms_data = dms_data, 
 #'     start_pos = 50, 
 #'     end_pos = 100, cluster_rows = TRUE)
 #' 
@@ -191,6 +188,22 @@ plot_dms_heatmap <-
         ...) 
 {
 
+    ## If dms_data argument missing
+    if (missing(dms_data)) {
+ 
+        message(paste(
+            "'dms_data' not provided,",
+            "using DMS data loaded with dms_substitutions()"
+        ))
+     
+        dms_data <- dms_substitutions()
+     
+    } else {
+        
+        dms_data
+        
+    }
+        
     ## Extract the specified assay
     assay_df <- dms_data[[assay_name]]
     
