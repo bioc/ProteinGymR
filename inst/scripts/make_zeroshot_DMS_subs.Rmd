@@ -1,20 +1,16 @@
 ---
 title: "make_zeroshot_DMS_subs"
 author: "Tram Nguyen"
-date: "2024-10-16"
+date: "2025-03-26"
 output: html_document
 ---
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-options(width = 80)
-```
-
 ```{r, warning=FALSE}
 suppressMessages(library(purrr))
 suppressMessages(library(readr))
 ```
 
 [Zenodo]: https://zenodo.org/records/13936340
+[Zenodo_v1.2]: https://zenodo.org/records/14997691
 [git_benchmark]: https://github.com/OATML-Markslab/ProteinGym/tree/main/benchmarks/DMS_zero_shot/substitutions
 [model_script]: https://github.com/OATML-Markslab/ProteinGym/tree/main/scripts/scoring_DMS_zero_shot/performance_substitutions.sh
 
@@ -61,6 +57,8 @@ model performance metrics for the zero-shot setting. Each data.frame contains
 the corrected average values for 62 models (columns) across 
 217 assays (rows) calculated on DMS substitutions.
 
+2. The same `list` as above for 17 additional models (total of 79).
+
 
 # Download and process model performance metric data
 
@@ -71,6 +69,9 @@ from [the ProteinGym Github repo][git_benchmark]
 Briefly, to calculate the DMS substitution benchmark metrics, the model scores 
 are downloaded from [ProteinGym Zenodo repository][[Zenodo] 
 (accessed 2024-10-16).
+
+As of Bioc 3.21, the latest data contains 79 models downloaded from 
+ProteinGym [v1.2][Zenodo_v1.2] (accessed 2025-03-26).
 
 The script to run the calculation is provided [here][model_script].
 
@@ -125,6 +126,92 @@ score_list <- lapply(score_list,
 saveRDS(score_list, 
     "/home/rstudio/ProteinGym_data/EH_data/v1.1/zeroshot_DMS_subs_v1.1.rds")
 ```
+
+
+# v1.2
+
+```{r, eval = FALSE}
+# Download from Zenodo - data stored locally
+file_dir <- paste0("/home/rstudio/ProteinGym_data/ProteinGym_v1.2/",
+    "DMS_benchmarks_performance/DMS_zero_shot/substitutions/")
+
+ProGym_files <- list.files(path=file_dir, 
+    pattern = "DMS_level.csv$", full.names=FALSE, recursive = TRUE)
+
+# Grab assay names
+ProGym_names <- sub("/.*", "", ProGym_files) 
+
+# Load in all the files as tables in a list
+ProGym_tables <- suppressMessages(lapply(paste0(file_dir, ProGym_files),
+                                         read_csv, show_col_types = FALSE))
+
+names(ProGym_tables) <- ProGym_names
+
+
+# Replace all punctuation with underscores in column names
+change_colnames <- function(df) {
+  colnames(df) <- gsub("[[:punct:]]", "_", colnames(df))
+  return(df)
+}
+
+# Apply function to all dataframes in the list
+score_list <- lapply(ProGym_tables, change_colnames)
+
+score_list <- map(score_list, ~ {
+  names(.x) <- gsub(" ", "_", names(.x))
+  .x
+})
+
+score_list <- map(score_list, ~ {
+  names(.x) <- gsub("\\.", "_", names(.x))
+  .x
+})
+
+score_list <- map(score_list, ~ {
+  names(.x) <- gsub("__", "_", names(.x))
+  .x
+}) # remove double underscores
+
+score_list <- lapply(score_list, function(df) {
+  names(df) <- gsub("_$", "", names(df))
+  return(df)
+}) # remove hanging underscores at end
+
+# Check that each dataframe has same column and row names across the list
+all(sapply(score_list[-1], 
+    function(df) identical(names(df), names(score_list[[1]]))))
+all(sapply(score_list[-1], 
+    function(df) identical(df[,1], score_list[[1]][,1])))
+
+## DISCREPENCIES BETWEEN MODEL NAMES IN FILES
+## CHANGE TO MODEL NAMES PROVIDED IN `available_models()`
+
+
+# Check that the names match the raw scores model names
+available_models() == names(score_list[[1]])[2:80]
+chk <- cbind(available_models(), names(score_list[[1]])[2:80])
+
+# Loop through the list and change column names from 2 to 80
+# Replace model names
+
+score_list <- lapply(score_list, function(df) {
+  colnames(df)[2:80] <- available_models()
+  df
+})
+
+available_models() == names(score_list[[1]])[2:80]
+
+# Add list element names
+names(score_list) <- c("AUC", "MCC", "NDCG", "Spearman", "Top_recall")
+```
+
+# Write model score metrics summary RDS object
+
+```{r, eval=FALSE}
+saveRDS(score_list, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/zeroshot_summary_scores_v1.2.rds")
+```
+
 
 
 # Reference
