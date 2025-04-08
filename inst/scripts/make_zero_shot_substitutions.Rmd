@@ -1,7 +1,7 @@
 ---
-title: "make_zero_shot_substitutions"
+title: "make_zero_shot_substitutions_scores"
 author: "Tram Nguyen"
-date: "2025-03-13"
+date: "2025-03-26"
 output: html_document
 editor_options: 
   markdown: 
@@ -64,7 +64,8 @@ entryNames <- sapply(entryNames, function(input_string) {
 
 # Convert entryNames to UniProt Accession ID
 ws <- UniProt.ws()
-out <- UniProt.ws::select(ws, entryNames, columns = "UniProtKB", keytype = "UniProtKB")
+out <- UniProt.ws::select(ws, entryNames, columns = "UniProtKB", 
+    keytype = "UniProtKB")
 accessions <- out$Entry
 
 # Manually checked results of mapping: Merge results with original PG studies
@@ -109,6 +110,28 @@ ProGym_tables <- lapply(ProGym_tables, function(df) {
     df |>
     mutate(DMS_score_bin = factor(DMS_score_bin))
 })
+
+# Replace column hyphens with underscores
+replace_hyphen <- function(df) {
+    # Replace in column names
+    names(df) <- gsub("-", "_", names(df))
+    
+    # Replace in all values (assuming all columns are character or factors)
+    df[] <- lapply(df, function(col) {
+    if (is.character(col)) {
+      return(gsub("-", "_", col))
+    } else if (is.factor(col)) {
+      return(factor(gsub("-", "_", as.character(col))))
+    } else {
+      return(col)  # Keep other types unchanged
+    }
+    })
+    
+    return(df)
+}
+
+# Apply the function to each dataframe in the list
+ProGym_tables <- lapply(ProGym_tables, replace_hyphen)
 ```
 
 Changed tibble to data.frames.
@@ -124,5 +147,6 @@ substitution assays.
 
 ```{r, eval=FALSE}
 saveRDS(ProGym_tables, 
-    "/home/rstudio/ProteinGym_data/EH_data/v1.2/ProGym217_zeroshot_scores_v1.2.rds")
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/zeroshot_scores_v1.2.rds")
 ```
+
