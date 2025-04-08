@@ -1,0 +1,199 @@
+---
+title: "make_supervised_scores"
+author: "Tram Nguyen"
+date: "2025-04-08"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Download data
+
+```{r, warning=FALSE}
+suppressMessages(library(dplyr))
+suppressMessages(library(readr))
+suppressMessages(library(UniProt.ws))
+suppressMessages(library(org.Hs.eg.db))
+```
+
+[Zenodo_v1.2]: https://zenodo.org/records/14997691
+[Notin_pub]: https://papers.nips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html
+
+
+# Download data
+
+Supervised scores for all DMS substitution in 217 assays were accessed from the [ProteinGym Zenodo][Zenodo_v1.2] repository (v1.2).
+(accessed 2025-04-08).
+
+Supervised data contains:
+- contigous_5
+- modulo_5
+- random_5
+- and the merged_scores_substitution summary table
+
+
+/DMS_supervised_substitutions_scores/fold_contiguous_5/
+/DMS_supervised_substitutions_scores/fold_modulo_5/
+/DMS_supervised_substitutions_scores/fold_random_5/
+
+
+```{r, warning=FALSE}
+# Data stored locally
+file_dir <- "/home/rstudio/ProteinGym_data/ProteinGym_v1.2/DMS_supervised_substitutions_scores/fold_random_5/"
+
+ProGym_files <- list.files(path=file_dir, full.names=FALSE)
+
+# Grab assay names
+ProGym_names <- sub(".csv", "", ProGym_files) 
+
+# Load in all the files as tables in a list
+ProGym_tables <- suppressMessages(lapply(paste0(file_dir, ProGym_files),
+                                         read_csv, show_col_types = FALSE))
+
+# Assign respective study names to each list element
+names(ProGym_tables) <- ProGym_names
+
+# Add column with `DMS_id` for each study respectively
+ProGym_tables <- 
+    purrr::map2(
+        ProGym_tables, 
+        ProGym_names, ~ {.x |>
+            mutate(DMS_id = .y)
+        }
+    )
+```
+
+# Convert ProteinGym's Entry Names to UniProt Accession
+
+```{r}
+# Grab the protein Entry Name from ProteinGym assays by extracting only the
+entryNames <- strsplit(names(ProGym_tables), split = "_", fixed = TRUE)
+
+# Function to grab SwissProt ID from DMS names (first and second elements)
+entryNames <- sapply(entryNames, function(input_string) {
+  first_two_elements <- paste(input_string[1], input_string[2], sep = "_")
+  return(first_two_elements)
+})
+
+# Convert entryNames to UniProt Accession ID
+ws <- UniProt.ws()
+out <- UniProt.ws::select(ws, entryNames, columns = "UniProtKB", 
+    keytype = "UniProtKB")
+accessions <- out$Entry
+
+# Manually checked results of mapping: Merge results with original PG studies
+pg_names <- as.data.frame(entryNames)
+cdf <- left_join(pg_names, out, by = c("entryNames" = "From"), keep = TRUE)
+colnames(cdf) <- c("pg_names", "entry", "accessions")
+```
+
+# Two IDs not mapped: ANCSZ_Hobbs
+# Manually map
+
+```{r}
+# Manually curation of ANCZ -- leave UniProt accession as NA
+cdf$entry[which(cdf$pg_names == "ANCSZ_Hobbs")] <- NA
+```
+
+# Add a column in the ProteinGym data with UniProt Accession
+
+```{r}
+ProGym_names <- names(ProGym_tables)
+
+# For each assay, mutate a new UniProt ID column
+uniprot_vec <- cdf$accessions
+
+ProGym_tables <- 
+    purrr::map2(ProGym_tables, 
+        uniprot_vec, ~ { .x |>
+            mutate(UniProt_id = .y)
+        }
+    )
+
+# Reorder the columns
+cols <- c("UniProt_id", "DMS_id", "mutant", "mutated_sequence", 
+          "DMS_score", "DMS_score_bin")
+
+ProGym_tables <- lapply(ProGym_tables, function(df) {
+   df |>  dplyr::select(all_of(cols), everything())
+})
+
+# Make "DMS_score_bin" factor
+ProGym_tables <- lapply(ProGym_tables, function(df) {
+    df |>
+    mutate(DMS_score_bin = factor(DMS_score_bin))
+})
+
+# Replace column hyphens with underscores, remove spaces, remove "predictions"
+replace_hyphen <- function(df) {
+    # Replace in column names
+    names(df) <- gsub("-", "_", names(df))
+    names(df) <- gsub(" ", "", names(df))
+    names(df) <- gsub("_predictions", "", names(df))
+    
+    # Replace in all values (assuming all columns are character or factors)
+    df[] <- lapply(df, function(col) {
+    if (is.character(col)) {
+      return(gsub("-", "_", col))
+    } else if (is.factor(col)) {
+      return(factor(gsub("-", "_", as.character(col))))
+    } else {
+      return(col)  # Keep other types unchanged
+    }
+    })
+    
+    return(df)
+}
+
+# Apply the function to each dataframe in the list
+ProGym_tables <- lapply(ProGym_tables, replace_hyphen)
+```
+
+Changed tibble to data.frames.
+```{r}
+ProGym_tables <- lapply(ProGym_tables, as.data.frame)
+```
+
+Returns a list of 12 supervised model scores for each 217 DMS 
+substitution assays for contigous fold, modulo fold, and random fold.
+
+
+# Write ProteinGym zero-shot list to RDS object
+
+```{r, eval=FALSE}
+saveRDS(ProGym_tables, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/supervised_contiguous5_scores_v1.2.rds")
+saveRDS(ProGym_tables, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/supervised_modulo5_scores_v1.2.rds")
+saveRDS(ProGym_tables, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/supervised_random5_scores_v1.2.rds")
+```
+
+
+# Make supervised model summary RDS
+
+```{r}
+summary_table <- read_csv("/home/rstudio/ProteinGym_data/ProteinGym_v1.2/DMS_supervised_substitutions_scores/merged_scores_substitutions_DMS.csv")
+
+# Apply the function to each dataframe in the list
+summary_table$model_name <- gsub("-", "_", summary_table$model_name)
+summary_table$model_name <- gsub(" ", "", summary_table$model_name)
+summary_table$model_name <- gsub("_predictions", "", summary_table$model_name)
+
+cdf$study <- ProGym_names
+
+summary_table <- left_join(cdf, summary_table, 
+    by = c("study" = "DMS_id"))
+
+colnames(summary_table)[3] <- "UniProt_id"
+colnames(summary_table)[4] <- "DMS_id"
+
+summary_table <- summary_table |> 
+    dplyr::select(c("UniProt_id", "DMS_id", "model_name", "fold_variable_name", 
+        "Spearman", "MSE"))
+
+saveRDS(summary_table, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/supervised_summary_scores_v1.2.rds")
+```
+
