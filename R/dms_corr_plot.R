@@ -220,7 +220,6 @@ pg_correlate <-
 #'    the Spearman correlation between experimental DMS scores and AlphaMissense 
 #'    predicted scores and prints the r and p-value of the analysis to console. 
 #'    Generally, a stronger negative correlation corresponds to a tighter 
-#'    relationship between the two measures.
 #'
 #' @examples
 #' 
@@ -241,7 +240,9 @@ pg_correlate <-
 #' Curran Associates, Inc.
 #' 
 #' @importFrom ggplot2 ggplot geom_bin2d aes element_text labs xlab ylab
-#'     scale_fill_continuous theme_classic annotate theme
+#'     scale_fill_continuous theme_classic annotate theme geom_point
+#'     
+#' @importFrom ggExtra ggMarginal
 #' 
 #' @export
 dms_corr_plot <-
@@ -284,8 +285,9 @@ dms_corr_plot <-
             aes(y = .data$mean_am, x = .data$mean_dms)
         ) +
         geom_bin2d(bins = 60) +
+        geom_point(alpha = 0) +
         scale_fill_continuous(type = "viridis") +
-        labs(title = paste0("UniProt ID: ", uniprotId)) +
+        labs(title = paste0("\nUniProt ID: ", uniprotId)) +
         xlab("DMS score") +
         ylab("AlphaMissense score") +
         theme_classic() +
@@ -297,6 +299,16 @@ dms_corr_plot <-
             legend.title = element_text(size = 16),
             legend.text = element_text(size = 16)
         )
+    
+    # Add marginal density plots
+    pg_density_plot <- ggMarginal(
+        pg_density_plot,
+        type = "densigram", # Can also use "histogram"
+        fill = "#B0C4DE", 
+        color = "black"  # Change color as needed
+    )
+
+    pg_density_plot
     
     print(paste0("r = ", format(round(cor_results$estimate, 2)), 
                 "; Pval = ", cor_results$p.value))

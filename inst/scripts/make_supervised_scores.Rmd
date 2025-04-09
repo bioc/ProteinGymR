@@ -1,12 +1,14 @@
 ---
-title: "make_zero_shot_substitutions_scores"
+title: "make_supervised_scores"
 author: "Tram Nguyen"
-date: "2025-03-26"
+date: "2025-04-08"
 output: html_document
 editor_options: 
   markdown: 
     wrap: 72
 ---
+
+# Download data
 
 ```{r, warning=FALSE}
 suppressMessages(library(dplyr))
@@ -21,12 +23,24 @@ suppressMessages(library(org.Hs.eg.db))
 
 # Download data
 
-Zero shot scores for all DMS substitution in 217 assays were accessed from the [ProteinGym Zenodo][Zenodo_v1.2] repository (v1.2).
-(accessed 2025-03-13).
+Supervised scores for all DMS substitution in 217 assays were accessed from the [ProteinGym Zenodo][Zenodo_v1.2] repository (v1.2).
+(accessed 2025-04-08).
+
+Supervised data contains:
+- contigous_5
+- modulo_5
+- random_5
+- and the merged_scores_substitution summary table
+
+
+/DMS_supervised_substitutions_scores/fold_contiguous_5/
+/DMS_supervised_substitutions_scores/fold_modulo_5/
+/DMS_supervised_substitutions_scores/fold_random_5/
+
 
 ```{r, warning=FALSE}
 # Data stored locally
-file_dir <- "/home/rstudio/ProteinGym_data/ProteinGym_v1.2/zero_shot_substitutions_scores/"
+file_dir <- "/home/rstudio/ProteinGym_data/ProteinGym_v1.2/DMS_supervised_substitutions_scores/fold_random_5/"
 
 ProGym_files <- list.files(path=file_dir, full.names=FALSE)
 
@@ -111,10 +125,12 @@ ProGym_tables <- lapply(ProGym_tables, function(df) {
     mutate(DMS_score_bin = factor(DMS_score_bin))
 })
 
-# Replace column hyphens with underscores
+# Replace column hyphens with underscores, remove spaces, remove "predictions"
 replace_hyphen <- function(df) {
     # Replace in column names
     names(df) <- gsub("-", "_", names(df))
+    names(df) <- gsub(" ", "", names(df))
+    names(df) <- gsub("_predictions", "", names(df))
     
     # Replace in all values (assuming all columns are character or factors)
     df[] <- lapply(df, function(col) {
@@ -139,14 +155,45 @@ Changed tibble to data.frames.
 ProGym_tables <- lapply(ProGym_tables, as.data.frame)
 ```
 
-Returns a list of multiple zero-shot model scores for each 217 DMS 
-substitution assays.
+Returns a list of 12 supervised model scores for each 217 DMS 
+substitution assays for contigous fold, modulo fold, and random fold.
 
 
 # Write ProteinGym zero-shot list to RDS object
 
 ```{r, eval=FALSE}
 saveRDS(ProGym_tables, 
-    "/home/rstudio/ProteinGym_data/EH_data/v1.2/zeroshot_scores_v1.2.rds")
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/supervised_contiguous5_scores_v1.2.rds")
+saveRDS(ProGym_tables, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/supervised_modulo5_scores_v1.2.rds")
+saveRDS(ProGym_tables, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/supervised_random5_scores_v1.2.rds")
+```
+
+
+# Make supervised model summary RDS
+
+```{r}
+summary_table <- read_csv("/home/rstudio/ProteinGym_data/ProteinGym_v1.2/DMS_supervised_substitutions_scores/merged_scores_substitutions_DMS.csv")
+
+# Apply the function to each dataframe in the list
+summary_table$model_name <- gsub("-", "_", summary_table$model_name)
+summary_table$model_name <- gsub(" ", "", summary_table$model_name)
+summary_table$model_name <- gsub("_predictions", "", summary_table$model_name)
+
+cdf$study <- ProGym_names
+
+summary_table <- left_join(cdf, summary_table, 
+    by = c("study" = "DMS_id"))
+
+colnames(summary_table)[3] <- "UniProt_id"
+colnames(summary_table)[4] <- "DMS_id"
+
+summary_table <- summary_table |> 
+    dplyr::select(c("UniProt_id", "DMS_id", "model_name", "fold_variable_name", 
+        "Spearman", "MSE"))
+
+saveRDS(summary_table, 
+    "/home/rstudio/ProteinGym_data/EH_data/v1.2/supervised_summary_scores_v1.2.rds")
 ```
 
