@@ -26,7 +26,6 @@ can be supplied.}
 the Spearman correlation between experimental DMS scores and AlphaMissense
 predicted scores and prints the r and p-value of the analysis to console.
 Generally, a stronger negative correlation corresponds to a tighter
-relationship between the two measures.
 }
 \description{
 \code{dms_corr_plot()} runs a Spearman correlation

@@ -220,7 +220,6 @@ pg_correlate <-
 #'    the Spearman correlation between experimental DMS scores and AlphaMissense 
 #'    predicted scores and prints the r and p-value of the analysis to console. 
 #'    Generally, a stronger negative correlation corresponds to a tighter 
-#'    relationship between the two measures.
 #'
 #' @examples
 #' 
@@ -241,7 +240,7 @@ pg_correlate <-
 #' Curran Associates, Inc.
 #' 
 #' @importFrom ggplot2 ggplot geom_bin2d aes element_text labs xlab ylab
-#'     scale_fill_continuous theme_classic annotate theme
+#'     scale_fill_continuous theme_classic annotate theme geom_point
 #'     
 #' @importFrom ggExtra ggMarginal
 #' 
