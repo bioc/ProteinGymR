@@ -243,6 +243,16 @@ plot_structure(assay_name = "ACE2_HUMAN_Chan_2020",
 ```
 
 
+# Correlate DMS scores with model scores
+
+```{r}
+dms_corr_plot(uniprotId = "Q9NV35")
+```
+
+
+
+
+
 ## Session Info
 ```{r}
 sessionInfo()
