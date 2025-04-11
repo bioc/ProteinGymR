@@ -1,26 +1,35 @@
-#' @rdname zeroshot_DMS_metrics
+#' @rdname zeroshot_scores
 #' 
-#' @title Model performance metrics for DMS substitutions in the zero-shot 
-#'    setting
+#' @title Load Zero-shot Model Predictions and Metrics for Substitutions 
+#' in 217 DMS Assays
 #'
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
 #' 
-#' @details `zeroshot_DMS_metrics()` loads in the five model performance metrics 
-#'    for ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") calculated on the 
-#'    DMS substitutions in the zero-shot setting.
+#' @details `zeroshot_DMS_metrics()` loads in the model performance metrics 
+#'    ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") calculated on the 
+#'    DMS substitutions in the zero-shot setting for 79 models updated in 
+#'    ProteinGym v1.2.
+#'    
+#' Each data.frame contains the following columns:
+#' 
+#' \describe{ 
+#' \item{\code{DMS_ID}:}{Character, Assay name for the DMS study.}
+#' \item{\code{Columns 2:80}:}{Numeric, Corresponding to the average performance
+#'  score of each of the 79 models tested.}
+#' \item{\code{Number_of_Mutants}:}{Numeric, Number of protein mutants 
+#'    evaluated.}
+#' \item{\code{Selection_Type}:}{Character, Protein function grouping.}
+#' \item{\code{UniProt_ID}:}{Character, UniProt protein entry name identifier.}
+#' \item{\code{DMS_score}:}{Numeric, experimental measurement in the DMS assay. 
+#'    Higher values indicate higher fitness of the mutated protein.}
+#' \item{\code{DMS_score_bin}:}{Factor, indicates whether the DMS_score is 
+#'    above the fitness cutoff (1 is fit, 0 is not fit).}
+#' \item{\code{MSA_Neff_L_category}:}{Multiple sequence alignment category.} 
+#' \item{\code{Taxon}:}{Taxon group.}
+#'}
 #'
-#' Each data.frame columns contain:
-#' - "DMS_ID": Showing the assay name for the 217 DMS studies.
-#' - Columns 2:63: Corresponding to the average performance score of each of the
-#'    61 models tested.
-#' - "Number_of_Mutants": Number of protein mutants evaluated. 
-#' - "Selection_Type": Protein function grouping.
-#' - "UniProt_ID": UniProt protein entry name identifier
-#' - "MSA_Neff_L_category": Multiple sequence alignment category. 
-#' - "Taxon": taxon group.
-#'
-#' @return Returns a [list()] object with five [data.frame()] corresponding to 
+#' @return Returns a [list()] object with 5 [data.frame()] corresponding to 
 #'    a model metric table.
 #' 
 #' @references
@@ -39,6 +48,7 @@
 #' @export
 zeroshot_DMS_metrics <- function (metadata = FALSE)
 {
+    ## TO DO: replace with updated table 79 models
     eh <- ExperimentHub::ExperimentHub()
     ehid <- "EH9593"
     
@@ -46,4 +56,50 @@ zeroshot_DMS_metrics <- function (metadata = FALSE)
         eh[ehid]
     }
     else eh[[ehid]]
+}
+
+
+#' @rdname zeroshot_scores
+#'
+#' @param metadata Logical, whether only experiment metadata should be returned.
+#' Default behavior is to return processed data with metadata included.
+#' 
+#' @details `zeroshot_scores()` loads prediction scores outputted by 
+#' models in the zero-shot setting evaluated on the 217 DMS substitution assays.
+#' To examine all model options, run `available_models()`.
+#'
+#' For raw model predictions, each data.frame includes 85 columns:
+#' \describe{
+#' \item{\code{UniProt_id}:}{Character, UniProt accession identifier.}
+#' \item{\code{DMS_id}:}{Character, ProteinGym assay identifier.}
+#' \item{\code{mutant}:}{Character, set of substitutions to apply on the 
+#'    reference sequence to obtain the mutated sequence (e.g., A1P:D2N implies 
+#'    the amino acid 'A' at position 1 should be replaced by 'P', and 'D' at 
+#'    position 2 should be replaced by 'N').}
+#' \item{\code{mutated_sequence}:}{Character, full amino acid sequence for the 
+#'    mutated protein.}
+#' \item{\code{DMS_score}:}{Numeric, experimental measurement in the DMS assay. 
+#'    Higher values indicate higher fitness of the mutated protein.}
+#' \item{\code{DMS_score_bin}:}{Factor, indicates whether the DMS_score is 
+#'    above the fitness cutoff (1 is fit, 0 is not fit).}
+#' \item{\code{Columns 7:85}:}{Respective zero-shot model name.}  
+#'}
+#'
+#' @return Returns a [list()] object of 217 individual assays.
+#' 
+#' @examples
+#' data <- supervised_scores()
+#' data_random <- supervised_scores(fold_scheme = "random")
+#' 
+#' @export
+zeroshot_scores <- function (metadata = FALSE)
+{
+    # Check for metadata argument
+    if (metadata == TRUE) {
+        #eh[ehid]
+        message("Grabbing metadata.")
+    } else {
+       data <- readRDS("../ProteinGym_data/EH_data/v1.2/zeroshot_scores_v1.2.rds")
+       return(data)
+    }
 }
