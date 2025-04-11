@@ -1,4 +1,4 @@
-#' @rdname ProteinGym_Supervised_Scores
+#' @rdname ProteinGym_supervised_scores
 #' 
 #' @title Load Semi-Supervised Model Predictions for Substitutions in 217 Assays
 #'
@@ -82,7 +82,7 @@ supervised_scores <- function (metadata = FALSE, fold_scheme = "contiguous")
     }
 }
 
-#' @rdname ProteinGym_Supervised_Scores
+#' @rdname ProteinGym_supervised_scores
 #' 
 #' @title Load Semi-Supervised Model Summary Metrics
 #'
