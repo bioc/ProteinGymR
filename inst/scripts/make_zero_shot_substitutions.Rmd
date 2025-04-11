@@ -137,6 +137,9 @@ ProGym_tables <- lapply(ProGym_tables, replace_hyphen)
 Changed tibble to data.frames.
 ```{r}
 ProGym_tables <- lapply(ProGym_tables, as.data.frame)
+
+# Remove extra bin_score column
+ProGym_tables[["ANCSZ_Hobbs_2022"]][,7] <- NULL
 ```
 
 Returns a list of multiple zero-shot model scores for each 217 DMS 

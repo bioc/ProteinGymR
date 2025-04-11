@@ -148,6 +148,9 @@ replace_hyphen <- function(df) {
 
 # Apply the function to each dataframe in the list
 ProGym_tables <- lapply(ProGym_tables, replace_hyphen)
+
+# Remove extra bin_score column
+ProGym_tables[["ANCSZ_Hobbs_2022"]][,7] <- NULL
 ```
 
 Changed tibble to data.frames.
