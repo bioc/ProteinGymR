@@ -48,14 +48,14 @@
 #' @export
 zeroshot_DMS_metrics <- function (metadata = FALSE)
 {
-    ## TO DO: replace with updated table 79 models
-    eh <- ExperimentHub::ExperimentHub()
-    ehid <- "EH9593"
-    
+    ## updated to v1.2 79 models
     if (metadata == TRUE) {
         eh[ehid]
     }
-    else eh[[ehid]]
+    else  {
+        data <- readRDS("../ProteinGym_data/EH_data/v1.2/zeroshot_summary_scores_v1.2.rds")
+        return(data)
+    }
 }
 
 
@@ -64,7 +64,7 @@ zeroshot_DMS_metrics <- function (metadata = FALSE)
 #' @param metadata Logical, whether only experiment metadata should be returned.
 #' Default behavior is to return processed data with metadata included.
 #' 
-#' @details `zeroshot_scores()` loads prediction scores outputted by 
+#' @details `zeroshot_substitutions()` loads prediction scores outputted by 
 #' models in the zero-shot setting evaluated on the 217 DMS substitution assays.
 #' To examine all model options, run `available_models()`.
 #'
@@ -88,11 +88,11 @@ zeroshot_DMS_metrics <- function (metadata = FALSE)
 #' @return Returns a [list()] object of 217 individual assays.
 #' 
 #' @examples
-#' data <- supervised_scores()
-#' data_random <- supervised_scores(fold_scheme = "random")
+#' data <- zeroshot_substitutions()
+#' data_random <- zeroshot_substitutions(fold_scheme = "random")
 #' 
 #' @export
-zeroshot_scores <- function (metadata = FALSE)
+zeroshot_substitutions <- function (metadata = FALSE)
 {
     # Check for metadata argument
     if (metadata == TRUE) {

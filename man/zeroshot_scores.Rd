@@ -2,13 +2,13 @@
 % Please edit documentation in R/zeroshot_DMS_metrics.R
 \name{zeroshot_DMS_metrics}
 \alias{zeroshot_DMS_metrics}
-\alias{zeroshot_scores}
+\alias{zeroshot_substitutions}
 \title{Load Zero-shot Model Predictions and Metrics for Substitutions
 in 217 DMS Assays}
 \usage{
 zeroshot_DMS_metrics(metadata = FALSE)
 
-zeroshot_scores(metadata = FALSE)
+zeroshot_substitutions(metadata = FALSE)
 }
 \arguments{
 \item{metadata}{Logical, whether only experiment metadata should be returned.
@@ -48,7 +48,7 @@ above the fitness cutoff (1 is fit, 0 is not fit).}
 \item{\code{Taxon}:}{Taxon group.}
 }
 
-\code{zeroshot_scores()} loads prediction scores outputted by
+\code{zeroshot_substitutions()} loads prediction scores outputted by
 models in the zero-shot setting evaluated on the 217 DMS substitution assays.
 To examine all model options, run \code{available_models()}.
 
@@ -73,8 +73,8 @@ above the fitness cutoff (1 is fit, 0 is not fit).}
 data <- zeroshot_DMS_metrics()
 data_meta <- zeroshot_DMS_metrics(metadata = TRUE)
 
-data <- supervised_scores()
-data_random <- supervised_scores(fold_scheme = "random")
+data <- zeroshot_substitutions()
+data_random <- zeroshot_substitutions(fold_scheme = "random")
 
 }
 \references{

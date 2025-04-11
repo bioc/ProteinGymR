@@ -10,7 +10,7 @@
 #' "contiguous". For more information about the different folding schemes,
 #' refer to the original publication.
 #'
-#' @details `supervised_scores()` loads prediction scores outputted by 
+#' @details `supervised_substitutions()` loads prediction scores outputted by 
 #' semi-supervised models run on the 217 DMS substitution assays.
 #' 
 #' For raw model predictions, each assay includes 18 columns:
@@ -33,11 +33,11 @@
 #' @return Returns a [list()] object of 217 individual assays.
 #' 
 #' @examples
-#' data <- supervised_scores()
-#' data_random <- supervised_scores(fold_scheme = "random")
+#' data <- supervised_substitutions()
+#' data_random <- supervised_substitutions(fold_scheme = "random")
 #' 
 #' @export
-supervised_scores <- function (metadata = FALSE, fold_scheme = "contiguous")
+supervised_substitutions <- function (metadata = FALSE, fold_scheme = "contiguous")
 {
     
     # Check if fold_scheme is one of the allowed values
