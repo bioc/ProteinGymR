@@ -107,7 +107,7 @@ zeroshot_summary_scores_v1.2 <- data.frame(
     Coordinate_1_based = TRUE,
     DataProvider = "Marks Lab at Harvard Medical School",
     Maintainer = "Tram Nguyen <Tram_Nguyen@hms.harvard.edu>",
-    RDataClass = "List",
+    RDataClass = "Data.Frame",
     DispatchClass = "RDS",
     RDataPath = "ProteinGymR/zeroshot_summary_scores_v1.2.rds",
     stringsAsFactors = FALSE
