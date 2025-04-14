@@ -136,8 +136,8 @@ zeroshot_sub_model_scores <- data.frame(
 
 # supervised_model_scores
 supervised_model_scores_cont <- data.frame(
-    Title = "ProteinGym semi-supervised model prediction scores for 11 models",
-    Description = paste("Semi-supervised prediction scores for 11 models",
+    Title = "ProteinGym semi-supervised model prediction scores for 12 models",
+    Description = paste("Semi-supervised prediction scores for 12 models",
         "across 217 DMS assays with contiguous 5 variable folds", 
         "from Notin et al. 2023"),
     BiocVersion = "3.21",
@@ -157,8 +157,8 @@ supervised_model_scores_cont <- data.frame(
 )
 
 supervised_model_scores_modulo <- data.frame(
-    Title = "ProteinGym semi-supervised model prediction scores for 11 models",
-    Description = paste("Semi-supervised prediction scores for 11 models",
+    Title = "ProteinGym semi-supervised model prediction scores for 12 models",
+    Description = paste("Semi-supervised prediction scores for 12 models",
         "across 217 DMS assays with modulo 5 variable folds", 
         "from Notin et al. 2023"),
     BiocVersion = "3.21",
@@ -179,8 +179,8 @@ supervised_model_scores_modulo <- data.frame(
 
 
 supervised_model_scores_random <- data.frame(
-    Title = "ProteinGym semi-supervised model prediction scores for 11 models",
-    Description = paste("Semi-supervised prediction scores for 11 models",
+    Title = "ProteinGym semi-supervised model prediction scores for 12 models",
+    Description = paste("Semi-supervised prediction scores for 12 models",
         "across 217 DMS assays with random 5 variable folds", 
         "from Notin et al. 2023"),
     BiocVersion = "3.21",
@@ -200,8 +200,8 @@ supervised_model_scores_random <- data.frame(
 )
 
 supervised_summary_metrics <- data.frame(
-    Title = "ProteinGym summary metrics of semi-supervised scores for 11 models",
-    Description = paste("Performance metrics of 11 semi-supervised models",
+    Title = "ProteinGym summary metrics of semi-supervised scores for 12 models",
+    Description = paste("Performance metrics of 12 semi-supervised models",
         "across 217 DMS assays using 5 variable fold for contigous, modulo,", 
         "and random settings from Notin et al. 2023"),
     BiocVersion = "3.21",

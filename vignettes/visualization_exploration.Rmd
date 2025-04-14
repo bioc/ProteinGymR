@@ -1,5 +1,5 @@
 ---
-title: "Visualization and Exploration"
+title: "Visualization and exploration"
 author: 
     - name: Tram Nguyen
       affiliation: Department of Biomedical Informatics, Harvard Medical School
@@ -20,9 +20,9 @@ output:
       toc_float: true
       toc_depth: 2
       code_folding: show
-date: "`r doc_date()`"
+date: "April 14, 2025"
 vignette: >
-    %\VignetteIndexEntry{Visualization and Exploration"}
+    %\VignetteIndexEntry{Visualization and exploration"}
     %\VignetteEncoding{UTF-8}
     %\VignetteEngine{knitr::rmarkdown}
 editor_options: 

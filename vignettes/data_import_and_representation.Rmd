@@ -117,7 +117,7 @@ DMS substitutions in a zero-shot setting. The data is provided with
 Load in with `zeroshot_substitutions()`.
 
 
-6. Two model performance metrics ("Spearman", and "MSE") for 11 models across 
+6. Two model performance metrics ("Spearman", and "MSE") for 12 models across 
 217 assays (as of Bioc 3.21) calculated on DMS substitutions in a 
 semi-supervised setting. Load in this data with `supervised_metrics()`.
 

@@ -32,9 +32,9 @@ knitr::opts_chunk$set(echo = TRUE)
     3. "supervised_contiguous5_scores_v1.2.rds", 
     "supervised_modulo5_scores_v1.2.rds", and
     "supervised_random5_scores_v1.2.rds": Semi-supervised model prediction 
-    scores calculated on 217 assays for 11 models with 3 folding schemes
+    scores calculated on 217 assays for 12 models with 3 folding schemes
     4. "supervised_summary_scores_v1.2.rds": Semi-supervised model performance 
-    summary metrics (Spearman and MSE) for 11 models
+    summary metrics (Spearman and MSE) for 12 models
     
 - New functions:
     - `supervised_substitutions()` load semi-supervised model predictions for 
@@ -53,7 +53,7 @@ knitr::opts_chunk$set(echo = TRUE)
     - `zeroshot_DMS_metrics()` loads in updated model performance metrics 
     ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") for 62 -> 79 models updated 
     in ProteinGym v1.2.
-    - `dms_corr_plot()` added marginals to plotting.
+    - `dms_corr_plot()` added marginals to plotting. Allows to compare any          zero-shot or supervised model vs DMS score.
     - `plot_dms_heatmap()` new parameters start_pos, end_pos, exact_coords, and
     allows user to cluster rows and columns.
     

@@ -22,7 +22,7 @@ Description: The ProteinGymR package provides analysis-ready data resources from
     1. deep mutational scanning (DMS) scores from 217 assays measuring the 
     impact of all possible amino acid substitutions across 186 proteins, 2.  
     model performance metrics and prediction scores from 79 variant prediction 
-    models in the zero-shot setting and 11 models in the semi-supervised 
+    models in the zero-shot setting and 12 models in the semi-supervised 
     setting. 
 License: Artistic-2.0
 URL: https://github.com/ccb-hms/ProteinGymR
