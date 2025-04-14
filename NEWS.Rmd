@@ -50,12 +50,11 @@ knitr::opts_chunk$set(echo = TRUE)
     DMS assay. 
     
 - Updated functions:
-    - `zeroshot_DMS_metrics()` loads in the model performance metrics 
-    ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") 62 -> 79 models updated in 
-    ProteinGym v1.2.
+    - `zeroshot_DMS_metrics()` loads in updated model performance metrics 
+    ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") for 62 -> 79 models updated 
+    in ProteinGym v1.2.
     - `dms_corr_plot()` added marginals to plotting.
     - `plot_dms_heatmap()` new parameters start_pos, end_pos, exact_coords, and
     allows user to cluster rows and columns.
-    
     
 - Vignette to show new visualization functions: "Visualization and Exploration"
