@@ -20,7 +20,7 @@ output:
       toc_float: true
       toc_depth: 2
       code_folding: show
-date: "`r doc_date()`"
+date: "April 14, 2025"
 vignette: >
     %\VignetteIndexEntry{Data access and representation}
     %\VignetteEncoding{UTF-8}
@@ -106,22 +106,33 @@ amino acid substitutions across 186 proteins. The data is provided with
 2.  AlphaMissense pathogenicity scores for ~1.6 M substitutions in the
 ProteinGym DMS data. The data is provided with `am_scores()`.
 
-3. Five model performance metrics ("AUC", "MCC", "NDCG", "Spearman", 
-"Top_recall") for 79 models across 217 assays calculated on DMS substitutions 
-in a zero-shot setting. The data is provided with `zeroshot_DMS_metrics()`.
+3. Reference file containing metadata associated with the 217 DMS assays.
 
-4. Reference file containing metadata associated with the 217 DMS assays.
+4. Five model performance metrics ("AUC", "MCC", "NDCG", "Spearman", 
+"Top_recall") for 79 models across 217 assays (as of Bioc 3.21) calculated on 
+DMS substitutions in a zero-shot setting. The data is provided with 
+`zeroshot_DMS_metrics()`.
 
 5. Model scores on the DMS substitutions for 79 models in the zero-shot setting.
+Load in with `zeroshot_substitutions()`.
 
-6. Model scores on the DMS substitutions for 11 semi-supervised models. 
+
+6. Two model performance metrics ("Spearman", and "MSE") for 11 models across 
+217 assays (as of Bioc 3.21) calculated on DMS substitutions in a 
+semi-supervised setting. Load in this data with `supervised_metrics()`.
+
+7. Model scores on the DMS substitutions for 11 semi-supervised models with 3 
+folding schemes: contiguous, modulo, and random. Loaded in with 
+`supervised_substitutions()` and by changing the "fold_scheme" argument, 
+respectively.
+
+8. PDB files for 197 protein structures, to be used in the `plot_structure()` 
+3D visualization function.
 
 
 # Import ProteinGym data
 
-In Bioc 3.20, ProteinGym data is accessed through ExperimentHub. Bioc 3.21 
-allows for dual importation, from ExperimentHub or through Zenodo's API which 
-accesses the current Zenodo database version.
+ProteinGym data is accessed through ExperimentHub.
 
 
 ## Load and explore the DMS data
@@ -174,7 +185,6 @@ names(dms_metadata)
 
 There are 45 columns representing metadata for DMS assays. For more information 
 about the information, see the [ProteinGym publication][pg_publication].
-
 
 
 # Benchmarking across models

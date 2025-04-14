@@ -89,7 +89,7 @@ zeroshot_DMS_metrics <- function (metadata = FALSE)
 #' 
 #' @examples
 #' data <- zeroshot_substitutions()
-#' data_random <- zeroshot_substitutions(fold_scheme = "random")
+#' data_meta <- zeroshot_substitutions(metadata = TRUE)
 #' 
 #' @export
 zeroshot_substitutions <- function (metadata = FALSE)
