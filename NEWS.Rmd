@@ -16,3 +16,45 @@ knitr::opts_chunk$set(echo = TRUE)
     4. Reference file with metadata for 217 DMS assays
 - `benchmark_models()` for plotting performance scores across 5 models
 - `dms_corr_plot()` for correlating AlphaMissense scores and DMS assay scores
+
+# ProteinGymR 1.0.0
+- Bioconductor 3.20 release
+
+
+# ProteinGymR 1.1.0
+- Additional datasets from ProteinGym v1.2 to ExperimentHub:
+    1. "ProteinGym_AF2_structures": PDB protein structures files (n=197)
+    2. "zeroshot_scores_v1.2.rds": Zero-shot model prediction scores calculated 
+    on DMS substitutions in 217 assays across 79 models
+    2. "zeroshot_summary_scores_v1.2.rds": Zero-shot model performance summary 
+    metrics updated from Bioc 3.20 from 62 -> 79 models
+    3. "supervised_contiguous5_scores_v1.2.rds", 
+    "supervised_modulo5_scores_v1.2.rds", and
+    "supervised_random5_scores_v1.2.rds": Semi-supervised model prediction 
+    scores calculated on 217 assays for 11 models with 3 folding schemes
+    4. "supervised_summary_scores_v1.2.rds": Semi-supervised model performance 
+    summary metrics (Spearman and MSE) for 11 models
+    
+- New functions:
+    - `supervised_substitutions()` load semi-supervised model predictions for 
+    substitutions in 217 Assays
+    - `supervised_metrics()` load semi-supervised model sumamry metrics
+    - `zeroshot_substitutions()` loads prediction scores outputted by 
+    models in the zero-shot setting evaluated on the 217 DMS substitution 
+    assays. To examine all model options, run `available_models()`.
+    - `plot_structure()` plots DMS or model scores for amino acid
+    substitutions on a 3D protein structure for a chosen assay.
+    - `plot_zeroshot_heatmap()` plots predicted model scores under the 
+    zero-shot model for amino acid substitutions along a protein in a defined 
+    DMS assay. 
+    
+- Updated functions:
+    - `zeroshot_DMS_metrics()` loads in the model performance metrics 
+    ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") 62 -> 79 models updated in 
+    ProteinGym v1.2.
+    - `dms_corr_plot()` added marginals to plotting.
+    - `plot_dms_heatmap()` new parameters start_pos, end_pos, exact_coords, and
+    allows user to cluster rows and columns.
+    
+    
+- Vignette to show new visualization functions: "Visualization and Exploration"
