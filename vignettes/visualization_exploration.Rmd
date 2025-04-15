@@ -20,7 +20,7 @@ output:
       toc_float: true
       toc_depth: 2
       code_folding: show
-date: "April 14, 2025"
+date: "April 15, 2025"
 vignette: >
     %\VignetteIndexEntry{Visualization and exploration"}
     %\VignetteEncoding{UTF-8}
@@ -43,6 +43,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r, message=FALSE, warning=FALSE}
 library(ProteinGymR)
 library(BiocFileCache)
+library(ComplexHeatmap)
 ```
 
 
@@ -70,14 +71,16 @@ region of interest, use the arguments `start_pos()` and `end_pos()` which takes
 in an integer for the first and last residue position to plot in the protein.
 
 ```{r ACE2 default heatmap, fig.wide = TRUE}
-ace2_dms <- plot_dms_heatmap(assay_name = "ACE2_HUMAN_Chan_2020")
+ace2_dms <- plot_dms_heatmap(assay_name = "ACE2_HUMAN_Chan_2020",
+                    start_pos = 1, end_pos = 100)
 
 print(ace2_dms)
 ```
 
 The heatmap shows the DMS score at each position along the given protein
-(x-axis) where a residue was mutated (alternate amino acid on y-axis). For this 
-demonstration, we subset to the first 100 positions and grouped the amino
+(x-axis) where a residue was mutated (alternate amino acid on displayed on the 
+y-axis and the reference allele at the position is shown on top). For this 
+demonstration, we subset to the first 1-100 positions and grouped the amino
 acids by their physiochemical properties (DE,KRH,NQ,ST,PGAVIL,MC,FYW). See
 [here][physiochem] for more information. As a note, not all positions along the 
 protein sequence may be subjected to mutation for every DMS assay. This results 
@@ -105,38 +108,43 @@ plot_dms_heatmap(assay_name = "SHOC2_HUMAN_Kwon_2022",
     end_pos = 60,
     cluster_rows = TRUE)
 ```
-In this region of the SHOC2_HUMAN protein, mutating to a K seemed to have the 
-most benign affect across all positions.
+In this region of the SHOC2_HUMAN protein, mutating to a K (y-axis) seemed to 
+have the most benign affect across all mutations.
 
 
 # Visualize model scores along a protein
 
 ProteinGymR Bioc 3.21 provides functionality to generate heatmaps of zero-shot
-mode scores for over 70 variant effect prediction models with the function
-`plot_zeroshot_heatmap()`. The only required arguments for this function are 
-the assay name to plot (same as for the DMS heatmap), and a model to plot. For
-a complete list of models, run `available_models()`. If `model_data` is not
-provided, the default model scores from ProteinGym will be loaded in from
-`ProteinGymR::zeroshot_substitutions()`.
+mode scores for 79 variant effect prediction models and 11 semi-supervised 
+models with the function `plot_zeroshot_heatmap()`. The required arguments 
+for this function are the assay name to plot (same as for the DMS heatmap), 
+and a model to plot. For a complete list of models, run `available_models()` for
+zero-shot models, and `supervised_available_models()` for the 11 semi-supervised
+models. If `model_data` is not provided, the default model scores from 
+ProteinGym will be loaded in from `ProteinGymR::zeroshot_substitutions()`.
 
 ```{r}
+# TODO change this to EH loading function
 ace2_model <- plot_zeroshot_heatmap(
     assay_name = "ACE2_HUMAN_Chan_2020", 
-    model = "GEMME")
+    model = "GEMME",
+    start_pos = 1,
+    end_pos = 100)
 
 print(ace2_model)
 ```
 
 As with the DMS scores, we are plotting the GEMME zero-shot scores for each 
 position available in the assay "ACE2_HUMAN_Chan_2020". Note that the model 
-score here are mostly negative and thus, the color scale is red. Model scores
-are not rescaled or normalized across the 78 models. For more information on
-model scores and how to interpret them, consult the original ProteinGym 
+scores here are mostly negative and thus, the color scale is red. Model scores
+are not rescaled or normalized across the 79 models, and comparison across of 
+raw model predictions should be cautioned in this context. For more information 
+on model scores and how to interpret them, consult the original ProteinGym 
 [publication][pg_publication].
 
-It was useful to visualize the DMS and model scores side by side for a given 
+It can be useful to visualize the DMS and model scores side by side for a given 
 assay to compare the experimental DMS scores and predicted zero-shot scores 
-outputted from the model. This is easily done in the given way:
+outputted from the model. This is easily done with the following:
 
 ```{r}
 ComplexHeatmap::draw(ace2_dms %v% ace2_model)
@@ -149,26 +157,23 @@ ComplexHeatmap::Heatmap().
 
 # 3D protein structure
 
-The function requires a file path to a PBD file contain protein structure 
-coordinates and a DMS assay to aggregate DMS scores that will be projected 
-onto the 3D structure.
+This vignette demonstrates how to explore and visualize DMS or model scores on 
+a 3D protein structure using the package r3dmol under the hood. The function 
+requires a file path to a PBD file containing protein structure coordinates and 
+a DMS or model assay to aggregate DMS scores that will be projected onto the 3D 
+structure.
 
-This vignette demonstrates how to explore and visualize DMS scores on a 3D 
-protein structure using the package r3dmol under the hood. The function requires
-a file path to a PBD file contain protein structure coordinates and a DMS assay
-to aggregate DMS scores that will be projected onto the 3D structure.
+By default, if no `dms_data` argument is provided, the DMS substitutions from 
+`ProteinGymR::dms_substitutions()` are loaded in, or if viewing model scores, 
+model scores from an assay loaded with `ProteinGymR::model_substitutions()` will
+be used as default. Alternatively, a user can specify their own DMS list to 
+project. The user may also specify what aggregation method to use for 
+calculating the summary statistic at each residue position. By default, 
+the mean DMS score/model prediction score is calculated for each position. 
+See the function documentation for details: `?plot_structure()`
 
-
-
-By default, if no `dms_data` argument is provided, the DMS subsitutions from 
-`ProteinGymR::dms_substitutions()` are loaded in. Alternatively, a user can 
-specify their own dms list to project. The user may also specify what
-aggregation method to use for calucating the statistic at each residue position.
-By default, the mean DMS score is calculated for each position. See the function
-documentation for details: `?plot_structure()`
-
-First, let's plot using all default settings. The only required arguments are
-the `assay_name` and the `pdb_file` path.
+First, let's use all the default settings. The only required arguments are
+the `assay_name` and the `pdb_file` file path.
 
 Importantly, the function normalizes the aggregated DMS scores so that a score
 of zero will always be represented as white and the range of scores will be
@@ -189,11 +194,13 @@ of the entire ACE2_HUMAN protein. By default the function only displayed the
 regions where there is information available in the assay. Red colors represent
 more pathogenic (lower DMS scores) and blue colors show more benign positions
 (higher DMS scores). Regions that appear white indicate closer to no change 
-before and after the DMS perturbation.
+before and after the DMS perturbation. By default, regions of the protein 
+without experiment information have the "ball and stick" representation.
 
-If we want to visualize the complete protein structure, but simple grey out the
-regions we do not have DMS assay information for, we can set the argument
-`full_structure == TRUE`
+If we want to visualize the complete protein structure, but simply grey out the
+regions we do not have DMS assay information for rather than using the 
+"ball and stick" representation, we can set the argument 
+`full_structure == TRUE`.
 
 ```{r}
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
@@ -203,7 +210,8 @@ plot_structure(assay_name = "ACE2_HUMAN_Chan_2020",
 
 <br>
 
-Now we can more clearly see the entire protein structure for ACE2_HUMAN. 
+Now we can more clearly see the entire protein structure for ACE2_HUMAN in the 
+ribbon representation. 
 
 Some assays extensively assessed nearly every position of the complete protein, 
 for example: the C6KNH7_9INFA protein from Lee et al. 2018. Let's visualize 
@@ -218,7 +226,10 @@ plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
 
 <br>
 
-For this protein, it looks like 
+As we might expect, the minimum DMS value (more pathogenic) is almost always a 
+negative number across all positions of this protein. Therefore, there seems to 
+be at least one amino acid mutation that could severely distrupt the fitness at
+any position of this protein.
 
 ```{r}
 dms_data <- dms_substitutions()
