@@ -43,6 +43,17 @@ available_models <- function()
              "S3F", "S3F_MSA", 
              "SiteRM")
 
+#' @rdname benchmark_models
+#' 
+#' @export
+supervised_available_models <- function() 
+    c("OHE_Notaugmented", "normalized_targets", 
+             "OHE_Augmented_DeepSequence", "OHE_Augmented_ESM1v", 
+             "OHE_Augmented_MSATransformer", "OHE_Augmented_Tranception", 
+             "OHE_Augmented_TranceptEVE", "Embeddings_Augmented_ESM1v", 
+             "Embeddings_Augmented_MSATransformer", 
+             "Embeddings_Augmented_Tranception", "ProteinNPT", "Kermut")
+
 #'
 #' @noRd
 # Check metric argument
