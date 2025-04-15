@@ -40,10 +40,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Setup
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
 library(ProteinGymR)
 library(BiocFileCache)
 library(ComplexHeatmap)
+library(stringr)
+library(dplyr)
+library(ggplot2)
+library(ggExtra)
 ```
 
 
@@ -154,6 +158,7 @@ ComplexHeatmap::draw(ace2_dms %v% ace2_model)
 columns, side by side. This can also be done with any output of class
 ComplexHeatmap::Heatmap().
 
+<br>
 
 # 3D protein structure
 
@@ -202,6 +207,8 @@ regions we do not have DMS assay information for rather than using the
 "ball and stick" representation, we can set the argument 
 `full_structure == TRUE`.
 
+<br>
+
 ```{r}
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
     pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb",
@@ -247,6 +254,8 @@ defining residue position coordinates with `start_pos` and `end_pos`.
 
 Let's just visualize the mean DMS scores of the protein from position 10:50.
 
+<br>
+
 ```{r}
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
     pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb",
@@ -263,12 +272,215 @@ protein UniProt ID and runs a Spearman correlation between the ProteinGym DMS
 assay scores and AlphaMissense predicted pathogenicity scores. It returns a 
 ggplot for visualization.
 
+<br>
+
 ```{r}
 dms_corr_plot(uniprotId = "Q9NV35")
 ```
+
+Be default, the `dms_corr_plot()` function gathers any of the 217 DMS assays of 
+the chosen UniProt ID and correlates the average DMS scoree across relevant
+assays and the AlphaMissense model predictions.
+
+<br>
+
+Although the default uses the AlphaMissense scores, it is also possible to 
+correlate DMS experimental scores with predictions from any of the 79 zero-shot 
+or 11 supervised models. Below is an example of the workflow to accomplish this
+for a single assay "A0A140D2T1_ZIKV_Sourisseau_2019".
+
+Load in both the zero-shot and DMS substitution scores for the 217 assays.
+
+```{r}
+## Load model scores
+model_data <- zeroshot_substitutions()
+
+## Load DMS scores
+dms_data <- dms_substitutions()
+```
+
+Specify the chosen assay and model to explore.
+
+```{r}
+assay_name <- "A0A140D2T1_ZIKV_Sourisseau_2019"
+model <- "GEMME"
+
+# Filter selected assay
+model_df <- as.data.frame(model_data[[assay_name]])
+dms_df <- as.data.frame(dms_data[[assay_name]])
+
+## Filter out multiple aa sites
+model_df <- model_df |>
+    filter(!str_detect(.data$mutant, ":"))
+
+dms_df <- dms_df |>  
+    filter(!str_detect(.data$mutant, ":"))
+
+## Select chosen model
+model_df <- model_df |>
+    dplyr::select(
+        mutant,
+        all_of(model)
+    )
+
+model_df <- model_df |>
+    dplyr::select(all_of(model), mutant)
+
+```
+
+Now we wrangle and merge the scores into a data.frame that we will use for 
+plotting.
+
+```{r}
+## Wrangle the data
+dms_df <- dms_df |>
+   dplyr::select(DMS_score, mutant)
+
+merged_table <- 
+        left_join(
+            model_df, dms_df, 
+            by = c("mutant"),
+            relationship = "many-to-many"
+        ) |>
+        na.omit() |> 
+        select(mutant, DMS_score, model = all_of(model))
+
+## Corr function
+pg_correlate <- 
+    function(merged_table)
+{
+    cor_results <- 
+        cor.test(
+            merged_table$DMS_score, merged_table$model, 
+            method=c("spearman"), 
+            exact = FALSE
+        )
+    
+    cor_results
+}
+
+cor_results <- pg_correlate(merged_table)
+
+
+## Correlation density plot
+pg_density_plot <- 
+    merged_table |> 
+    ggplot(
+        aes(x = .data$DMS_score, y = .data$model)
+    ) +
+    geom_bin2d(bins = 60) +
+    geom_point(alpha = 0) +
+    scale_fill_continuous(type = "viridis") +
+    xlab("DMS score") +
+    ylab(paste0(model, "\nzero shot score")) +
+    theme_classic() +
+    theme(
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.y = element_text(size = 16, vjust = 2),
+        axis.title.x = element_text(size = 16, vjust = 0),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 16)
+    )
+
+# Add marginal density plots
+pg_density_plot <- ggMarginal(
+        pg_density_plot,
+        type = "densigram", # Can also use "histogram"
+        fill = "#B0C4DE", 
+        color = "black"  # Change color as needed
+    )
+
+
+pg_density_plot
+
+print(paste0("r = ", format(round(cor_results$estimate, 2)), 
+                "; Pval = ", cor_results$p.value))
+
+```
+
+<br>
+
+We can also explore the correlation between two different models.
+
+```{r}
+assay_name <- "A0A140D2T1_ZIKV_Sourisseau_2019"
+model1 <- "EVE_ensemble"
+model2 <- "S3F_MSA"
+
+# Filter selected assay
+model_df <- model_data[[assay_name]]
+
+## Filter out multiple aa sites
+model_df <- model_df |>  
+    filter(!grepl(":", .data$mutant))
+
+## Select chosen model
+model_df <- model_df |>
+    dplyr::select(
+        mutant,
+        all_of(c(model1 = model1, model2 = model2))
+    )
+
+## Corr function
+pg_correlate <- 
+    function(model_df)
+{
+    cor_results <- 
+        cor.test(
+            model_df$model1, model_df$model2, 
+            method=c("spearman"), 
+            exact = FALSE
+        )
+    
+    cor_results
+}
+
+cor_results <- pg_correlate(model_df = model_df)
+
+## Correlation density plot
+pg_density_plot <- 
+    model_df |> 
+    ggplot(
+        aes(x = .data$model1, y = .data$model2)
+    ) +
+    geom_bin2d(bins = 60) +
+    geom_point(alpha = 0) +
+    scale_fill_continuous(type = "viridis") +
+    xlab(paste0(model1, "\nzero shot score")) +
+    ylab(paste0(model2, "\nzero shot score")) +
+    theme_classic() +
+    theme(
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.y = element_text(size = 16, vjust = 2),
+        axis.title.x = element_text(size = 16, vjust = 0),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 16)
+    )
+
+# Add marginal density plots
+pg_density_plot <- ggMarginal(
+        pg_density_plot,
+        type = "densigram", # Can also use "histogram"
+        fill = "#B0C4DE", 
+        color = "black"  # Change color as needed
+        )
+    
+pg_density_plot
+
+
+
+print(paste0("r = ", format(round(cor_results$estimate, 2)), 
+                "; Pval = ", cor_results$p.value))
+```
+
+Between the EVE_ensemble and S3F_MSA, there seems to be good correlation between
+the model predictions for the variants in the assay 
+"A0A140D2T1_ZIKV_Sourisseau_2019".
+
 
 ## Session Info
 ```{r}
 sessionInfo()
 ```
-
