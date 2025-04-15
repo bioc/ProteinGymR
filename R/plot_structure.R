@@ -165,7 +165,7 @@ plot_structure <- function(assay_name,
                     full_structure = FALSE,
                     aggregate_fun = mean) {
     
-    ## TO DO: Grab pdb path using pdb_structure() from ExperimentHub
+    ## TODO: Grab pdb path using pdb_structure() from ExperimentHub
     
     ## Read the PDB file
     pdb <- read.pdb(pdb_file)

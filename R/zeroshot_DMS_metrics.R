@@ -53,7 +53,7 @@ zeroshot_DMS_metrics <- function (metadata = FALSE)
         eh[ehid]
     }
     else  {
-        data <- readRDS("../ProteinGym_data/EH_data/v1.2/zeroshot_summary_scores_v1.2.rds")
+        data <- readRDS("~/ProteinGym_data/EH_data/v1.2/zeroshot_summary_scores_v1.2.rds")
         return(data)
     }
 }
@@ -99,7 +99,7 @@ zeroshot_substitutions <- function (metadata = FALSE)
         #eh[ehid]
         message("Grabbing metadata.")
     } else {
-       data <- readRDS("../ProteinGym_data/EH_data/v1.2/zeroshot_scores_v1.2.rds")
+       data <- readRDS("~/ProteinGym_data/EH_data/v1.2/zeroshot_scores_v1.2.rds")
        return(data)
     }
 }

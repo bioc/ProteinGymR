@@ -151,7 +151,7 @@ filter_exact_coord <-
 #' 
 #' available_models()
 #' 
-#' model_data <- readRDS("~/ProteinGym_data/EH_data/v1.2/ProGym217_zeroshot_scores_v1.2.rds")
+#' model_data <- readRDS("~/ProteinGym_data/EH_data/v1.2/zeroshot_scores_v1.2.rds")
 #' 
 #' model_data <- zeroshot_substitutions()
 #' 
@@ -212,7 +212,7 @@ plot_zeroshot_heatmap <-
                 "using default data loaded with zeroshot_substitutions()"
             ))
          
-            model_data <- readRDS("~/ProteinGym_data/EH_data/v1.2/ProGym217_zeroshot_scores_v1.2.rds")
+            model_data <- readRDS("~/ProteinGym_data/EH_data/v1.2/zeroshot_scores_v1.2.rds")
      
         } else {
             
