@@ -296,6 +296,15 @@ Be default, the `dms_corr_plot()` function gathers any of the 217 DMS assays of
 the chosen UniProt ID and correlates the average DMS score across relevant
 assays and the AlphaMissense model predictions.
 
+```{r}
+dms_corr_plot(uniprotId = "Q9NV35")
+```
+
+Be default, the `dms_corr_plot()` function gathers any of the 217 DMS assays of 
+the chosen UniProt ID and correlates the average DMS scoree across relevant
+assays and the AlphaMissense model predictions.
+
+<br>
 
 Although the default uses the AlphaMissense scores, it is also possible to 
 correlate DMS experimental scores with predictions from any of the 79 zero-shot 
@@ -316,7 +325,7 @@ Specify the chosen assay and model to explore. Again, to view all assay names to
 choose from, run `names()` on the list loaded in by `dms_substitutions()`.
 
 ```{r}
-## Choose A0A140D2T1_ZIKV_Sourisseau_2019 assay
+## Specify the chosen assay and model to explore.
 assay_name <- "A0A140D2T1_ZIKV_Sourisseau_2019"
 model <- "GEMME"
 
@@ -410,6 +419,7 @@ pg_density_plot
 print(paste0("r = ", format(round(cor_results$estimate, 2)), 
                 "; Pval = ", cor_results$p.value))
 ```
+
 <br>
 
 We can also explore the correlation between two different models.
