@@ -87,31 +87,12 @@ Each PBD table in \code{pdb_data()} must include the following columns:
 \examples{
 
 # Using default dms_data
-plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
-   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb")
+plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
    
-plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-   pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-   aggregate_fun = mean)
-   
-plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-   start_pos = 20, 
-   end_pos = 50,
-   full_structure = TRUE,
-   aggregate_fun = min)
-   
-plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
+plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
    start_pos = 20, 
    end_pos = 50,
    full_structure = FALSE,
-   aggregate_fun = mean)
-
-plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018", 
-   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",
-   dms_data = dms_data, 
-   full_structure = TRUE,
-   aggregate_fun = mean)
+   aggregate_fun = min)
    
 }

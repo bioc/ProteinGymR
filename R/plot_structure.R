@@ -42,6 +42,22 @@ filter_by_pos <-
     return(filtered_df)
 }
 
+
+#' @rdname plot_structure
+#'
+#' @noRd
+#' 
+#' @importFrom dplyr filter
+#'
+
+## Extract protein from assay names
+getProtIDs <- function(assay_names) {
+    sapply(assay_names, function(x) {
+        parts <- strsplit(x, "_", fixed = TRUE)[[1]]
+        paste(parts[1:2], collapse = "_")
+        })
+}
+
 #' @rdname plot_structure
 #' 
 #' @title Visualize DMS and Model Scores on 3D Protein Structures
@@ -117,6 +133,10 @@ filter_by_pos <-
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
 #'              arrange select
 #'              
+#' @importFrom ExperimentHub ExperimentHub
+#' 
+#' @importFrom AnnotationHub query
+#'              
 #' @importFrom tidyr pivot_wider
 #' 
 #' @importFrom bio3d read.pdb
@@ -129,32 +149,13 @@ filter_by_pos <-
 #' @examples
 #' 
 #' # Using default dms_data
-#' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
-#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb")
+#' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
 #'    
-#' plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-#'    pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-#'    aggregate_fun = mean)
-#'    
-#' plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-#'    start_pos = 20, 
-#'    end_pos = 50,
-#'    full_structure = TRUE,
-#'    aggregate_fun = min)
-#'    
-#' plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
+#' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
 #'    start_pos = 20, 
 #'    end_pos = 50,
 #'    full_structure = FALSE,
-#'    aggregate_fun = mean)
-#'
-#' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018", 
-#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",
-#'    dms_data = dms_data, 
-#'    full_structure = TRUE,
-#'    aggregate_fun = mean)
+#'    aggregate_fun = min)
 #'    
 #' @export 
 plot_structure <- function(assay_name, 
@@ -165,8 +166,25 @@ plot_structure <- function(assay_name,
                     full_structure = FALSE,
                     aggregate_fun = mean) {
     
-    ## TODO: Grab pdb path using pdb_structure() from ExperimentHub
-    
+    ## Grab pdb file from ExperimentHub if not specified by user
+    if (missing(pdb_file)){
+        
+        prot <- getProtIDs(assay_name = assay_name)
+        
+        eh <- ExperimentHub()
+        # Grab ehid of PDB
+        results <- query(eh, c("ProteinGym", prot))
+        ehid <- results$ah_id
+        
+        # Choose one of the results (replace with an actual EH ID from the query above)
+        pdb_file <- eh[[ehid]]
+
+    } else {
+        
+        ## User-defined pdb_file
+        pdb_file
+    }
+
     ## Read the PDB file
     pdb <- read.pdb(pdb_file)
     
