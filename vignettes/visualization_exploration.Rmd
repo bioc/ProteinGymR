@@ -31,7 +31,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, nobreak = TRUE)
 ```
 
 [CH]: https://bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html
@@ -239,9 +239,13 @@ any position of this protein.
 ```{r, fig.wide = TRUE}
 dms_data <- dms_substitutions()
 df <- dms_data[["C6KNH7_9INFA_Lee_2018"]]
-hist(df$DMS_score)
+
+ggplot(df, aes(DMS_score)) +
+    geom_histogram() + 
+    theme_minimal()
 ```
 
+<br> 
 We can see that for this DMS assay, most values of the minimum DMS score at each
 position are negative and are thus represented as red.
 
@@ -276,11 +280,12 @@ ggplot for visualization.
 dms_corr_plot(uniprotId = "Q9NV35")
 ```
 
+<br>
+
 Be default, the `dms_corr_plot()` function gathers any of the 217 DMS assays of 
 the chosen UniProt ID and correlates the average DMS score across relevant
 assays and the AlphaMissense model predictions.
 
-<br>
 
 Although the default uses the AlphaMissense scores, it is also possible to 
 correlate DMS experimental scores with predictions from any of the 79 zero-shot 
@@ -326,7 +331,6 @@ model_df <- model_df |>
 model_df <- model_df |>
     dplyr::select(all_of(model), mutant)
 ```
-<br>
 
 Now we wrangle and merge the scores into a data.frame that we will use for 
 plotting.
@@ -396,7 +400,6 @@ pg_density_plot
 print(paste0("r = ", format(round(cor_results$estimate, 2)), 
                 "; Pval = ", cor_results$p.value))
 ```
-
 <br>
 
 We can also explore the correlation between two different models.
