@@ -150,6 +150,10 @@ getProtIDs <- function(assay_names) {
 #' 
 #' # Using default dms_data
 #' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
+#' 
+#' # Use EVE model color scheme
+#' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+#'     color_scheme = "EVE")
 #'    
 #' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
 #'    start_pos = 20, 
@@ -164,7 +168,8 @@ plot_structure <- function(assay_name,
                     start_pos = NULL,
                     end_pos = NULL,
                     full_structure = FALSE,
-                    aggregate_fun = mean) {
+                    aggregate_fun = mean, 
+                    color_scheme) {
     
     ## Grab pdb file from ExperimentHub if not specified by user
     if (missing(pdb_file)){
@@ -244,8 +249,19 @@ plot_structure <- function(assay_name,
         )
     
     ## Map normalized values to a color scale
-    color_func <- colorRampPalette(c("red", "white", "blue"))
-    
+    ## Use EVE coloring
+    if (missing(color_scheme)) {
+        color_func <- colorRampPalette(c("red", "white", "blue"))
+    } else if (color_scheme == "EVE") {
+        color_func <- colorRampPalette(
+            c("#000", 
+            "#9440e8", 
+            "#00CED1", 
+            "#fde662"))
+    } else {
+        color_func <- colorRampPalette(c("red", "white", "blue"))
+    }
+
     ## Generate color palette
     num_colors <- 100
     color_palette <- color_func(num_colors)

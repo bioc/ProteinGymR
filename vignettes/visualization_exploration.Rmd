@@ -266,6 +266,16 @@ plot_structure(assay_name = "ACE2_HUMAN_Chan_2020",
 ```
 
 
+Finally, it is possible to use the same color scheme as the popEVE 
+mutation [portal](https://pop.evemodel.org/). We can do this for any of 
+the heatmaps or protein structure plots.
+
+```{r, fig.wide = TRUE}
+plot_structure(assay_name = "ACE2_HUMAN_Chan_2020",
+    color_scheme = "EVE")
+```
+
+
 # Correlate DMS scores with model scores
 
 By default, `dms_corr_plot()` allows the user to evaluate the correlation 

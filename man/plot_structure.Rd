@@ -11,7 +11,8 @@ plot_structure(
   start_pos = NULL,
   end_pos = NULL,
   full_structure = FALSE,
-  aggregate_fun = mean
+  aggregate_fun = mean,
+  color_scheme
 )
 }
 \arguments{
@@ -88,6 +89,10 @@ Each PBD table in \code{pdb_data()} must include the following columns:
 
 # Using default dms_data
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
+
+# Use EVE model color scheme
+plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+    color_scheme = "EVE")
    
 plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
    start_pos = 20, 

@@ -156,11 +156,14 @@ filter_exact_coord <-
 #'     
 #' plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
 #'     start_pos = 10, 
-#'     end_pos = 80, exact_coord = TRUE)
+#'     end_pos = 80, 
+#'     exact_coord = TRUE,
+#'     color_scheme = "EVE")
 #'     
 #' plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
 #'     start_pos = 50, 
-#'     end_pos = 100, cluster_rows = TRUE)
+#'     end_pos = 100, 
+#'     cluster_rows = TRUE)
 #' 
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
 #'              arrange select
@@ -185,6 +188,7 @@ plot_dms_heatmap <-
         exact_coord = FALSE,
         cluster_rows = FALSE,
         cluster_columns = FALSE,
+        color_scheme,
         ...) 
 {
 
@@ -195,13 +199,9 @@ plot_dms_heatmap <-
             "'dms_data' not provided,",
             "using DMS data loaded with dms_substitutions()"
         ))
-     
         dms_data <- dms_substitutions()
-     
     } else {
-        
         dms_data
-        
     }
         
     ## Extract the specified assay
@@ -317,12 +317,29 @@ plot_dms_heatmap <-
     )
 
     ## Create the heatmap
-    col_fun <- colorRamp2(c(
-                    min(reordered_matrix, na.rm = TRUE), 0, 
-                    max(reordered_matrix, na.rm = TRUE)), 
-                c("red", "white", "blue")
-                )
     
+    ## Use EVE coloring
+    if (missing(color_scheme)) {
+        col_fun <- colorRamp2(
+            c(min(reordered_matrix, na.rm = TRUE), 0, 
+            max(reordered_matrix, na.rm = TRUE)), 
+            c("red", "white", "blue")
+        )
+    } else if (color_scheme == "EVE") {
+        halfpt <- (min(reordered_matrix, na.rm = TRUE)/2)
+        col_fun <- colorRamp2(
+            c(min(reordered_matrix, na.rm = TRUE), halfpt, 0, 
+            max(reordered_matrix, na.rm = TRUE)), 
+            c("#000", "#9440e8", "#00CED1", "#fde662")
+        )
+    } else {
+        col_fun <- colorRamp2(
+            c(min(reordered_matrix, na.rm = TRUE), 0, 
+            max(reordered_matrix, na.rm = TRUE)), 
+            c("red", "white", "blue")
+        )
+    }
+        
     ComplexHeatmap::Heatmap(reordered_matrix,
         name = "DMS Score",
         cluster_rows = cluster_rows,

@@ -151,15 +151,14 @@ filter_exact_coord <-
 #' 
 #' available_models()
 #' 
-#' model_data <- zeroshot_DMS_metrics()
-#' 
 #' model_data <- zeroshot_substitutions()
 #' 
 #' plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
 #'     model_data = model_data, 
 #'     model = "GEMME",
-#'     start_pos = 600, 
-#'     end_pos = 700)
+#'     start_pos = 600,
+#'     end_pos = 700, 
+#'     color_scheme = "EVE")
 #'     
 #' plot_zeroshot_heatmap(assay_name = "SRC_HUMAN_Nguyen_2022",
 #'     model_data = model_data,
@@ -169,7 +168,8 @@ filter_exact_coord <-
 #'     model_data = model_data, 
 #'     model = "EVmutations",
 #'     start_pos = 10, 
-#'     end_pos = 80, exact_coord = TRUE)
+#'     end_pos = 80, 
+#'     exact_coord = TRUE)
 #' 
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
 #'              arrange select
@@ -195,6 +195,7 @@ plot_zeroshot_heatmap <-
         exact_coord = FALSE,
         cluster_rows = FALSE,
         cluster_columns = FALSE,
+        color_scheme,
         ...) 
 {
         ## Check model is defined
@@ -215,9 +216,7 @@ plot_zeroshot_heatmap <-
             model_data <- zeroshot_substitutions()
      
         } else {
-            
             model_data
-            
         }
         
         ## Extract the specified assay
@@ -334,14 +333,31 @@ plot_zeroshot_heatmap <-
         phyiochem_order <- unlist(strsplit(phyiochem_order, split = ""))
         
         reordered_matrix <- heatmap_matrix[match(phyiochem_order, 
-                                                   rownames(heatmap_matrix)), ]
+                                rownames(heatmap_matrix)), ]
         
         ## Create the heatmap
-        col_fun <- colorRamp2(c(
-                        min(reordered_matrix, na.rm = TRUE), 0,
-                        max(reordered_matrix, na.rm = TRUE)),
-                    c("red", "white", "blue")
-                    )
+       
+        ## Use EVE coloring
+        if (missing(color_scheme)) {
+            col_fun <- colorRamp2(
+                c(min(reordered_matrix, na.rm = TRUE), 0, 
+                max(reordered_matrix, na.rm = TRUE)), 
+                c("red", "white", "blue")
+            )
+        } else if (color_scheme == "EVE") {
+            halfpt <- (min(reordered_matrix, na.rm = TRUE)/2)
+            col_fun <- colorRamp2(
+                c(min(reordered_matrix, na.rm = TRUE), halfpt, 0, 
+                max(reordered_matrix, na.rm = TRUE)), 
+                c("#000", "#9440e8", "#00CED1", "#fde662")
+            )
+        } else {
+            col_fun <- colorRamp2(
+                c(min(reordered_matrix, na.rm = TRUE), 0, 
+                max(reordered_matrix, na.rm = TRUE)), 
+                c("red", "white", "blue")
+            )
+        }
         
         ComplexHeatmap::Heatmap(reordered_matrix,
             name = paste(model),
