@@ -20,7 +20,7 @@ output:
       toc_float: true
       toc_depth: 2
       code_folding: show
-date: "April 14, 2025"
+date: "April 23, 2025"
 vignette: >
     %\VignetteIndexEntry{Data access and representation}
     %\VignetteEncoding{UTF-8}
@@ -116,15 +116,14 @@ DMS substitutions in a zero-shot setting. The data is provided with
 5. Model scores on the DMS substitutions for 79 models in the zero-shot setting.
 Load in with `zeroshot_substitutions()`.
 
-
 6. Two model performance metrics ("Spearman", and "MSE") for 12 models across 
 217 assays (as of Bioc 3.21) calculated on DMS substitutions in a 
 semi-supervised setting. Load in this data with `supervised_metrics()`.
 
 7. Model scores on the DMS substitutions for 11 semi-supervised models with 3 
 folding schemes: contiguous, modulo, and random. Loaded in with 
-`supervised_substitutions()` and by changing the "fold_scheme" argument, 
-respectively.
+`supervised_substitutions()` and by changing the 
+"fold_scheme" argument, respectively.
 
 8. PDB files for 197 protein structures, to be used in the `plot_structure()` 
 3D visualization function.
@@ -192,7 +191,8 @@ about the information, see the [ProteinGym publication][pg_publication].
 We will now use the built-in function `benchmark_models()` to compare 
 performance across several variant effect prediction models calculated on the 
 217 DMS assays in the zero-shot setting. This function takes in one of the five 
-available metrics, and compares up to 5 models of the 62 available.
+available metrics, and compares up to 5 models of the 79 available (as of 
+ProteinGym v1.2).
 
 In the zero-shot setting, experimental phenotypical measurements from
 a given assay are predicted without having access to any ground-truth labels at 
@@ -232,7 +232,7 @@ model if it gives its highest scores to sequences with the highest DMS value.
 Finally, we also calculate Top K Recall, where we select K to be the top 10% 
 of DMS values.
 
-To view all available models, use the function: `available_models()`
+To view all available zero-shot models, use the function: `available_models()`.
 
 ```{r, available_models}
 available_models()

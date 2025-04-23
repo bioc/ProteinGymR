@@ -79,7 +79,7 @@ should match \code{model} argument string.
 
 available_models()
 
-model_data <- readRDS("~/ProteinGym_data/EH_data/v1.2/ProGym217_zeroshot_scores_v1.2.rds")
+model_data <- zeroshot_DMS_metrics()
 
 model_data <- zeroshot_substitutions()
 

@@ -20,7 +20,7 @@ output:
       toc_float: true
       toc_depth: 2
       code_folding: show
-date: "April 15, 2025"
+date: "April 23, 2025"
 vignette: >
     %\VignetteIndexEntry{Visualization and exploration"}
     %\VignetteEncoding{UTF-8}
@@ -75,8 +75,10 @@ region of interest, use the arguments `start_pos()` and `end_pos()` which takes
 in an integer for the first and last residue position to plot in the protein.
 
 ```{r ACE2 default heatmap, fig.wide = TRUE}
-ace2_dms <- plot_dms_heatmap(assay_name = "ACE2_HUMAN_Chan_2020",
-                    start_pos = 1, end_pos = 100)
+ace2_dms <- plot_dms_heatmap(
+    assay_name = "ACE2_HUMAN_Chan_2020",
+    start_pos = 1, 
+    end_pos = 100)
 
 print(ace2_dms)
 ```
@@ -127,8 +129,7 @@ zero-shot models, and `supervised_available_models()` for the 11 semi-supervised
 models. If `model_data` is not provided, the default model scores from 
 ProteinGym will be loaded in from `ProteinGymR::zeroshot_substitutions()`.
 
-```{r}
-# TODO change this to EH loading function
+```{r, fig.wide = TRUE}
 ace2_model <- plot_zeroshot_heatmap(
     assay_name = "ACE2_HUMAN_Chan_2020", 
     model = "GEMME",
@@ -150,7 +151,7 @@ It can be useful to visualize the DMS and model scores side by side for a given
 assay to compare the experimental DMS scores and predicted zero-shot scores 
 outputted from the model. This is easily done with the following:
 
-```{r}
+```{r, fig.wide = TRUE}
 ComplexHeatmap::draw(ace2_dms %v% ace2_model)
 ```
 
@@ -185,9 +186,8 @@ of zero will always be represented as white and the range of scores will be
 scaled relatively to -1 and 1 in that assay, with 1 being the maximum 
 aggregated DMS score within that assay region.
 
-```{r}
-plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
-    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb")
+```{r, fig.wide = TRUE}
+plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
 ```
 
 <br>
@@ -209,9 +209,8 @@ regions we do not have DMS assay information for rather than using the
 
 <br>
 
-```{r}
+```{r, fig.wide = TRUE}
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
-    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb",
     full_structure = TRUE)
 ```
 
@@ -225,9 +224,8 @@ for example: the C6KNH7_9INFA protein from Lee et al. 2018. Let's visualize
 this protein and set the aggregation method to view the minimum DMS score across
 all mutants at each position by setting `aggregation_fun = min`.
 
-```{r}
+```{r, fig.wide = TRUE}
 plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018", 
-    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",
     aggregate_fun = min)
 ```
 
@@ -238,7 +236,7 @@ negative number across all positions of this protein. Therefore, there seems to
 be at least one amino acid mutation that could severely distrupt the fitness at
 any position of this protein.
 
-```{r}
+```{r, fig.wide = TRUE}
 dms_data <- dms_substitutions()
 df <- dms_data[["C6KNH7_9INFA_Lee_2018"]]
 hist(df$DMS_score)
@@ -256,11 +254,11 @@ Let's just visualize the mean DMS scores of the protein from position 10:50.
 
 <br>
 
-```{r}
+```{r, fig.wide = TRUE}
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
-    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb",
     start_pos = 10,
-    end_pos = 50, full_structure = FALSE)
+    end_pos = 50, 
+    full_structure = FALSE)
 ```
 
 
@@ -274,12 +272,12 @@ ggplot for visualization.
 
 <br>
 
-```{r}
+```{r, warning = FALSE, fig.wide = TRUE}
 dms_corr_plot(uniprotId = "Q9NV35")
 ```
 
 Be default, the `dms_corr_plot()` function gathers any of the 217 DMS assays of 
-the chosen UniProt ID and correlates the average DMS scoree across relevant
+the chosen UniProt ID and correlates the average DMS score across relevant
 assays and the AlphaMissense model predictions.
 
 <br>
@@ -299,13 +297,15 @@ model_data <- zeroshot_substitutions()
 dms_data <- dms_substitutions()
 ```
 
-Specify the chosen assay and model to explore.
+Specify the chosen assay and model to explore. Again, to view all assay names to 
+choose from, run `names()` on the list loaded in by `dms_substitutions()`.
 
 ```{r}
+## Choose A0A140D2T1_ZIKV_Sourisseau_2019 assay
 assay_name <- "A0A140D2T1_ZIKV_Sourisseau_2019"
 model <- "GEMME"
 
-# Filter selected assay
+## Filter selected assay
 model_df <- as.data.frame(model_data[[assay_name]])
 dms_df <- as.data.frame(dms_data[[assay_name]])
 
@@ -325,13 +325,13 @@ model_df <- model_df |>
 
 model_df <- model_df |>
     dplyr::select(all_of(model), mutant)
-
 ```
+<br>
 
 Now we wrangle and merge the scores into a data.frame that we will use for 
 plotting.
 
-```{r}
+```{r, fig.wide = TRUE}
 ## Wrangle the data
 dms_df <- dms_df |>
    dplyr::select(DMS_score, mutant)
@@ -360,7 +360,6 @@ pg_correlate <-
 }
 
 cor_results <- pg_correlate(merged_table)
-
 
 ## Correlation density plot
 pg_density_plot <- 
@@ -396,19 +395,19 @@ pg_density_plot
 
 print(paste0("r = ", format(round(cor_results$estimate, 2)), 
                 "; Pval = ", cor_results$p.value))
-
 ```
 
 <br>
 
 We can also explore the correlation between two different models.
 
-```{r}
+```{r, fig.wide = TRUE}
+## Select assay and models to compare
 assay_name <- "A0A140D2T1_ZIKV_Sourisseau_2019"
 model1 <- "EVE_ensemble"
 model2 <- "S3F_MSA"
 
-# Filter selected assay
+## Filter selected assay
 model_df <- model_data[[assay_name]]
 
 ## Filter out multiple aa sites
@@ -459,7 +458,7 @@ pg_density_plot <-
         legend.text = element_text(size = 16)
     )
 
-# Add marginal density plots
+## Add marginal density plots
 pg_density_plot <- ggMarginal(
         pg_density_plot,
         type = "densigram", # Can also use "histogram"
@@ -469,16 +468,14 @@ pg_density_plot <- ggMarginal(
     
 pg_density_plot
 
-
-
 print(paste0("r = ", format(round(cor_results$estimate, 2)), 
                 "; Pval = ", cor_results$p.value))
 ```
+<br>
 
 Between the EVE_ensemble and S3F_MSA, there seems to be good correlation between
 the model predictions for the variants in the assay 
 "A0A140D2T1_ZIKV_Sourisseau_2019".
-
 
 ## Session Info
 ```{r}
