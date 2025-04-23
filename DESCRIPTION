@@ -31,6 +31,10 @@ Depends:
     R (>= 4.4.0)
 Imports: 
     ExperimentHub,
+    AnnotationHub,
+    bio3d,
+    r3dmol,
+    ggExtra,
     dplyr,
     forcats,
     ggdist,
@@ -45,7 +49,6 @@ Imports:
     circlize,
     stringr
 Suggests: 
-    AnnotationHub,
     tibble,
     BiocStyle,
     knitr,
