@@ -5,7 +5,10 @@
 \alias{supervised_metrics}
 \title{Load Semi-Supervised Model Predictions for Substitutions in 217 Assays}
 \usage{
-supervised_substitutions(metadata = FALSE, fold_scheme = "contiguous")
+supervised_substitutions(
+  metadata = FALSE,
+  fold_scheme = c("contiguous", "modulo", "random")
+)
 
 supervised_metrics(metadata = FALSE)
 }
@@ -70,9 +73,10 @@ position 2 should be replaced by 'N').}
 \examples{
 data <- supervised_substitutions()
 data_random <- supervised_substitutions(fold_scheme = "random")
+meta <- supervised_substitutions(metadata = TRUE)
 
 data <- supervised_metrics()
-data_meta <- supervised_metrics(metadata = TRUE)
+meta <- supervised_metrics(metadata = TRUE)
 
 }
 \references{
