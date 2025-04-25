@@ -51,8 +51,8 @@ filter_by_pos <-
 #'
 
 ## Extract protein from assay names
-getProtIDs <- function(assay_names) {
-    sapply(assay_names, function(x) {
+getProtIDs <- function(names) {
+    sapply(names, function(x) {
         parts <- strsplit(x, "_", fixed = TRUE)[[1]]
         paste(parts[1:2], collapse = "_")
         })
@@ -68,15 +68,9 @@ getProtIDs <- function(assay_names) {
 #' @param assay_name `character()` a valid DMS assay name. For the full list of 
 #'    available assays, run `names()` on the list object loaded with 
 #'    `ProteinGymR::dms_substitutions()`. Alternatively, the name of a 
-#'    user-defined DMS assay.
 #'    
-#' @param pdb_data `list()` object of protein structure coordinates in a
-#'    Protein Data Bank format.  By default, pdb files for proteins associated
-#'    with ProteinGym data can be loaded in with `ProteinGymR::pdb_files()`.
-#'    Alternatively, a user-defined list of pdb data.frames with names 
-#'    matching the `assay_name` param.
-#'    
-#' @param pdb_file `string()` input path to PBD file.
+#' @param pdb_file `string()` defaults to corresonding PDB FilePath on 
+#'    ExperimentHub. Alternatively, a file path to a user-defined PDB file.
 #' 
 #' @param dms_data `list()` object of DMS assays loaded with 
 #'   `ProteinGymR::dms_substitutions()`.
@@ -102,6 +96,10 @@ getProtIDs <- function(assay_names) {
 #'    also take in a user-defined function with a numeric vector as input. 
 #'    By default, the mean DMS score across mutations at each position is
 #'    calculated.
+#'    
+#' @param color_scheme `character()` defaults to blue, white, and red to 
+#'    represent positive, neutral, negative scores. Set argument equal to "EVE" 
+#'    to use the color scheme consistent with the popEVE portal.
 #'
 #' @details
 #'
@@ -119,7 +117,7 @@ getProtIDs <- function(assay_names) {
 #' - `DMS_score`: Experimental measurement in the DMS assay. 
 #'    Higher values indicate higher fitness of the mutated protein.
 #'    
-#' Each PBD table in `pdb_data()` must include the following columns:
+#' Each PBD table in `pdb_file` must include the following columns:
 #' 
 #'
 #' @return `plot_structure()` returns a [`r3dmol::r3dmol`] 
@@ -132,6 +130,8 @@ getProtIDs <- function(assay_names) {
 #'   
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
 #'              arrange select
+#'              
+#' @importFrom grDevices colorRampPalette
 #'              
 #' @importFrom ExperimentHub ExperimentHub
 #' 
@@ -174,14 +174,14 @@ plot_structure <- function(assay_name,
     ## Grab pdb file from ExperimentHub if not specified by user
     if (missing(pdb_file)){
         
-        prot <- getProtIDs(assay_name = assay_name)
+        prot <- getProtIDs(names = assay_name)
         
         eh <- ExperimentHub()
-        # Grab ehid of PDB
+        ## Grab ehid of PDB
         results <- query(eh, c("ProteinGym", prot))
         ehid <- results$ah_id
         
-        # Choose one of the results (replace with an actual EH ID from the query above)
+        ## Replace with an actual EH ID from the query above)
         pdb_file <- eh[[ehid]]
 
     } else {
@@ -223,9 +223,9 @@ plot_structure <- function(assay_name,
     
     ## Aggregate DMS_scores by position
     df <- df |>
-        group_by(pos) |>
+        group_by(.data$pos) |>
         summarise(
-          aggregate_dms = do.call(aggregate_fun, list(DMS_score)),
+          aggregate_dms = do.call(aggregate_fun, list(.data$DMS_score)),
           .groups = 'drop'
         )
     
@@ -249,7 +249,6 @@ plot_structure <- function(assay_name,
         )
     
     ## Map normalized values to a color scale
-    ## Use EVE coloring
     if (missing(color_scheme)) {
         color_func <- colorRampPalette(c("red", "white", "blue"))
     } else if (color_scheme == "EVE") {

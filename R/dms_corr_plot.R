@@ -266,7 +266,8 @@ dms_corr_plot <-
     
     ## Join tables by uniprotId
     merged_table <-
-        pg_match_id(am_table = alphamissense_table, pg_table = dms_table)
+        pg_match_id(am_table = alphamissense_table, 
+            pg_table = dms_table)
     
     ## Check if merged table is empty
     if (!NROW(merged_table)) {

@@ -45,6 +45,12 @@ chosen assay.}
 
 \item{cluster_columns}{\code{logical()} defaults to FALSE. See argument details in
 \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap}.}
+
+\item{color_scheme}{\code{character()} defaults to blue, white, and red to
+represent positive, neutral, negative scores. Set argument equal to "EVE"
+to use the color scheme consistent with the popEVE portal.}
+
+\item{...}{additional arguments passed to internal plotting functions.}
 }
 \value{
 Returns a \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap} plot of DMS scores for each

@@ -122,6 +122,12 @@ filter_exact_coord <-
 #' 
 #' @param cluster_columns `logical()` defaults to FALSE. See argument details in 
 #'    [ComplexHeatmap::Heatmap].
+#'    
+#' @param color_scheme `character()` defaults to blue, white, and red to 
+#'  represent positive, neutral, negative scores. Set argument equal to "EVE" 
+#'  to use the color scheme consistent with the popEVE portal.
+#'  
+#' @param ... additional arguments passed to internal plotting functions.
 #' 
 #' @details
 #'
@@ -234,7 +240,7 @@ plot_dms_heatmap <-
     ## Reshape to wide format
     assay_wide <- assay_df |>
         #select(-ref) |>
-        pivot_wider(names_from = alt, values_from = DMS_score) |>
+        pivot_wider(names_from = .data$alt, values_from = .data$DMS_score) |>
         arrange(pos)
     
     ## Subset to start_pos and end_pos, or default to first and last sites.

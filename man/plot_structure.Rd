@@ -18,10 +18,10 @@ plot_structure(
 \arguments{
 \item{assay_name}{\code{character()} a valid DMS assay name. For the full list of
 available assays, run \code{names()} on the list object loaded with
-\code{ProteinGymR::dms_substitutions()}. Alternatively, the name of a
-user-defined DMS assay.}
+\code{ProteinGymR::dms_substitutions()}. Alternatively, the name of a}
 
-\item{pdb_file}{\code{string()} input path to PBD file.}
+\item{pdb_file}{\code{string()} defaults to corresonding PDB FilePath on
+ExperimentHub. Alternatively, a file path to a user-defined PDB file.}
 
 \item{dms_data}{\code{list()} object of DMS assays loaded with
 \code{ProteinGymR::dms_substitutions()}.
@@ -48,11 +48,9 @@ also take in a user-defined function with a numeric vector as input.
 By default, the mean DMS score across mutations at each position is
 calculated.}
 
-\item{pdb_data}{\code{list()} object of protein structure coordinates in a
-Protein Data Bank format.  By default, pdb files for proteins associated
-with ProteinGym data can be loaded in with \code{ProteinGymR::pdb_files()}.
-Alternatively, a user-defined list of pdb data.frames with names
-matching the \code{assay_name} param.}
+\item{color_scheme}{\code{character()} defaults to blue, white, and red to
+represent positive, neutral, negative scores. Set argument equal to "EVE"
+to use the color scheme consistent with the popEVE portal.}
 }
 \value{
 \code{plot_structure()} returns a \code{\link[r3dmol:init]{r3dmol::r3dmol}}
@@ -83,7 +81,7 @@ replaced by 'N').
 Higher values indicate higher fitness of the mutated protein.
 }
 
-Each PBD table in \code{pdb_data()} must include the following columns:
+Each PBD table in \code{pdb_file} must include the following columns:
 }
 \examples{
 

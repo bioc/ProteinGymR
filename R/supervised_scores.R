@@ -124,6 +124,9 @@ supervised_substitutions <- function(metadata = FALSE,
 #' @export
 supervised_metrics <- function (metadata = FALSE)
 {
+    # Load EH
+    eh <- ExperimentHub::ExperimentHub()
+    
     # Check for metadata argument
     if (metadata == TRUE) {
         eh["EH9649"]

@@ -104,6 +104,9 @@ filter_exact_coord <-
 #'   `ProteinGymR::zeroshot_substitutions()`.
 #'    Alternatively, a user-defined list of assays with names corresponding
 #'    to `assay_name` param.
+#'    
+#' @param model `character()` one of the 79 zero-shot models to plot. To view
+#'    the list of models, runs `ProteinGymR::available_models()`.
 #'
 #' @param start_pos `integer()` first amino acid position to plot. If missing, 
 #'    default start is at the first position along the protein where zero shot 
@@ -123,6 +126,12 @@ filter_exact_coord <-
 #' 
 #' @param cluster_columns `logical()` defaults to FALSE. See argument details in 
 #'    [ComplexHeatmap::Heatmap].
+#'    
+#' @param color_scheme `character()` defaults to blue, white, and red to 
+#'    represent positive, neutral, negative scores. Set argument equal to "EVE" 
+#'    to use the color scheme consistent with the popEVE portal.
+#'    
+#' @param ... additional arguments passed to internal plotting functions.
 #' 
 #' @details
 #'
@@ -166,7 +175,7 @@ filter_exact_coord <-
 #'     
 #' plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
 #'     model_data = model_data, 
-#'     model = "EVmutations",
+#'     model = "EVE_ensemble",
 #'     start_pos = 10, 
 #'     end_pos = 80, 
 #'     exact_coord = TRUE)
@@ -237,7 +246,7 @@ plot_zeroshot_heatmap <-
         ## Select chosen model
         assay_df <- assay_df |>
             dplyr::select(
-                mutant,
+                .data$mutant,
                 all_of(model)
             )
         
@@ -253,9 +262,9 @@ plot_zeroshot_heatmap <-
         
         ## Reshape to wide format
         assay_wide <- assay_df |>
-            dplyr::select(-mutant) |>
-            pivot_wider(names_from = alt, values_from = model) |>
-            arrange(pos)
+            dplyr::select(-.data$mutant) |>
+            pivot_wider(names_from = .data$alt, values_from = model) |>
+            arrange(.data$pos)
     
         ## Subset to start_pos and end_pos, or default to first and last sites.
         if (is.null(start_pos)) {
@@ -293,7 +302,7 @@ plot_zeroshot_heatmap <-
         
         ## Define a text annotation for the columns
         column_annotation <- assay_pos |> 
-            dplyr::select(ref, pos) |> 
+            dplyr::select(.data$ref, .data$pos) |> 
             unique()
         
         ## cluster_columns with NA check
@@ -319,7 +328,7 @@ plot_zeroshot_heatmap <-
         alt <- alt[-c(1)]
         
         assay_pos <- assay_pos |>
-            dplyr::select(-c(ref))
+            dplyr::select(-c(.data$ref))
         
         heatmap_matrix <- assay_pos |>
             dplyr::select(2:length(assay_pos)) |> as.matrix()

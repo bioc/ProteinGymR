@@ -190,7 +190,7 @@ benchmark_models <- function(
     
     ## Reorder models in descending mean scores
     res_long <- res_long |> 
-        group_by(model) |> 
+        group_by(.data$model) |> 
         mutate(model_mean = mean(.data$score)) |> 
         ungroup() |> 
         mutate(model = fct_reorder(.data$model, .data$model_mean, .desc = TRUE))

@@ -28,6 +28,9 @@ user-defined DMS assay.}
 Alternatively, a user-defined list of assays with names corresponding
 to \code{assay_name} param.}
 
+\item{model}{\code{character()} one of the 79 zero-shot models to plot. To view
+the list of models, runs \code{ProteinGymR::available_models()}.}
+
 \item{start_pos}{\code{integer()} first amino acid position to plot. If missing,
 default start is at the first position along the protein where zero shot
 scores are available.}
@@ -46,6 +49,12 @@ chosen assay.}
 
 \item{cluster_columns}{\code{logical()} defaults to FALSE. See argument details in
 \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap}.}
+
+\item{color_scheme}{\code{character()} defaults to blue, white, and red to
+represent positive, neutral, negative scores. Set argument equal to "EVE"
+to use the color scheme consistent with the popEVE portal.}
+
+\item{...}{additional arguments passed to internal plotting functions.}
 }
 \value{
 Returns a \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap} plot of zero-shot model scores
@@ -95,7 +104,7 @@ plot_zeroshot_heatmap(assay_name = "SRC_HUMAN_Nguyen_2022",
     
 plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
     model_data = model_data, 
-    model = "EVmutations",
+    model = "EVE_ensemble",
     start_pos = 10, 
     end_pos = 80, 
     exact_coord = TRUE)
