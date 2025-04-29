@@ -80,7 +80,6 @@ supervised_substitutions <- function(metadata = FALSE,
     }
 }
 
-
 #' @rdname supervised_scores
 #' 
 #' @title Load Semi-Supervised Model Summary Metrics
