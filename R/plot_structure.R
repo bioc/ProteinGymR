@@ -125,7 +125,6 @@ getProtIDs <- function(names) {
 #'    
 #' Each PBD table in `pdb_file` must include the following columns:
 #' 
-#'
 #' @return `plot_structure()` returns a [`r3dmol::r3dmol`] 
 #'    object of DMS scores for each position along a protein in a chosen DMS 
 #'    assay. The x-axis shows amino acid positions where a DMS mutation exist, 
@@ -157,8 +156,9 @@ getProtIDs <- function(names) {
 #' # Using default dms_data
 #' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
 #' 
-#' # Use EVE model color scheme
+#' # Use EVE model color scheme with semi-supervised model
 #' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+#'     data_scores = "Kermut",
 #'     color_scheme = "EVE")
 #'    
 #' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",

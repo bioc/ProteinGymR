@@ -95,8 +95,9 @@ Each PBD table in \code{pdb_file} must include the following columns:
 # Using default dms_data
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
 
-# Use EVE model color scheme
+# Use EVE model color scheme with semi-supervised model
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+    data_scores = "Kermut",
     color_scheme = "EVE")
    
 plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
