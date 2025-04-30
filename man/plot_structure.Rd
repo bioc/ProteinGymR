@@ -7,7 +7,8 @@
 plot_structure(
   assay_name,
   pdb_file,
-  dms_data,
+  data_scores = "DMS",
+  dms_data = NULL,
   start_pos = NULL,
   end_pos = NULL,
   full_structure = FALSE,
@@ -22,6 +23,12 @@ available assays, run \code{names()} on the list object loaded with
 
 \item{pdb_file}{\code{string()} defaults to corresonding PDB FilePath on
 ExperimentHub. Alternatively, a file path to a user-defined PDB file.}
+
+\item{data_scores}{\code{character()} specify whether DMS, zero-shot, or
+supervised model prediction scores should be displayed scores. Pass either
+"DMS" for experimental scores, or alternatively, a model name from
+\code{available_models()} for zero-shot or \code{supervised_available_models()} for
+semi-supervised models options. Defaults to DMS.}
 
 \item{dms_data}{\code{list()} object of DMS assays loaded with
 \code{ProteinGymR::dms_substitutions()}.

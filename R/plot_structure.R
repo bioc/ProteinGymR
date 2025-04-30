@@ -69,6 +69,12 @@ getProtIDs <- function(names) {
 #'    available assays, run `names()` on the list object loaded with 
 #'    `ProteinGymR::dms_substitutions()`. Alternatively, the name of a 
 #'    
+#' @param data_scores `character()` specify whether DMS, zero-shot, or 
+#'    supervised model prediction scores should be displayed scores. Pass either
+#'    "DMS" for experimental scores, or alternatively, a model name from
+#'    `available_models()` for zero-shot or `supervised_available_models()` for
+#'    semi-supervised models options. Defaults to DMS.
+#'    
 #' @param pdb_file `string()` defaults to corresonding PDB FilePath on 
 #'    ExperimentHub. Alternatively, a file path to a user-defined PDB file.
 #' 
@@ -129,7 +135,7 @@ getProtIDs <- function(names) {
 #'    respectively.
 #'   
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
-#'              arrange select
+#'              arrange select rename
 #'              
 #' @importFrom grDevices colorRampPalette
 #'              
@@ -162,15 +168,82 @@ getProtIDs <- function(names) {
 #'    aggregate_fun = min)
 #'    
 #' @export 
-plot_structure <- function(assay_name, 
-                    pdb_file, 
-                    dms_data, 
-                    start_pos = NULL,
-                    end_pos = NULL,
-                    full_structure = FALSE,
-                    aggregate_fun = mean, 
-                    color_scheme) {
+plot_structure <- function(
+    assay_name, 
+    pdb_file, 
+    data_scores = "DMS",
+    dms_data = NULL, 
+    start_pos = NULL,
+    end_pos = NULL,
+    full_structure = FALSE,
+    aggregate_fun = mean, 
+    color_scheme)
+{
     
+    ## Validate data source
+    valid_scores <- c(
+        available_models(), 
+        supervised_available_models(),
+        "AlphaMissense", "DMS") 
+    
+    if (!all(data_scores %in% valid_scores)) {
+        invalid_scores <- data_scores[!data_scores %in% valid_scores]
+        stop(paste0("Invalid `data_scores` specified: ", invalid_scores, "\n",
+            "Make sure it is `DMS` or an accurate model name in ProteinGym."))
+    }
+    
+    ## Validate assay_name
+    valid_assays <- c(names(dms_substitutions()), names(dms_data)) 
+    
+    if (!all(assay_name %in% valid_assays)) {
+        invalid_assay <- assay_name[!assay_name %in% valid_assays]
+        stop(paste0("Invalid `assay_name` specified: ", invalid_assay))
+    }
+    
+    ## Load the appropriate data based on data_scores
+    if (data_scores == "DMS") {
+        ## If dms_data argument missing
+        if (missing(dms_data) || is.null(dms_data)) {
+            message(paste(
+                "'dms_data' not provided,",
+                "using DMS data loaded with dms_substitutions()"
+            ))
+            dms_data <- dms_substitutions()
+            df <- dms_data[[assay_name]]
+            
+            df <- df |> 
+                dplyr::rename(pg_scores = DMS_score)
+            
+        } else {
+            df <- dms_data
+            df <- df[[assay_name]]
+            df <- df |> 
+                dplyr::rename(pg_scores = DMS_score)
+        }
+        
+    ## Load zero-shot model
+    } else if (data_scores %in% available_models()) {
+        message("Using zero-shot model scores with zeroshot_substitutions()")
+        data <- zeroshot_substitutions()
+        df <- data[[assay_name]]
+        df <- df[,c("mutant", data_scores)]
+        df <- df |> 
+            rename(pg_scores = all_of(data_scores))
+        
+    ## Load semi-supervised model
+    } else if (data_scores %in% supervised_available_models()) {
+        message("Using semi-supervised model scores loaded with ",
+            "supervised_substitutions()")
+        data <- supervised_substitutions()
+        df <- data[[assay_name]]
+        df <- df[,c("mutant", data_scores)]
+        df <- df |> 
+            dplyr::rename(pg_scores = all_of(data_scores))
+        
+    } else {
+        stop("Invalid data_source. Choose from 'DMS' or pass a valid model name.")
+    }
+
     ## Grab pdb file from ExperimentHub if not specified by user
     if (missing(pdb_file)){
         
@@ -185,7 +258,6 @@ plot_structure <- function(assay_name,
         pdb_file <- eh[[ehid]]
 
     } else {
-        
         ## User-defined pdb_file
         pdb_file
     }
@@ -193,60 +265,34 @@ plot_structure <- function(assay_name,
     ## Read the PDB file
     pdb <- read.pdb(pdb_file)
     
-    ## If dms_data argument missing
-    if (missing(dms_data)) {
- 
-    message(paste(
-        "'dms_data' not provided,",
-        "using DMS data loaded with dms_substitutions()"
-    ))
- 
-    dms_data <- dms_substitutions()
- 
-    } else {
-        
-        dms_data
-        
-    }
- 
-    ## Extract the DMS data for the given assay name
-    df <- dms_data[[assay_name]]
-    
-    ## Split pos and amino acids
+    ## Process data: split position and amino acids
     df <- df |>
         mutate(
           ref = str_sub(.data$mutant, 1, 1),
-          pos = as.integer(gsub(".*?([0-9]+).*", "\\1",
-                                .data$mutant)),
+          pos = as.integer(gsub(".*?([0-9]+).*", "\\1", .data$mutant)),
           alt = str_sub(.data$mutant, -1)
         )
     
-    ## Aggregate DMS_scores by position
+    ## Aggregate scores by position
     df <- df |>
         group_by(.data$pos) |>
         summarise(
-          aggregate_dms = do.call(aggregate_fun, list(.data$DMS_score)),
+          aggregate_score = do.call(aggregate_fun, list(.data$pg_scores)),
           .groups = 'drop'
         )
     
     ## Select user-defined protein range
-    filtered_df <- filter_by_pos(
-        df = df, 
+    filtered_df <- filter_by_pos(df = df, 
         start_pos = start_pos, 
-        end_pos = end_pos
-        )
-    
+        end_pos = end_pos)
     start_pos <- min(filtered_df$pos)
     end_pos <- max(filtered_df$pos)
     selected_residues <- list(resi = c(start_pos:end_pos))
     
     ## Normalize score between -1 and 1, centered around zero
-    max_abs <- max(abs(filtered_df$aggregate_dms))
-    
+    max_abs <- max(abs(filtered_df$aggregate_score))
     filtered_df <- filtered_df |> 
-        mutate(
-            norm_scores = .data$aggregate_dms / max_abs
-        )
+        mutate(norm_scores = .data$aggregate_score / max_abs)
     
     ## Map normalized values to a color scale
     if (missing(color_scheme)) {
@@ -293,9 +339,7 @@ plot_structure <- function(assay_name,
                 style = list(cartoon = list(color = filtered_df$color[i]))
               )
         }
-        
         return(viewer)
-    
     } else {
         
          message(paste(
@@ -334,7 +378,6 @@ plot_structure <- function(assay_name,
                  style = list(cartoon = list(color = "#3f3f3f"))
              )
         }
-        
         return(full_viewer)
     }  
 }

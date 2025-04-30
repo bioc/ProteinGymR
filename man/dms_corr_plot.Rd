@@ -68,7 +68,6 @@ Higher values indicate higher fitness of the mutated protein.
 # Use defaults. Only requires uniprotId
 dms_corr_plot(uniprotId = "Q9NV35")
 
-# Supervised model
 dms_corr_plot(
     uniprotId = "P04637",
     model = "Kermut"
