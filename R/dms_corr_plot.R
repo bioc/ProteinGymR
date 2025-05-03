@@ -279,6 +279,7 @@ pg_correlate <-
 #' @importFrom ggExtra ggMarginal
 #' @importFrom lifecycle is_present deprecate_stop deprecated
 #' 
+#' @export
 dms_corr_plot <-
     function(
         uniprotId, 
