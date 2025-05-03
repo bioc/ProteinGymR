@@ -14,6 +14,9 @@ dms_corr_plot(
 \arguments{
 \item{uniprotId}{\code{character()} a valid UniProt accession identifier.}
 
+\item{alphamissense_table}{deprecated as of ProteinGymR 1.2.0. To access
+AlphaMissense model predictions, get \code{model} argument to "AlphaMissense".}
+
 \item{dms_table}{a table containing deep mutational scanning (DMS)
 assay scores for mutations. The default table loads substitutions from
 \href{https://proteingym.org/download}{ProteinGym}.

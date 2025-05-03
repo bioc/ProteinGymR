@@ -223,6 +223,9 @@ pg_correlate <-
 #'    [ProteinGym](https://proteingym.org/download).
 #'    Alternatively, a user-defined [`tibble::tbl_df`] or [`data.frame`]
 #'    can be supplied.
+#'    
+#' @param alphamissense_table deprecated as of ProteinGymR 1.2.0. To access 
+#'    AlphaMissense model predictions, get `model` argument to "AlphaMissense".
 #'
 #' @details
 #'
