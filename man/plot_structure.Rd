@@ -73,6 +73,16 @@ respectively.
 substitutions on a 3D protein structure for a chosen assay.
 }
 \details{
+By default, \code{plot_structure()} plots the mean DMS values of all amino acid
+residues, summarized for a protein position. If a model is chosen instead for
+\code{data_scores} argument, a helper function is invoked which normalizes the
+model prediction scores using a rank-based normal quantile transformation.
+The result is a set of normalized scores that preserve the rank order of the
+models scores, while standardizing the distribution. Transformed values
+typically fall between -3 and 3. This normalization ensures the scores are
+approximately standard normally distributed (mean = 0, SD = 1), allowing
+comparisons across models.
+
 For \code{plot_structure()},
 \code{dms_data} must be a \code{list()} object with set names for each assay
 element matching \code{assay_name} parameter.
@@ -104,6 +114,5 @@ plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
    start_pos = 20, 
    end_pos = 50,
    full_structure = FALSE,
-   aggregate_fun = min)
    
 }

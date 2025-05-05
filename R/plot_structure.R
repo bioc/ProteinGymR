@@ -4,7 +4,6 @@
 #' 
 #' @importFrom dplyr filter
 #'
-
 filter_by_pos <- 
     function(df, start_pos = NULL, end_pos = NULL)
 {
@@ -42,20 +41,69 @@ filter_by_pos <-
     return(filtered_df)
 }
 
-
+## Extract protein from assay names
 #' @rdname plot_structure
 #'
 #' @noRd
 #' 
 #' @importFrom dplyr filter
-#'
-
-## Extract protein from assay names
+#' 
 getProtIDs <- function(names) {
     sapply(names, function(x) {
         parts <- strsplit(x, "_", fixed = TRUE)[[1]]
         paste(parts[1:2], collapse = "_")
         })
+}
+
+#' Normalize aggregate_score using rank-based normal quantile transformation
+#' @rdname plot_structure
+#' 
+#' This transformation converts `aggregate_score` values into `quant_score`
+#' values using a rank-based normal quantile approach:
+#'
+#' 1. The empirical cumulative distribution function (`ecdf`) is computed
+#'    to determine the percentile rank of each score.
+#' 2. The `qnorm` function (standard normal quantile function) is applied
+#'    to these percentiles, converting them into z-scores from a standard
+#'    normal distribution (mean = 0, SD = 1).
+#'
+#' The resulting `quant_score` values preserve the rank order of the
+#' original data but are now approximately normally distributed. Typical
+#' values range between -3 and 3.
+#'
+#' This transformation is useful for:
+#' - Comparing scores on a standard scale
+#' - Enabling normally-distributed inputs for modeling
+#' - Mapping to color gradients (e.g., with `parula` palette)
+#'
+#' @noRd
+#' 
+#' @importFrom pals parula
+#'
+color_line <- function(
+        df, 
+        adj = 1, 
+        quant_norm = TRUE, 
+        col_pal, n = 200) 
+{
+    if (quant_norm) {
+        df = df |> 
+            mutate(quant_score = qnorm(ecdf(aggregate_score)(aggregate_score)))
+    }
+    
+    filtered_df <- df |> 
+        mutate(
+        # Clamp scores between -3 and 3 to avoid Inf or out-of-bounds
+        quant_clamped = pmax(pmin(quant_score, 3), -3),
+
+        # Map -3 to 1 and 3 to n
+        color_index = floor((quant_clamped + 3) / 6 * n) + 1,
+
+        # Assign hex color
+        color = col_pal[color_index]
+    )
+    
+    return(filtered_df)
 }
 
 #' @rdname plot_structure
@@ -108,6 +156,15 @@ getProtIDs <- function(names) {
 #'    to use the color scheme consistent with the popEVE portal.
 #'
 #' @details
+#' By default, `plot_structure()` plots the mean DMS values of all amino acid 
+#' residues, summarized for a protein position. If a model is chosen instead for
+#' `data_scores` argument, a helper function is invoked which normalizes the 
+#' model prediction scores using a rank-based normal quantile transformation. 
+#' The result is a set of normalized scores that preserve the rank order of the 
+#' models scores, while standardizing the distribution. Transformed values 
+#' typically fall between -3 and 3. This normalization ensures the scores are 
+#' approximately standard normally distributed (mean = 0, SD = 1), allowing 
+#' comparisons across models.
 #'
 #' For `plot_structure()`, 
 #'    `dms_data` must be a `list()` object with set names for each assay 
@@ -149,7 +206,7 @@ getProtIDs <- function(names) {
 #' @importFrom stringr str_sub
 #' 
 #' @importFrom r3dmol r3dmol m_zoom_to m_add_model m_remove_all_models
-#'              m_style_cartoon m_set_style
+#'              m_style_cartoon m_set_style m_add_surface
 #' 
 #' @examples
 #' 
@@ -165,7 +222,6 @@ getProtIDs <- function(names) {
 #'    start_pos = 20, 
 #'    end_pos = 50,
 #'    full_structure = FALSE,
-#'    aggregate_fun = min)
 #'    
 #' @export 
 plot_structure <- function(
@@ -264,7 +320,7 @@ plot_structure <- function(
 
     ## Read the PDB file
     pdb <- read.pdb(pdb_file)
-    
+
     ## Process data: split position and amino acids
     df <- df |>
         mutate(
@@ -289,37 +345,43 @@ plot_structure <- function(
     end_pos <- max(filtered_df$pos)
     selected_residues <- list(resi = c(start_pos:end_pos))
     
-    ## Normalize score between -1 and 1, centered around zero
-    max_abs <- max(abs(filtered_df$aggregate_score))
-    filtered_df <- filtered_df |> 
-        mutate(norm_scores = .data$aggregate_score / max_abs)
-    
-    ## Map normalized values to a color scale
+    ## Select color palette
     if (missing(color_scheme)) {
-        color_func <- colorRampPalette(c("red", "white", "blue"))
+        if (data_scores == "DMS") {
+            col_pal <- pals::coolwarm(n=200)
+        } else {
+            col_pal <- pals::parula(n=200)
+        }
     } else if (color_scheme == "EVE") {
-        color_func <- colorRampPalette(
+        col_pal <- colorRampPalette(
             c("#000", 
             "#9440e8", 
             "#00CED1", 
             "#fde662"))
+        col_pal <- col_pal(200)
     } else {
-        color_func <- colorRampPalette(c("red", "white", "blue"))
+        col_pal <- pals::coolwarm(n=200)
+    }
+    
+    ## Map palette to normalized values
+    filtered_df <- color_line(
+        df = filtered_df, 
+        quant_norm = TRUE, 
+        col_pal = col_pal
+        )
+    
+    ## Grab max, mean, min for color legend
+    if (missing(data_scores) || data_scores == "DMS") {
+        min_val <- round(min(filtered_df$aggregate_score, na.rm = TRUE), 2)
+        max_val <- round(max(filtered_df$aggregate_score, na.rm = TRUE), 2)
+        mid_val <- round((min_val + max_val) / 2, 2)
+    } else {
+        min_val <- round(min(filtered_df$quant_clamped, na.rm = TRUE), 2)
+        max_val <- round(max(filtered_df$quant_clamped, na.rm = TRUE), 2)
+        mid_val <- round((min_val + max_val) / 2, 2)
+
     }
 
-    ## Generate color palette
-    num_colors <- 100
-    color_palette <- color_func(num_colors)
-    
-    ## Function to map values to color
-    value_to_color <- function(values, palette) {
-        scaled_index <- round((values + 1) / 2 * (length(palette) - 1) + 1)
-        palette[scaled_index]
-    }
-  
-    ## Map normalized scores to colors
-    filtered_df$color <- value_to_color(filtered_df$norm_scores, color_palette)
-    
     ## If full_structure missing or set to TRUE, display complete protein
     if (missing(full_structure) | full_structure == FALSE) {
          
@@ -338,8 +400,36 @@ plot_structure <- function(
                 sel = list(resi = filtered_df$pos[i]),
                 style = list(cartoon = list(color = filtered_df$color[i]))
               )
+
         }
-        return(viewer)
+        
+        ## Create a color scale legend using HTML/CSS
+        color_gradient_css <- paste(rev(col_pal), collapse = ", ")
+        
+        ## Create the legend with value labels
+        legend_div <- tags$div(
+          style = paste0(
+            "position:absolute; top:10px; right:60px; width:20px; height:200px;
+             background: linear-gradient(to top, ", color_gradient_css, ");
+             border: 1px solid black;"
+                  ),
+          # Top label
+          tags$div(max_val, style = "position:absolute; top:-10px; left:30px; font-size:15px;"),
+          # Middle label
+          tags$div(mid_val, style = "position:absolute; top:90px; left:30px; font-size:15px;"),
+          # Bottom label
+          tags$div(min_val, style = "position:absolute; top:190px; left:30px; font-size:15px;")
+        )
+        
+        ## Combine viewer and legend
+        return(
+        browsable(
+            tagList(
+                tags$div(style = "position:relative; width:100%; height:600px;",
+                    viewer, legend_div)
+            )
+        )
+    )
     } else {
         
          message(paste(
@@ -378,6 +468,43 @@ plot_structure <- function(
                  style = list(cartoon = list(color = "#3f3f3f"))
              )
         }
-        return(full_viewer)
-    }  
+
+        ## Create a color scale legend using HTML/CSS
+        color_gradient_css <- paste(rev(col_pal), collapse = ", ")
+        
+        ## Create the legend with value labels
+        legend_div <- tags$div(
+          style = paste0(
+            "position:absolute; top:10px; right:60px; width:20px; height:200px;
+             background: linear-gradient(to top, ", color_gradient_css, ");
+             border: 1px solid black;"
+                  ),
+          # Top label
+          tags$div(max_val, style = "position:absolute; top:-10px; left:30px; font-size:15px;"),
+          # Middle label
+          tags$div(mid_val, style = "position:absolute; top:90px; left:30px; font-size:15px;"),
+          # Bottom label
+          tags$div(min_val, style = "position:absolute; top:190px; left:30px; font-size:15px;")
+        )
+        
+        ## Combine viewer and legend
+        return(
+        browsable(
+            tagList(
+                tags$div(style = "position:relative; width:100%; height:600px;",
+                    full_viewer, legend_div)
+            )
+        )
+    )
+    }
+    
+    ## Combine viewer and legend
+    return(
+        browsable(
+            tagList(
+                tags$div(style = "position:relative; width:100%; height:600px;",
+                    full_viewer, legend_div)
+            )
+        )
+    )
 }
