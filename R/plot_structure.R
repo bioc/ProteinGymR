@@ -207,6 +207,8 @@ color_line <- function(
 #' 
 #' @importFrom r3dmol r3dmol m_zoom_to m_add_model m_remove_all_models
 #'              m_style_cartoon m_set_style m_add_surface
+#'              
+#' @importFrom htmltools tags browsable tagList
 #' 
 #' @examples
 #' 

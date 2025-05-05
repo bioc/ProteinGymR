@@ -40,6 +40,7 @@ Imports:
     ggdist,
     gghalves,
     ggplot2,
+    pals,
     purrr,
     queryup,
     spdl,
@@ -49,7 +50,8 @@ Imports:
     circlize,
     stringr,
     lifecycle,
-    rlang
+    rlang,
+    htmltools
 Suggests: 
     tibble,
     BiocStyle,
