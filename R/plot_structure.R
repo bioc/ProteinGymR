@@ -212,18 +212,14 @@ color_line <- function(
 #' 
 #' @examples
 #' 
-#' # Using default dms_data
-#' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
-#' 
-#' # Use EVE model color scheme with semi-supervised model
-#' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
-#'     data_scores = "Kermut",
-#'     color_scheme = "EVE")
-#'    
 #' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
 #'    start_pos = 20, 
 #'    end_pos = 50,
-#'    full_structure = FALSE,
+#'    full_structure = FALSE)
+#'    
+#' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+#'     data_scores = "Kermut",
+#'     color_scheme = "EVE")
 #'    
 #' @export 
 plot_structure <- function(
@@ -362,6 +358,8 @@ plot_structure <- function(
             # Convert to 6-digit hex by removing the alpha channel (last two characters)
             filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
             col_pal <- filtered_df$color
+            
+            col_fun <- return(col_fun)
         } else {
             col_pal <- pals::parula(n=200)
             
@@ -391,6 +389,8 @@ plot_structure <- function(
                 mutate(color = col_fun(aggregate_score))
             filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
             col_pal <- filtered_df$color
+            
+            col_fun <- return(col_fun)
 
         } else {
             

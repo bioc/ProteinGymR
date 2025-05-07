@@ -331,6 +331,7 @@ plot_dms_heatmap <-
             max(reordered_matrix, na.rm = TRUE)), 
             c("red", "white", "blue")
         )
+        return(col_fun)
     } else if (color_scheme == "EVE") {
         halfpt <- (min(reordered_matrix, na.rm = TRUE)/2)
         col_fun <- colorRamp2(
@@ -338,12 +339,14 @@ plot_dms_heatmap <-
             max(reordered_matrix, na.rm = TRUE)), 
             c("#000", "#9440e8", "#00CED1", "#fde662")
         )
+        return(col_fun)
     } else {
         col_fun <- colorRamp2(
             c(min(reordered_matrix, na.rm = TRUE), 0, 
             max(reordered_matrix, na.rm = TRUE)), 
             c("red", "white", "blue")
         )
+        return(col_fun)
     }
         
     ComplexHeatmap::Heatmap(reordered_matrix,

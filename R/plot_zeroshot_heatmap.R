@@ -349,6 +349,7 @@ plot_zeroshot_heatmap <-
     
             # Create color function
             col_fun <- colorRamp2(c(min_val, mid_val, max_val), parula_colors)
+            return(col_fun)
             
         } else if (color_scheme == "EVE") {
             halfpt <- (min(reordered_matrix, na.rm = TRUE)/2)
@@ -356,12 +357,14 @@ plot_zeroshot_heatmap <-
                 c(min_val, mid_val, max_val), 
                 c("#000", "#9440e8", "#00CED1", "#fde662")
             )
+            return(col_fun)
         } else {
             # Choose 3 colors from parula palette
             parula_colors <- parula(3)
     
             # Create color function
             col_fun <- colorRamp2(c(min_val, mid_val, max_val), parula_colors)
+            return(col_fun)
         }
         
         ComplexHeatmap::Heatmap(reordered_matrix,
