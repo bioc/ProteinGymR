@@ -48,12 +48,14 @@ knitr::opts_chunk$set(echo = TRUE)
     - `plot_zeroshot_heatmap()` plots predicted model scores under the 
     zero-shot model for amino acid substitutions along a protein in a defined 
     DMS assay. 
+    - `model_corr_plot()` to contrast any two models with Spearman correlation.
     
 - Updated functions:
     - `zeroshot_DMS_metrics()` loads in updated model performance metrics 
     ("AUC", "MCC", "NDCG", "Spearman", "Top_recall") for 62 -> 79 models updated 
     in ProteinGym v1.2.
-    - `dms_corr_plot()` added marginals to plotting. Allows to compare any          zero-shot or supervised model vs DMS score.
+    - `dms_corr_plot()` added marginals to plotting. Allows to compare any          
+    zero-shot or supervised model vs DMS score.
     - `plot_dms_heatmap()` new parameters start_pos, end_pos, exact_coords, and
     allows user to cluster rows and columns.
     

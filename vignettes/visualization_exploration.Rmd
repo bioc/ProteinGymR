@@ -80,7 +80,7 @@ ace2_dms <- plot_dms_heatmap(
     start_pos = 1, 
     end_pos = 100)
 
-print(ace2_dms)
+ace2_dms
 ```
 
 The heatmap shows the DMS score at each position along the given protein
@@ -114,7 +114,7 @@ shoc2_dms <- plot_dms_heatmap(assay_name = "SHOC2_HUMAN_Kwon_2022",
     end_pos = 60,
     cluster_rows = TRUE)
 
-print(shoc2_dms)
+shoc2_dms
 ```
 In this region of the SHOC2_HUMAN protein, mutating to a K (y-axis) seemed to 
 have the most benign affect across all mutations.
