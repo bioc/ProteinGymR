@@ -89,24 +89,13 @@ should match \code{model} argument string.
 
 available_models()
 
-model_data <- zeroshot_substitutions()
-
 plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-    model_data = model_data, 
     model = "GEMME",
     start_pos = 600,
     end_pos = 700, 
     color_scheme = "EVE")
     
 plot_zeroshot_heatmap(assay_name = "SRC_HUMAN_Nguyen_2022",
-    model_data = model_data,
     model = "CARP_38M")
-    
-plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-    model_data = model_data, 
-    model = "EVE_ensemble",
-    start_pos = 10, 
-    end_pos = 80, 
-    exact_coord = TRUE)
 
 }

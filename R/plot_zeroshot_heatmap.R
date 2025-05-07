@@ -160,25 +160,14 @@ filter_exact_coord <-
 #' 
 #' available_models()
 #' 
-#' model_data <- zeroshot_substitutions()
-#' 
 #' plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-#'     model_data = model_data, 
 #'     model = "GEMME",
 #'     start_pos = 600,
 #'     end_pos = 700, 
 #'     color_scheme = "EVE")
 #'     
 #' plot_zeroshot_heatmap(assay_name = "SRC_HUMAN_Nguyen_2022",
-#'     model_data = model_data,
 #'     model = "CARP_38M")
-#'     
-#' plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-#'     model_data = model_data, 
-#'     model = "EVE_ensemble",
-#'     start_pos = 10, 
-#'     end_pos = 80, 
-#'     exact_coord = TRUE)
 #' 
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
 #'              arrange select
@@ -192,6 +181,8 @@ filter_exact_coord <-
 #' @importFrom circlize colorRamp2
 #' 
 #' @importFrom stringr str_sub
+#' 
+#' @importFrom pals parula
 #'
 #' @export
 plot_zeroshot_heatmap <- 
@@ -345,27 +336,32 @@ plot_zeroshot_heatmap <-
                                 rownames(heatmap_matrix)), ]
         
         ## Create the heatmap
+        
+        ## Use 3 breakpoints: min, mid, max
+        min_val <- min(reordered_matrix, na.rm = TRUE)
+        max_val <- max(reordered_matrix, na.rm = TRUE)
+        mid_val <- (min_val + max_val) / 2
        
-        ## Use EVE coloring
+        ## Color heatmap
         if (missing(color_scheme)) {
-            col_fun <- colorRamp2(
-                c(min(reordered_matrix, na.rm = TRUE), 0, 
-                max(reordered_matrix, na.rm = TRUE)), 
-                c("red", "white", "blue")
-            )
+            # Choose 3 colors from parula palette
+            parula_colors <- parula(3)
+    
+            # Create color function
+            col_fun <- colorRamp2(c(min_val, mid_val, max_val), parula_colors)
+            
         } else if (color_scheme == "EVE") {
             halfpt <- (min(reordered_matrix, na.rm = TRUE)/2)
             col_fun <- colorRamp2(
-                c(min(reordered_matrix, na.rm = TRUE), halfpt, 0, 
-                max(reordered_matrix, na.rm = TRUE)), 
+                c(min_val, mid_val, max_val), 
                 c("#000", "#9440e8", "#00CED1", "#fde662")
             )
         } else {
-            col_fun <- colorRamp2(
-                c(min(reordered_matrix, na.rm = TRUE), 0, 
-                max(reordered_matrix, na.rm = TRUE)), 
-                c("red", "white", "blue")
-            )
+            # Choose 3 colors from parula palette
+            parula_colors <- parula(3)
+    
+            # Create color function
+            col_fun <- colorRamp2(c(min_val, mid_val, max_val), parula_colors)
         }
         
         ComplexHeatmap::Heatmap(reordered_matrix,

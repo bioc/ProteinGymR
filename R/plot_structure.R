@@ -205,10 +205,10 @@ color_line <- function(
 #' 
 #' @importFrom stringr str_sub
 #' 
+#' @importFrom htmltools tags browsable tagList
+#' 
 #' @importFrom r3dmol r3dmol m_zoom_to m_add_model m_remove_all_models
 #'              m_style_cartoon m_set_style m_add_surface
-#'              
-#' @importFrom htmltools tags browsable tagList
 #' 
 #' @examples
 #' 
@@ -235,7 +235,7 @@ plot_structure <- function(
     end_pos = NULL,
     full_structure = FALSE,
     aggregate_fun = mean, 
-    color_scheme)
+    color_scheme = NULL)
 {
     
     ## Validate data source
@@ -346,37 +346,106 @@ plot_structure <- function(
     start_pos <- min(filtered_df$pos)
     end_pos <- max(filtered_df$pos)
     selected_residues <- list(resi = c(start_pos:end_pos))
-    
+
     ## Select color palette
-    if (missing(color_scheme)) {
+    if (missing(color_scheme) || is.null(color_scheme)) {
         if (data_scores == "DMS") {
-            col_pal <- pals::coolwarm(n=200)
+            col_fun <- colorRamp2(
+                c(min(filtered_df$aggregate_score), 0, 
+                    max(filtered_df$aggregate_score)
+                ),
+                c("red", "white", "blue")
+            )
+            filtered_df <- filtered_df |> 
+                mutate(color = col_fun(aggregate_score))
+            
+            # Convert to 6-digit hex by removing the alpha channel (last two characters)
+            filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
+            col_pal <- filtered_df$color
         } else {
             col_pal <- pals::parula(n=200)
+            
+            ## Map palette to normalized values
+            filtered_df <- color_line(
+                df = filtered_df, 
+                quant_norm = TRUE, 
+                col_pal = col_pal
+                )
         }
     } else if (color_scheme == "EVE") {
-        col_pal <- colorRampPalette(
-            c("#000", 
-            "#9440e8", 
-            "#00CED1", 
-            "#fde662"))
-        col_pal <- col_pal(200)
+    ## DMS vs model score mapping
+        if (data_scores == "DMS") {
+            # Define your breakpoints based on the value range
+            min_val <- min(filtered_df$aggregate_score, na.rm = TRUE)
+            max_val <- max(filtered_df$aggregate_score, na.rm = TRUE)
+            mid1_val <- min_val + (max_val - min_val) * 1/3
+            mid2_val <- min_val + (max_val - min_val) * 2/3
+        
+            # Create the color function with four breakpoints
+            col_fun <- colorRamp2(
+              c(min_val, mid1_val, mid2_val, max_val),
+              c("#000000", "#9440e8", "#00CED1", "#fde662")
+            )
+    
+            filtered_df <- filtered_df |> 
+                mutate(color = col_fun(aggregate_score))
+            filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
+            col_pal <- filtered_df$color
+
+        } else {
+            
+            # Define your breakpoints based on the value range
+            min_val <- min(filtered_df$aggregate_score, na.rm = TRUE)
+            max_val <- max(filtered_df$aggregate_score, na.rm = TRUE)
+            mid1_val <- min_val + (max_val - min_val) * 1/3
+            mid2_val <- min_val + (max_val - min_val) * 2/3
+        
+            # Create the color function with four breakpoints
+            col_fun <- colorRamp2(
+              c(min_val, mid1_val, mid2_val, max_val),
+              c("#000000", "#9440e8", "#00CED1", "#fde662")
+            )
+            
+            filtered_df <- filtered_df |> 
+                mutate(color = col_fun(aggregate_score))
+            
+            filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
+            col_pal <- filtered_df$color
+ 
+            filtered_df <- color_line(
+                df = filtered_df, 
+                quant_norm = TRUE, 
+                col_pal = col_pal
+                )
+        }
+        
     } else {
-        col_pal <- pals::coolwarm(n=200)
+        col_fun <- colorRamp2(
+                c(min(filtered_df$aggregate_score), 0, 
+                    max(filtered_df$aggregate_score)
+                ),
+                c("red", "white", "blue")
+            )
+        
+            filtered_df <- filtered_df |> 
+                mutate(color = col_fun(aggregate_score))
+            
+            ## Convert to 6-digit hex - removing the alpha channel
+            filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
+            col_pal <- filtered_df$color
     }
-    
-    ## Map palette to normalized values
-    filtered_df <- color_line(
-        df = filtered_df, 
-        quant_norm = TRUE, 
-        col_pal = col_pal
-        )
-    
+
     ## Grab max, mean, min for color legend
     if (missing(data_scores) || data_scores == "DMS") {
-        min_val <- round(min(filtered_df$aggregate_score, na.rm = TRUE), 2)
-        max_val <- round(max(filtered_df$aggregate_score, na.rm = TRUE), 2)
-        mid_val <- round((min_val + max_val) / 2, 2)
+        if (!is.null(color_scheme) && color_scheme == "EVE"){
+            min_val <- round(min(filtered_df$aggregate_score, na.rm = TRUE), 2)
+            max_val <- round(max(filtered_df$aggregate_score, na.rm = TRUE), 2)
+            mid_val <- round(min_val + (max_val - min_val) * 2, 2)
+        } else {
+            min_val <- round(min(filtered_df$aggregate_score, na.rm = TRUE), 2)
+            max_val <- round(max(filtered_df$aggregate_score, na.rm = TRUE), 2)
+            mid_val <- 0
+        }
     } else {
         min_val <- round(min(filtered_df$quant_clamped, na.rm = TRUE), 2)
         max_val <- round(max(filtered_df$quant_clamped, na.rm = TRUE), 2)
@@ -386,7 +455,7 @@ plot_structure <- function(
 
     ## If full_structure missing or set to TRUE, display complete protein
     if (missing(full_structure) | full_structure == FALSE) {
-         
+
         ## Initialize the 3D viewer, hide all but except selected regions
         viewer <- r3dmol() |>
             m_remove_all_models() |>
@@ -404,9 +473,17 @@ plot_structure <- function(
               )
 
         }
-        
-        ## Create a color scale legend using HTML/CSS
-        color_gradient_css <- paste(rev(col_pal), collapse = ", ")
+
+        if (!is.null(color_scheme) && color_scheme == "EVE"){
+            gradient_vals <- seq(min_val, max_val, length.out = 100)
+            col_pal_grad <- col_fun(gradient_vals)
+            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+        } else {
+            ## Create a color scale legend using HTML/CSS
+            gradient_vals <- seq(min_val, max_val, length.out = 100)
+            col_pal_grad <- col_fun(gradient_vals)
+            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+        }
         
         ## Create the legend with value labels
         legend_div <- tags$div(
@@ -462,7 +539,7 @@ plot_structure <- function(
               )
         }
         
-        ## Color residues without data as yellow
+        ## Color residues without PDB coords as black
         for (resi in residues_without_data) {
          full_viewer <- full_viewer |>
              m_set_style(
@@ -472,7 +549,16 @@ plot_structure <- function(
         }
 
         ## Create a color scale legend using HTML/CSS
-        color_gradient_css <- paste(rev(col_pal), collapse = ", ")
+        if (!is.null(color_scheme) && color_scheme == "EVE"){
+            gradient_vals <- seq(min_val, max_val, length.out = 100)
+            col_pal_grad <- col_fun(gradient_vals)
+            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+        } else {
+            ## Create a color scale legend using HTML/CSS
+            gradient_vals <- seq(min_val, max_val, length.out = 100)
+            col_pal_grad <- col_fun(gradient_vals)
+            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+        }
         
         ## Create the legend with value labels
         legend_div <- tags$div(

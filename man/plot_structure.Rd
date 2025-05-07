@@ -13,7 +13,7 @@ plot_structure(
   end_pos = NULL,
   full_structure = FALSE,
   aggregate_fun = mean,
-  color_scheme
+  color_scheme = NULL
 )
 }
 \arguments{
