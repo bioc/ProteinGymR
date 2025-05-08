@@ -105,10 +105,16 @@ Each PBD table in \code{pdb_file} must include the following columns:
 plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
    start_pos = 20, 
    end_pos = 50,
-   full_structure = FALSE)
+   full_structure = FALSE,
+   aggregate_fun = max)
+   
+plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
+   start_pos = 20,
+   end_pos = 50,
+   data_scores = "GEMME")
    
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
     data_scores = "Kermut",
     color_scheme = "EVE")
-   
+  
 }

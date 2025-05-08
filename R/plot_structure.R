@@ -106,6 +106,28 @@ color_line <- function(
     return(filtered_df)
 }
 
+#' Get color function for mapping
+#' @noRd
+#' 
+get_col_func <- function(
+    color_scheme,
+    values) {
+
+    if (!is.null(color_scheme) && color_scheme == "EVE") {
+        col_fun <- colorRamp2(
+            values,
+            c("#000000", "#9440e8", "#00CED1", "#fde662")
+        )
+        return(col_fun) 
+    } else {
+        col_fun <- colorRamp2(
+            values,
+            c("red", "white", "blue")
+        ) 
+        return(col_fun)
+    }
+}
+
 #' @rdname plot_structure
 #' 
 #' @title Visualize DMS and Model Scores on 3D Protein Structures
@@ -215,12 +237,18 @@ color_line <- function(
 #' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
 #'    start_pos = 20, 
 #'    end_pos = 50,
-#'    full_structure = FALSE)
+#'    full_structure = FALSE,
+#'    aggregate_fun = max)
+#'    
+#' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
+#'    start_pos = 20,
+#'    end_pos = 50,
+#'    data_scores = "GEMME")
 #'    
 #' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
 #'     data_scores = "Kermut",
 #'     color_scheme = "EVE")
-#'    
+#'   
 #' @export 
 plot_structure <- function(
     assay_name, 
@@ -343,23 +371,22 @@ plot_structure <- function(
     end_pos <- max(filtered_df$pos)
     selected_residues <- list(resi = c(start_pos:end_pos))
 
-    ## Select color palette
+    ## Map color palette to values
     if (missing(color_scheme) || is.null(color_scheme)) {
         if (data_scores == "DMS") {
-            col_fun <- colorRamp2(
-                c(min(filtered_df$aggregate_score), 0, 
-                    max(filtered_df$aggregate_score)
-                ),
-                c("red", "white", "blue")
-            )
+            values <- c(min(filtered_df$aggregate_score), 0, 
+                max(filtered_df$aggregate_score))
+        
+            col_fun <- get_col_func(values = values,
+                color_scheme = color_scheme)
+            
             filtered_df <- filtered_df |> 
                 mutate(color = col_fun(aggregate_score))
             
-            # Convert to 6-digit hex by removing the alpha channel (last two characters)
+            # Convert to 6-digit hex by removing the alpha channel 
             filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
             col_pal <- filtered_df$color
             
-            col_fun <- return(col_fun)
         } else {
             col_pal <- pals::parula(n=200)
             
@@ -379,78 +406,73 @@ plot_structure <- function(
             mid1_val <- min_val + (max_val - min_val) * 1/3
             mid2_val <- min_val + (max_val - min_val) * 2/3
         
+            values <- c(min_val, mid1_val, mid2_val, max_val)
+            
             # Create the color function with four breakpoints
-            col_fun <- colorRamp2(
-              c(min_val, mid1_val, mid2_val, max_val),
-              c("#000000", "#9440e8", "#00CED1", "#fde662")
-            )
-    
+            col_fun <- get_col_func(color_scheme = color_scheme,
+                values = values)
+            
             filtered_df <- filtered_df |> 
                 mutate(color = col_fun(aggregate_score))
             filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
             col_pal <- filtered_df$color
             
-            col_fun <- return(col_fun)
-
         } else {
+            filtered_df <- 
+                filtered_df |> 
+                mutate(quant_score = qnorm(
+                    ecdf(aggregate_score)(aggregate_score)
+                    )
+                )
+            
+             filtered_df <- filtered_df |> 
+                mutate(
+            # Clamp scores between -3 and 3 to avoid Inf or out-of-bounds
+                quant_clamped = pmax(pmin(quant_score, 3), -3)
+                )
             
             # Define your breakpoints based on the value range
-            min_val <- min(filtered_df$aggregate_score, na.rm = TRUE)
-            max_val <- max(filtered_df$aggregate_score, na.rm = TRUE)
+            min_val <- min(filtered_df$quant_clamped, na.rm = TRUE)
+            max_val <- max(filtered_df$quant_clamped, na.rm = TRUE)
             mid1_val <- min_val + (max_val - min_val) * 1/3
             mid2_val <- min_val + (max_val - min_val) * 2/3
         
+            values <- c(min_val, mid1_val, mid2_val, max_val)
+        
             # Create the color function with four breakpoints
-            col_fun <- colorRamp2(
-              c(min_val, mid1_val, mid2_val, max_val),
-              c("#000000", "#9440e8", "#00CED1", "#fde662")
-            )
-            
+            col_fun <- get_col_func(color_scheme = color_scheme,
+                values = values)
             filtered_df <- filtered_df |> 
-                mutate(color = col_fun(aggregate_score))
+                mutate(color = col_fun(quant_clamped))
             
             filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
             col_pal <- filtered_df$color
- 
-            filtered_df <- color_line(
-                df = filtered_df, 
-                quant_norm = TRUE, 
-                col_pal = col_pal
-                )
         }
         
     } else {
-        col_fun <- colorRamp2(
-                c(min(filtered_df$aggregate_score), 0, 
-                    max(filtered_df$aggregate_score)
-                ),
-                c("red", "white", "blue")
-            )
+        values <- c(min(filtered_df$aggregate_score), 0, 
+                max(filtered_df$aggregate_score))
         
-            filtered_df <- filtered_df |> 
+        col_fun <- get_col_func(values = values,
+                color_scheme = color_scheme)
+        
+        filtered_df <- filtered_df |> 
                 mutate(color = col_fun(aggregate_score))
             
-            ## Convert to 6-digit hex - removing the alpha channel
-            filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
-            col_pal <- filtered_df$color
+        ## Convert to 6-digit hex - removing the alpha channel
+        filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
+        col_pal <- filtered_df$color
     }
 
     ## Grab max, mean, min for color legend
     if (missing(data_scores) || data_scores == "DMS") {
-        if (!is.null(color_scheme) && color_scheme == "EVE"){
-            min_val <- round(min(filtered_df$aggregate_score, na.rm = TRUE), 2)
-            max_val <- round(max(filtered_df$aggregate_score, na.rm = TRUE), 2)
-            mid_val <- round(min_val + (max_val - min_val) * 2, 2)
-        } else {
             min_val <- round(min(filtered_df$aggregate_score, na.rm = TRUE), 2)
             max_val <- round(max(filtered_df$aggregate_score, na.rm = TRUE), 2)
             mid_val <- 0
-        }
     } else {
-        min_val <- round(min(filtered_df$quant_clamped, na.rm = TRUE), 2)
-        max_val <- round(max(filtered_df$quant_clamped, na.rm = TRUE), 2)
-        mid_val <- round((min_val + max_val) / 2, 2)
-
+            min_val <- round(min(filtered_df$quant_clamped, na.rm = TRUE), 2)
+            max_val <- round(max(filtered_df$quant_clamped, na.rm = TRUE), 2)
+            mid_val <- round((min_val + max_val) / 2, 2)
     }
 
     ## If full_structure missing or set to TRUE, display complete protein
@@ -474,15 +496,25 @@ plot_structure <- function(
 
         }
 
+        ## Create a color scale legend using HTML/CSS
         if (!is.null(color_scheme) && color_scheme == "EVE"){
             gradient_vals <- seq(min_val, max_val, length.out = 100)
             col_pal_grad <- col_fun(gradient_vals)
             color_gradient_css <- paste(col_pal_grad, collapse = ", ")
         } else {
-            ## Create a color scale legend using HTML/CSS
-            gradient_vals <- seq(min_val, max_val, length.out = 100)
-            col_pal_grad <- col_fun(gradient_vals)
-            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+            if (data_scores == "DMS"){
+                gradient_vals <- seq(min_val, max_val, length.out = 100)
+                col_pal_grad <- col_fun(gradient_vals)
+                color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+            } else {
+                # Create interpolator function
+                col_fun <- colorRampPalette(col_pal)
+                # Generate 100 colors spanning your value range
+                col_pal_grad <- col_fun(100)
+                # Create a CSS gradient string
+                color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+            }
+            
         }
         
         ## Create the legend with value labels

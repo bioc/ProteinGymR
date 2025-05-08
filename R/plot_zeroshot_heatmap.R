@@ -85,6 +85,33 @@ filter_exact_coord <-
         
         assay_pos
     }
+    }
+
+#' @rdname plot_zeroshot_heatmap
+#' 
+#' Create a color function for the heatmap
+#' 
+#' @noRd
+make_col_fun_model <- function(mat, color_scheme = "default") {
+  min_val <- min(mat, na.rm = TRUE)
+  max_val <- max(mat, na.rm = TRUE)
+  mid_val <- 0
+  
+  if (color_scheme == "EVE") {
+    halfpt <- min_val / 2
+    col_fun <- colorRamp2(
+      c(min_val, halfpt, mid_val, max_val),
+      c("#000", "#9440e8", "#00CED1", "#fde662")
+    )
+  } else {
+    parula_colors <- parula(3)
+    col_fun <- colorRamp2(
+      c(min_val, mid_val, max_val),
+      parula_colors
+    )
+  }
+  
+  return(col_fun)
 }
 
 #' @rdname plot_zeroshot_heatmap
@@ -336,36 +363,10 @@ plot_zeroshot_heatmap <-
                                 rownames(heatmap_matrix)), ]
         
         ## Create the heatmap
-        
-        ## Use 3 breakpoints: min, mid, max
-        min_val <- min(reordered_matrix, na.rm = TRUE)
-        max_val <- max(reordered_matrix, na.rm = TRUE)
-        mid_val <- (min_val + max_val) / 2
-       
-        ## Color heatmap
         if (missing(color_scheme)) {
-            # Choose 3 colors from parula palette
-            parula_colors <- parula(3)
-    
-            # Create color function
-            col_fun <- colorRamp2(c(min_val, mid_val, max_val), parula_colors)
-            return(col_fun)
-            
-        } else if (color_scheme == "EVE") {
-            halfpt <- (min(reordered_matrix, na.rm = TRUE)/2)
-            col_fun <- colorRamp2(
-                c(min_val, mid_val, max_val), 
-                c("#000", "#9440e8", "#00CED1", "#fde662")
-            )
-            return(col_fun)
-        } else {
-            # Choose 3 colors from parula palette
-            parula_colors <- parula(3)
-    
-            # Create color function
-            col_fun <- colorRamp2(c(min_val, mid_val, max_val), parula_colors)
-            return(col_fun)
+            color_scheme <- "default"
         }
+        col_fun <- make_col_fun_model(reordered_matrix, color_scheme)
         
         ComplexHeatmap::Heatmap(reordered_matrix,
             name = paste(model),

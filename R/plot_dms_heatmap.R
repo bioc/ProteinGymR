@@ -87,6 +87,24 @@ filter_exact_coord <-
     }
 }
 
+#' Create a color function for the heatmap
+#' @noRd
+make_col_fun_dms <- function(mat, color_scheme = "default") {
+  if (color_scheme == "EVE") {
+    halfpt <- (min(mat, na.rm = TRUE) / 2)
+    col_fun <- colorRamp2(
+      c(min(mat, na.rm = TRUE), halfpt, 0, max(mat, na.rm = TRUE)),
+      c("#000", "#9440e8", "#00CED1", "#fde662")
+    )
+  } else {
+    col_fun <- colorRamp2(
+      c(min(mat, na.rm = TRUE), 0, max(mat, na.rm = TRUE)),
+      c("red", "white", "blue")
+    )
+  }
+  return(col_fun)
+}
+
 #' @rdname plot_dms_heatmap
 #' 
 #' @title Visualize DMS Scores Along a Protein
@@ -292,7 +310,6 @@ plot_dms_heatmap <-
     
     column_annotation[is.na(column_annotation)] <- " "
     
-    
     ## Convert to matrix
     pos <- assay_pos$pos
     alt <- colnames(assay_pos)
@@ -323,33 +340,12 @@ plot_dms_heatmap <-
     )
 
     ## Create the heatmap
-    
-    ## Use EVE coloring
     if (missing(color_scheme)) {
-        col_fun <- colorRamp2(
-            c(min(reordered_matrix, na.rm = TRUE), 0, 
-            max(reordered_matrix, na.rm = TRUE)), 
-            c("red", "white", "blue")
-        )
-        return(col_fun)
-    } else if (color_scheme == "EVE") {
-        halfpt <- (min(reordered_matrix, na.rm = TRUE)/2)
-        col_fun <- colorRamp2(
-            c(min(reordered_matrix, na.rm = TRUE), halfpt, 0, 
-            max(reordered_matrix, na.rm = TRUE)), 
-            c("#000", "#9440e8", "#00CED1", "#fde662")
-        )
-        return(col_fun)
-    } else {
-        col_fun <- colorRamp2(
-            c(min(reordered_matrix, na.rm = TRUE), 0, 
-            max(reordered_matrix, na.rm = TRUE)), 
-            c("red", "white", "blue")
-        )
-        return(col_fun)
+        color_scheme <- "default"
     }
+    col_fun <- make_col_fun_dms(reordered_matrix, color_scheme)
         
-    ComplexHeatmap::Heatmap(reordered_matrix,
+    plot <- ComplexHeatmap::Heatmap(reordered_matrix,
         name = "DMS Score",
         cluster_rows = cluster_rows,
         cluster_columns = cluster_columns,
@@ -358,4 +354,5 @@ plot_dms_heatmap <-
         top_annotation = column_annotation,
         ...)
 
+    return(plot)
 }
