@@ -474,6 +474,42 @@ plot_structure <- function(
             max_val <- round(max(filtered_df$quant_clamped, na.rm = TRUE), 2)
             mid_val <- round((min_val + max_val) / 2, 2)
     }
+    
+    ## R3DMOL PLOTTING
+        ## Create a color scale legend using HTML/CSS
+        if (!is.null(color_scheme) && color_scheme == "EVE"){
+            gradient_vals <- seq(min_val, max_val, length.out = 100)
+            col_pal_grad <- col_fun(gradient_vals)
+            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+        } else {
+            if (data_scores == "DMS"){
+                gradient_vals <- seq(min_val, max_val, length.out = 100)
+                col_pal_grad <- col_fun(gradient_vals)
+                color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+            } else {
+                # Create interpolator function
+                col_fun <- colorRampPalette(col_pal)
+                # Generate 100 colors spanning your value range
+                col_pal_grad <- col_fun(100)
+                # Create a CSS gradient string
+                color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+            }
+            
+        }
+        ## Create the legend with value labels
+        legend_div <- tags$div(
+          style = paste0(
+            "position:absolute; top:10px; right:60px; width:20px; height:200px;
+             background: linear-gradient(to top, ", color_gradient_css, ");
+             border: 1px solid black;"
+                  ),
+          # Top label
+          tags$div(max_val, style = "position:absolute; top:-10px; left:30px; font-size:15px;"),
+          # Middle label
+          tags$div(mid_val, style = "position:absolute; top:90px; left:30px; font-size:15px;"),
+          # Bottom label
+          tags$div(min_val, style = "position:absolute; top:190px; left:30px; font-size:15px;")
+        )
 
     ## If full_structure missing or set to TRUE, display complete protein
     if (missing(full_structure) | full_structure == FALSE) {
@@ -496,42 +532,6 @@ plot_structure <- function(
 
         }
 
-        ## Create a color scale legend using HTML/CSS
-        if (!is.null(color_scheme) && color_scheme == "EVE"){
-            gradient_vals <- seq(min_val, max_val, length.out = 100)
-            col_pal_grad <- col_fun(gradient_vals)
-            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
-        } else {
-            if (data_scores == "DMS"){
-                gradient_vals <- seq(min_val, max_val, length.out = 100)
-                col_pal_grad <- col_fun(gradient_vals)
-                color_gradient_css <- paste(col_pal_grad, collapse = ", ")
-            } else {
-                # Create interpolator function
-                col_fun <- colorRampPalette(col_pal)
-                # Generate 100 colors spanning your value range
-                col_pal_grad <- col_fun(100)
-                # Create a CSS gradient string
-                color_gradient_css <- paste(col_pal_grad, collapse = ", ")
-            }
-            
-        }
-        
-        ## Create the legend with value labels
-        legend_div <- tags$div(
-          style = paste0(
-            "position:absolute; top:10px; right:60px; width:20px; height:200px;
-             background: linear-gradient(to top, ", color_gradient_css, ");
-             border: 1px solid black;"
-                  ),
-          # Top label
-          tags$div(max_val, style = "position:absolute; top:-10px; left:30px; font-size:15px;"),
-          # Middle label
-          tags$div(mid_val, style = "position:absolute; top:90px; left:30px; font-size:15px;"),
-          # Bottom label
-          tags$div(min_val, style = "position:absolute; top:190px; left:30px; font-size:15px;")
-        )
-        
         ## Combine viewer and legend
         return(
         browsable(
@@ -580,51 +580,14 @@ plot_structure <- function(
              )
         }
 
-        ## Create a color scale legend using HTML/CSS
-        if (!is.null(color_scheme) && color_scheme == "EVE"){
-            gradient_vals <- seq(min_val, max_val, length.out = 100)
-            col_pal_grad <- col_fun(gradient_vals)
-            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
-        } else {
-            ## Create a color scale legend using HTML/CSS
-            gradient_vals <- seq(min_val, max_val, length.out = 100)
-            col_pal_grad <- col_fun(gradient_vals)
-            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
-        }
-        
-        ## Create the legend with value labels
-        legend_div <- tags$div(
-          style = paste0(
-            "position:absolute; top:10px; right:60px; width:20px; height:200px;
-             background: linear-gradient(to top, ", color_gradient_css, ");
-             border: 1px solid black;"
-                  ),
-          # Top label
-          tags$div(max_val, style = "position:absolute; top:-10px; left:30px; font-size:15px;"),
-          # Middle label
-          tags$div(mid_val, style = "position:absolute; top:90px; left:30px; font-size:15px;"),
-          # Bottom label
-          tags$div(min_val, style = "position:absolute; top:190px; left:30px; font-size:15px;")
-        )
-        
         ## Combine viewer and legend
         return(
-        browsable(
-            tagList(
-                tags$div(style = "position:relative; width:100%; height:600px;",
-                    full_viewer, legend_div)
+            browsable(
+                tagList(
+                    tags$div(style = "position:relative; width:100%; height:600px;",
+                        full_viewer, legend_div)
+                )
             )
         )
-    )
     }
-    
-    ## Combine viewer and legend
-    return(
-        browsable(
-            tagList(
-                tags$div(style = "position:relative; width:100%; height:600px;",
-                    full_viewer, legend_div)
-            )
-        )
-    )
 }
