@@ -43,6 +43,17 @@ available_models <- function()
              "S3F", "S3F_MSA", 
              "SiteRM")
 
+#' @rdname benchmark_models
+#' 
+#' @export
+supervised_available_models <- function() 
+    c("OHE_Notaugmented", "normalized_targets", 
+             "OHE_Augmented_DeepSequence", "OHE_Augmented_ESM1v", 
+             "OHE_Augmented_MSATransformer", "OHE_Augmented_Tranception", 
+             "OHE_Augmented_TranceptEVE", "Embeddings_Augmented_ESM1v", 
+             "Embeddings_Augmented_MSATransformer", 
+             "Embeddings_Augmented_Tranception", "ProteinNPT", "Kermut")
+
 #'
 #' @noRd
 # Check metric argument
@@ -179,7 +190,7 @@ benchmark_models <- function(
     
     ## Reorder models in descending mean scores
     res_long <- res_long |> 
-        group_by(model) |> 
+        group_by(.data$model) |> 
         mutate(model_mean = mean(.data$score)) |> 
         ungroup() |> 
         mutate(model = fct_reorder(.data$model, .data$model_mean, .desc = TRUE))

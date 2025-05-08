@@ -12,6 +12,7 @@ plot_dms_heatmap(
   exact_coord = FALSE,
   cluster_rows = FALSE,
   cluster_columns = FALSE,
+  color_scheme,
   ...
 )
 }
@@ -44,6 +45,12 @@ chosen assay.}
 
 \item{cluster_columns}{\code{logical()} defaults to FALSE. See argument details in
 \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap}.}
+
+\item{color_scheme}{\code{character()} defaults to blue, white, and red to
+represent positive, neutral, negative scores. Set argument equal to "EVE"
+to use the color scheme consistent with the popEVE portal.}
+
+\item{...}{additional arguments passed to internal plotting functions.}
 }
 \value{
 Returns a \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap} plot of DMS scores for each
@@ -83,10 +90,13 @@ plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018",
     
 plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
     start_pos = 10, 
-    end_pos = 80, exact_coord = TRUE)
+    end_pos = 80, 
+    exact_coord = TRUE,
+    color_scheme = "EVE")
     
 plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
     start_pos = 50, 
-    end_pos = 100, cluster_rows = TRUE)
+    end_pos = 100, 
+    cluster_rows = TRUE)
 
 }

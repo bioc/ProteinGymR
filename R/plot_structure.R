@@ -4,7 +4,6 @@
 #' 
 #' @importFrom dplyr filter
 #'
-
 filter_by_pos <- 
     function(df, start_pos = NULL, end_pos = NULL)
 {
@@ -42,6 +41,93 @@ filter_by_pos <-
     return(filtered_df)
 }
 
+## Extract protein from assay names
+#' @rdname plot_structure
+#'
+#' @noRd
+#' 
+#' @importFrom dplyr filter
+#' 
+getProtIDs <- function(names) {
+    sapply(names, function(x) {
+        parts <- strsplit(x, "_", fixed = TRUE)[[1]]
+        paste(parts[1:2], collapse = "_")
+        })
+}
+
+#' Normalize aggregate_score using rank-based normal quantile transformation
+#' @rdname plot_structure
+#' 
+#' This transformation converts `aggregate_score` values into `quant_score`
+#' values using a rank-based normal quantile approach:
+#'
+#' 1. The empirical cumulative distribution function (`ecdf`) is computed
+#'    to determine the percentile rank of each score.
+#' 2. The `qnorm` function (standard normal quantile function) is applied
+#'    to these percentiles, converting them into z-scores from a standard
+#'    normal distribution (mean = 0, SD = 1).
+#'
+#' The resulting `quant_score` values preserve the rank order of the
+#' original data but are now approximately normally distributed. Typical
+#' values range between -3 and 3.
+#'
+#' This transformation is useful for:
+#' - Comparing scores on a standard scale
+#' - Enabling normally-distributed inputs for modeling
+#' - Mapping to color gradients (e.g., with `parula` palette)
+#'
+#' @noRd
+#' 
+#' @importFrom pals parula
+#'
+color_line <- function(
+        df, 
+        adj = 1, 
+        quant_norm = TRUE, 
+        col_pal, n = 200) 
+{
+    if (quant_norm) {
+        df = df |> 
+            mutate(quant_score = qnorm(ecdf(aggregate_score)(aggregate_score)))
+    }
+    
+    filtered_df <- df |> 
+        mutate(
+        # Clamp scores between -3 and 3 to avoid Inf or out-of-bounds
+        quant_clamped = pmax(pmin(quant_score, 3), -3),
+
+        # Map -3 to 1 and 3 to n
+        color_index = floor((quant_clamped + 3) / 6 * n) + 1,
+
+        # Assign hex color
+        color = col_pal[color_index]
+    )
+    
+    return(filtered_df)
+}
+
+#' Get color function for mapping
+#' @noRd
+#' 
+get_col_func <- function(
+    color_scheme,
+    values) {
+
+    if (!is.null(color_scheme) && color_scheme == "EVE") {
+        col_fun <- colorRamp2(
+            values,
+            c("#000000", "#9440e8", "#00CED1", "#fde662")
+        )
+        return(col_fun) 
+    } else {
+        col_fun <- colorRamp2(
+            values,
+            c("red", "white", "blue")
+        ) 
+        return(col_fun)
+    }
+}
+
 #' @rdname plot_structure
 #' 
 #' @title Visualize DMS and Model Scores on 3D Protein Structures
@@ -52,15 +138,15 @@ filter_by_pos <-
 #' @param assay_name `character()` a valid DMS assay name. For the full list of 
 #'    available assays, run `names()` on the list object loaded with 
 #'    `ProteinGymR::dms_substitutions()`. Alternatively, the name of a 
-#'    user-defined DMS assay.
 #'    
-#' @param pdb_data `list()` object of protein structure coordinates in a
-#'    Protein Data Bank format.  By default, pdb files for proteins associated
-#'    with ProteinGym data can be loaded in with `ProteinGymR::pdb_files()`.
-#'    Alternatively, a user-defined list of pdb data.frames with names 
-#'    matching the `assay_name` param.
+#' @param data_scores `character()` specify whether DMS, zero-shot, or 
+#'    supervised model prediction scores should be displayed scores. Pass either
+#'    "DMS" for experimental scores, or alternatively, a model name from
+#'    `available_models()` for zero-shot or `supervised_available_models()` for
+#'    semi-supervised models options. Defaults to DMS.
 #'    
-#' @param pdb_file `string()` input path to PBD file.
+#' @param pdb_file `string()` defaults to corresonding PDB FilePath on 
+#'    ExperimentHub. Alternatively, a file path to a user-defined PDB file.
 #' 
 #' @param dms_data `list()` object of DMS assays loaded with 
 #'   `ProteinGymR::dms_substitutions()`.
@@ -86,8 +172,21 @@ filter_by_pos <-
 #'    also take in a user-defined function with a numeric vector as input. 
 #'    By default, the mean DMS score across mutations at each position is
 #'    calculated.
+#'    
+#' @param color_scheme `character()` defaults to blue, white, and red to 
+#'    represent positive, neutral, negative scores. Set argument equal to "EVE" 
+#'    to use the color scheme consistent with the popEVE portal.
 #'
 #' @details
+#' By default, `plot_structure()` plots the mean DMS values of all amino acid 
+#' residues, summarized for a protein position. If a model is chosen instead for
+#' `data_scores` argument, a helper function is invoked which normalizes the 
+#' model prediction scores using a rank-based normal quantile transformation. 
+#' The result is a set of normalized scores that preserve the rank order of the 
+#' models scores, while standardizing the distribution. Transformed values 
+#' typically fall between -3 and 3. This normalization ensures the scores are 
+#' approximately standard normally distributed (mean = 0, SD = 1), allowing 
+#' comparisons across models.
 #'
 #' For `plot_structure()`, 
 #'    `dms_data` must be a `list()` object with set names for each assay 
@@ -103,9 +202,8 @@ filter_by_pos <-
 #' - `DMS_score`: Experimental measurement in the DMS assay. 
 #'    Higher values indicate higher fitness of the mutated protein.
 #'    
-#' Each PBD table in `pdb_data()` must include the following columns:
+#' Each PBD table in `pdb_file` must include the following columns:
 #' 
-#'
 #' @return `plot_structure()` returns a [`r3dmol::r3dmol`] 
 #'    object of DMS scores for each position along a protein in a chosen DMS 
 #'    assay. The x-axis shows amino acid positions where a DMS mutation exist, 
@@ -115,7 +213,13 @@ filter_by_pos <-
 #'    respectively.
 #'   
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
-#'              arrange select
+#'              arrange select rename
+#'              
+#' @importFrom grDevices colorRampPalette
+#'              
+#' @importFrom ExperimentHub ExperimentHub
+#' 
+#' @importFrom AnnotationHub query
 #'              
 #' @importFrom tidyr pivot_wider
 #' 
@@ -123,127 +227,293 @@ filter_by_pos <-
 #' 
 #' @importFrom stringr str_sub
 #' 
+#' @importFrom htmltools tags browsable tagList
+#' 
 #' @importFrom r3dmol r3dmol m_zoom_to m_add_model m_remove_all_models
-#'              m_style_cartoon m_set_style
+#'              m_style_cartoon m_set_style m_add_surface
 #' 
 #' @examples
 #' 
-#' # Using default dms_data
-#' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
-#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb")
-#'    
-#' plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-#'    pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-#'    aggregate_fun = mean)
-#'    
-#' plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-#'    start_pos = 20, 
-#'    end_pos = 50,
-#'    full_structure = TRUE,
-#'    aggregate_fun = min)
-#'    
-#' plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
+#' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
 #'    start_pos = 20, 
 #'    end_pos = 50,
 #'    full_structure = FALSE,
-#'    aggregate_fun = mean)
-#'
-#' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018", 
-#'    pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",
-#'    dms_data = dms_data, 
-#'    full_structure = TRUE,
-#'    aggregate_fun = mean)
+#'    aggregate_fun = max)
 #'    
+#' plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
+#'    start_pos = 20,
+#'    end_pos = 50,
+#'    data_scores = "GEMME")
+#'    
+#' plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+#'     data_scores = "Kermut",
+#'     color_scheme = "EVE")
+#'   
 #' @export 
-plot_structure <- function(assay_name, 
-                    pdb_file, 
-                    dms_data, 
-                    start_pos = NULL,
-                    end_pos = NULL,
-                    full_structure = FALSE,
-                    aggregate_fun = mean) {
+plot_structure <- function(
+    assay_name, 
+    pdb_file, 
+    data_scores = "DMS",
+    dms_data = NULL, 
+    start_pos = NULL,
+    end_pos = NULL,
+    full_structure = FALSE,
+    aggregate_fun = mean, 
+    color_scheme = NULL)
+{
     
-    ## TO DO: Grab pdb path using pdb_structure() from ExperimentHub
+    ## Validate data source
+    valid_scores <- c(
+        available_models(), 
+        supervised_available_models(),
+        "AlphaMissense", "DMS") 
     
+    if (!all(data_scores %in% valid_scores)) {
+        invalid_scores <- data_scores[!data_scores %in% valid_scores]
+        stop(paste0("Invalid `data_scores` specified: ", invalid_scores, "\n",
+            "Make sure it is `DMS` or an accurate model name in ProteinGym."))
+    }
+    
+    ## Validate assay_name
+    valid_assays <- c(names(dms_substitutions()), names(dms_data)) 
+    
+    if (!all(assay_name %in% valid_assays)) {
+        invalid_assay <- assay_name[!assay_name %in% valid_assays]
+        stop(paste0("Invalid `assay_name` specified: ", invalid_assay))
+    }
+    
+    ## Load the appropriate data based on data_scores
+    if (data_scores == "DMS") {
+        ## If dms_data argument missing
+        if (missing(dms_data) || is.null(dms_data)) {
+            message(paste(
+                "'dms_data' not provided,",
+                "using DMS data loaded with dms_substitutions()"
+            ))
+            dms_data <- dms_substitutions()
+            df <- dms_data[[assay_name]]
+            
+            df <- df |> 
+                dplyr::rename(pg_scores = DMS_score)
+            
+        } else {
+            df <- dms_data
+            df <- df[[assay_name]]
+            df <- df |> 
+                dplyr::rename(pg_scores = DMS_score)
+        }
+        
+    ## Load zero-shot model
+    } else if (data_scores %in% available_models()) {
+        message("Using zero-shot model scores with zeroshot_substitutions()")
+        data <- zeroshot_substitutions()
+        df <- data[[assay_name]]
+        df <- df[,c("mutant", data_scores)]
+        df <- df |> 
+            rename(pg_scores = all_of(data_scores))
+        
+    ## Load semi-supervised model
+    } else if (data_scores %in% supervised_available_models()) {
+        message("Using semi-supervised model scores loaded with ",
+            "supervised_substitutions()")
+        data <- supervised_substitutions()
+        df <- data[[assay_name]]
+        df <- df[,c("mutant", data_scores)]
+        df <- df |> 
+            dplyr::rename(pg_scores = all_of(data_scores))
+        
+    } else {
+        stop("Invalid data_source. Choose from 'DMS' or pass a valid model name.")
+    }
+
+    ## Grab pdb file from ExperimentHub if not specified by user
+    if (missing(pdb_file)){
+        
+        prot <- getProtIDs(names = assay_name)
+        
+        eh <- ExperimentHub()
+        ## Grab ehid of PDB
+        results <- query(eh, c("ProteinGym", prot))
+        ehid <- results$ah_id
+        
+        ## Replace with an actual EH ID from the query above)
+        pdb_file <- eh[[ehid]]
+
+    } else {
+        ## User-defined pdb_file
+        pdb_file
+    }
+
     ## Read the PDB file
     pdb <- read.pdb(pdb_file)
-    
-    ## If dms_data argument missing
-    if (missing(dms_data)) {
- 
-    message(paste(
-        "'dms_data' not provided,",
-        "using DMS data loaded with dms_substitutions()"
-    ))
- 
-    dms_data <- dms_substitutions()
- 
-    } else {
-        
-        dms_data
-        
-    }
- 
-    ## Extract the DMS data for the given assay name
-    df <- dms_data[[assay_name]]
-    
-    ## Split pos and amino acids
+
+    ## Process data: split position and amino acids
     df <- df |>
         mutate(
           ref = str_sub(.data$mutant, 1, 1),
-          pos = as.integer(gsub(".*?([0-9]+).*", "\\1",
-                                .data$mutant)),
+          pos = as.integer(gsub(".*?([0-9]+).*", "\\1", .data$mutant)),
           alt = str_sub(.data$mutant, -1)
         )
     
-    ## Aggregate DMS_scores by position
+    ## Aggregate scores by position
     df <- df |>
-        group_by(pos) |>
+        group_by(.data$pos) |>
         summarise(
-          aggregate_dms = do.call(aggregate_fun, list(DMS_score)),
+          aggregate_score = do.call(aggregate_fun, list(.data$pg_scores)),
           .groups = 'drop'
         )
     
     ## Select user-defined protein range
-    filtered_df <- filter_by_pos(
-        df = df, 
+    filtered_df <- filter_by_pos(df = df, 
         start_pos = start_pos, 
-        end_pos = end_pos
-        )
-    
+        end_pos = end_pos)
     start_pos <- min(filtered_df$pos)
     end_pos <- max(filtered_df$pos)
     selected_residues <- list(resi = c(start_pos:end_pos))
-    
-    ## Normalize score between -1 and 1, centered around zero
-    max_abs <- max(abs(filtered_df$aggregate_dms))
-    
-    filtered_df <- filtered_df |> 
-        mutate(
-            norm_scores = .data$aggregate_dms / max_abs
-        )
-    
-    ## Map normalized values to a color scale
-    color_func <- colorRampPalette(c("red", "white", "blue"))
-    
-    ## Generate color palette
-    num_colors <- 100
-    color_palette <- color_func(num_colors)
-    
-    ## Function to map values to color
-    value_to_color <- function(values, palette) {
-        scaled_index <- round((values + 1) / 2 * (length(palette) - 1) + 1)
-        palette[scaled_index]
+
+    ## Map color palette to values
+    if (missing(color_scheme) || is.null(color_scheme)) {
+        if (data_scores == "DMS") {
+            values <- c(min(filtered_df$aggregate_score), 0, 
+                max(filtered_df$aggregate_score))
+        
+            col_fun <- get_col_func(values = values,
+                color_scheme = color_scheme)
+            
+            filtered_df <- filtered_df |> 
+                mutate(color = col_fun(aggregate_score))
+            
+            # Convert to 6-digit hex by removing the alpha channel 
+            filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
+            col_pal <- filtered_df$color
+            
+        } else {
+            col_pal <- pals::parula(n=200)
+            
+            ## Map palette to normalized values
+            filtered_df <- color_line(
+                df = filtered_df, 
+                quant_norm = TRUE, 
+                col_pal = col_pal
+                )
+        }
+    } else if (color_scheme == "EVE") {
+    ## DMS vs model score mapping
+        if (data_scores == "DMS") {
+            # Define your breakpoints based on the value range
+            min_val <- min(filtered_df$aggregate_score, na.rm = TRUE)
+            max_val <- max(filtered_df$aggregate_score, na.rm = TRUE)
+            mid1_val <- min_val + (max_val - min_val) * 1/3
+            mid2_val <- min_val + (max_val - min_val) * 2/3
+        
+            values <- c(min_val, mid1_val, mid2_val, max_val)
+            
+            # Create the color function with four breakpoints
+            col_fun <- get_col_func(color_scheme = color_scheme,
+                values = values)
+            
+            filtered_df <- filtered_df |> 
+                mutate(color = col_fun(aggregate_score))
+            filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
+            col_pal <- filtered_df$color
+            
+        } else {
+            filtered_df <- 
+                filtered_df |> 
+                mutate(quant_score = qnorm(
+                    ecdf(aggregate_score)(aggregate_score)
+                    )
+                )
+            
+             filtered_df <- filtered_df |> 
+                mutate(
+            # Clamp scores between -3 and 3 to avoid Inf or out-of-bounds
+                quant_clamped = pmax(pmin(quant_score, 3), -3)
+                )
+            
+            # Define your breakpoints based on the value range
+            min_val <- min(filtered_df$quant_clamped, na.rm = TRUE)
+            max_val <- max(filtered_df$quant_clamped, na.rm = TRUE)
+            mid1_val <- min_val + (max_val - min_val) * 1/3
+            mid2_val <- min_val + (max_val - min_val) * 2/3
+        
+            values <- c(min_val, mid1_val, mid2_val, max_val)
+        
+            # Create the color function with four breakpoints
+            col_fun <- get_col_func(color_scheme = color_scheme,
+                values = values)
+            filtered_df <- filtered_df |> 
+                mutate(color = col_fun(quant_clamped))
+            
+            filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
+            col_pal <- filtered_df$color
+        }
+        
+    } else {
+        values <- c(min(filtered_df$aggregate_score), 0, 
+                max(filtered_df$aggregate_score))
+        
+        col_fun <- get_col_func(values = values,
+                color_scheme = color_scheme)
+        
+        filtered_df <- filtered_df |> 
+                mutate(color = col_fun(aggregate_score))
+            
+        ## Convert to 6-digit hex - removing the alpha channel
+        filtered_df$color <- gsub("^(#.{6}).{2}$", "\\1", filtered_df$color)
+        col_pal <- filtered_df$color
     }
-  
-    ## Map normalized scores to colors
-    filtered_df$color <- value_to_color(filtered_df$norm_scores, color_palette)
+
+    ## Grab max, mean, min for color legend
+    if (missing(data_scores) || data_scores == "DMS") {
+            min_val <- round(min(filtered_df$aggregate_score, na.rm = TRUE), 2)
+            max_val <- round(max(filtered_df$aggregate_score, na.rm = TRUE), 2)
+            mid_val <- 0
+    } else {
+            min_val <- round(min(filtered_df$quant_clamped, na.rm = TRUE), 2)
+            max_val <- round(max(filtered_df$quant_clamped, na.rm = TRUE), 2)
+            mid_val <- round((min_val + max_val) / 2, 2)
+    }
     
+    ## R3DMOL PLOTTING
+        ## Create a color scale legend using HTML/CSS
+        if (!is.null(color_scheme) && color_scheme == "EVE"){
+            gradient_vals <- seq(min_val, max_val, length.out = 100)
+            col_pal_grad <- col_fun(gradient_vals)
+            color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+        } else {
+            if (data_scores == "DMS"){
+                gradient_vals <- seq(min_val, max_val, length.out = 100)
+                col_pal_grad <- col_fun(gradient_vals)
+                color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+            } else {
+                # Create interpolator function
+                col_fun <- colorRampPalette(col_pal)
+                # Generate 100 colors spanning your value range
+                col_pal_grad <- col_fun(100)
+                # Create a CSS gradient string
+                color_gradient_css <- paste(col_pal_grad, collapse = ", ")
+            }
+            
+        }
+        ## Create the legend with value labels
+        legend_div <- tags$div(
+          style = paste0(
+            "position:absolute; top:10px; right:60px; width:20px; height:200px;
+             background: linear-gradient(to top, ", color_gradient_css, ");
+             border: 1px solid black;"
+                  ),
+          # Top label
+          tags$div(max_val, style = "position:absolute; top:-10px; left:30px; font-size:15px;"),
+          # Middle label
+          tags$div(mid_val, style = "position:absolute; top:90px; left:30px; font-size:15px;"),
+          # Bottom label
+          tags$div(min_val, style = "position:absolute; top:190px; left:30px; font-size:15px;")
+        )
+
     ## If full_structure missing or set to TRUE, display complete protein
     if (missing(full_structure) | full_structure == FALSE) {
-         
+
         ## Initialize the 3D viewer, hide all but except selected regions
         viewer <- r3dmol() |>
             m_remove_all_models() |>
@@ -259,10 +529,18 @@ plot_structure <- function(assay_name,
                 sel = list(resi = filtered_df$pos[i]),
                 style = list(cartoon = list(color = filtered_df$color[i]))
               )
+
         }
-        
-        return(viewer)
-    
+
+        ## Combine viewer and legend
+        return(
+        browsable(
+            tagList(
+                tags$div(style = "position:relative; width:100%; height:600px;",
+                    viewer, legend_div)
+            )
+        )
+    )
     } else {
         
          message(paste(
@@ -293,7 +571,7 @@ plot_structure <- function(assay_name,
               )
         }
         
-        ## Color residues without data as yellow
+        ## Color residues without PDB coords as black
         for (resi in residues_without_data) {
          full_viewer <- full_viewer |>
              m_set_style(
@@ -301,7 +579,15 @@ plot_structure <- function(assay_name,
                  style = list(cartoon = list(color = "#3f3f3f"))
              )
         }
-        
-        return(full_viewer)
-    }  
+
+        ## Combine viewer and legend
+        return(
+            browsable(
+                tagList(
+                    tags$div(style = "position:relative; width:100%; height:600px;",
+                        full_viewer, legend_div)
+                )
+            )
+        )
+    }
 }

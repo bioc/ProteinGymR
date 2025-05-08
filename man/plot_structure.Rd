@@ -7,20 +7,28 @@
 plot_structure(
   assay_name,
   pdb_file,
-  dms_data,
+  data_scores = "DMS",
+  dms_data = NULL,
   start_pos = NULL,
   end_pos = NULL,
   full_structure = FALSE,
-  aggregate_fun = mean
+  aggregate_fun = mean,
+  color_scheme = NULL
 )
 }
 \arguments{
 \item{assay_name}{\code{character()} a valid DMS assay name. For the full list of
 available assays, run \code{names()} on the list object loaded with
-\code{ProteinGymR::dms_substitutions()}. Alternatively, the name of a
-user-defined DMS assay.}
+\code{ProteinGymR::dms_substitutions()}. Alternatively, the name of a}
 
-\item{pdb_file}{\code{string()} input path to PBD file.}
+\item{pdb_file}{\code{string()} defaults to corresonding PDB FilePath on
+ExperimentHub. Alternatively, a file path to a user-defined PDB file.}
+
+\item{data_scores}{\code{character()} specify whether DMS, zero-shot, or
+supervised model prediction scores should be displayed scores. Pass either
+"DMS" for experimental scores, or alternatively, a model name from
+\code{available_models()} for zero-shot or \code{supervised_available_models()} for
+semi-supervised models options. Defaults to DMS.}
 
 \item{dms_data}{\code{list()} object of DMS assays loaded with
 \code{ProteinGymR::dms_substitutions()}.
@@ -47,11 +55,9 @@ also take in a user-defined function with a numeric vector as input.
 By default, the mean DMS score across mutations at each position is
 calculated.}
 
-\item{pdb_data}{\code{list()} object of protein structure coordinates in a
-Protein Data Bank format.  By default, pdb files for proteins associated
-with ProteinGym data can be loaded in with \code{ProteinGymR::pdb_files()}.
-Alternatively, a user-defined list of pdb data.frames with names
-matching the \code{assay_name} param.}
+\item{color_scheme}{\code{character()} defaults to blue, white, and red to
+represent positive, neutral, negative scores. Set argument equal to "EVE"
+to use the color scheme consistent with the popEVE portal.}
 }
 \value{
 \code{plot_structure()} returns a \code{\link[r3dmol:init]{r3dmol::r3dmol}}
@@ -67,6 +73,16 @@ respectively.
 substitutions on a 3D protein structure for a chosen assay.
 }
 \details{
+By default, \code{plot_structure()} plots the mean DMS values of all amino acid
+residues, summarized for a protein position. If a model is chosen instead for
+\code{data_scores} argument, a helper function is invoked which normalizes the
+model prediction scores using a rank-based normal quantile transformation.
+The result is a set of normalized scores that preserve the rank order of the
+models scores, while standardizing the distribution. Transformed values
+typically fall between -3 and 3. This normalization ensures the scores are
+approximately standard normally distributed (mean = 0, SD = 1), allowing
+comparisons across models.
+
 For \code{plot_structure()},
 \code{dms_data} must be a \code{list()} object with set names for each assay
 element matching \code{assay_name} parameter.
@@ -82,36 +98,23 @@ replaced by 'N').
 Higher values indicate higher fitness of the mutated protein.
 }
 
-Each PBD table in \code{pdb_data()} must include the following columns:
+Each PBD table in \code{pdb_file} must include the following columns:
 }
 \examples{
 
-# Using default dms_data
-plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
-   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ACE2_HUMAN.pdb")
-   
-plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-   pdb_file = "~/Desktop/R/docker-data/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-   aggregate_fun = mean)
-   
-plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
-   start_pos = 20, 
-   end_pos = 50,
-   full_structure = TRUE,
-   aggregate_fun = min)
-   
-plot_structure(assay_name = "ADRB2_HUMAN_Jones_2020", 
-   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/ADRB2_HUMAN.pdb",
+plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
    start_pos = 20, 
    end_pos = 50,
    full_structure = FALSE,
-   aggregate_fun = mean)
-
-plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018", 
-   pdb_file = "~/ProteinGym_data/ProteinGym_v1.1/ProteinGym_AF2_structures/C6KNH7_9INFA.pdb",
-   dms_data = dms_data, 
-   full_structure = TRUE,
-   aggregate_fun = mean)
+   aggregate_fun = max)
    
+plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018",
+   start_pos = 20,
+   end_pos = 50,
+   data_scores = "GEMME")
+   
+plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
+    data_scores = "Kermut",
+    color_scheme = "EVE")
+  
 }

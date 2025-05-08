@@ -85,6 +85,33 @@ filter_exact_coord <-
         
         assay_pos
     }
+    }
+
+#' @rdname plot_zeroshot_heatmap
+#' 
+#' Create a color function for the heatmap
+#' 
+#' @noRd
+make_col_fun_model <- function(mat, color_scheme = "default") {
+  min_val <- min(mat, na.rm = TRUE)
+  max_val <- max(mat, na.rm = TRUE)
+  mid_val <- 0
+  
+  if (color_scheme == "EVE") {
+    halfpt <- min_val / 2
+    col_fun <- colorRamp2(
+      c(min_val, halfpt, mid_val, max_val),
+      c("#000", "#9440e8", "#00CED1", "#fde662")
+    )
+  } else {
+    parula_colors <- parula(3)
+    col_fun <- colorRamp2(
+      c(min_val, mid_val, max_val),
+      parula_colors
+    )
+  }
+  
+  return(col_fun)
 }
 
 #' @rdname plot_zeroshot_heatmap
@@ -104,6 +131,9 @@ filter_exact_coord <-
 #'   `ProteinGymR::zeroshot_substitutions()`.
 #'    Alternatively, a user-defined list of assays with names corresponding
 #'    to `assay_name` param.
+#'    
+#' @param model `character()` one of the 79 zero-shot models to plot. To view
+#'    the list of models, runs `ProteinGymR::available_models()`.
 #'
 #' @param start_pos `integer()` first amino acid position to plot. If missing, 
 #'    default start is at the first position along the protein where zero shot 
@@ -123,6 +153,12 @@ filter_exact_coord <-
 #' 
 #' @param cluster_columns `logical()` defaults to FALSE. See argument details in 
 #'    [ComplexHeatmap::Heatmap].
+#'    
+#' @param color_scheme `character()` defaults to blue, white, and red to 
+#'    represent positive, neutral, negative scores. Set argument equal to "EVE" 
+#'    to use the color scheme consistent with the popEVE portal.
+#'    
+#' @param ... additional arguments passed to internal plotting functions.
 #' 
 #' @details
 #'
@@ -151,25 +187,14 @@ filter_exact_coord <-
 #' 
 #' available_models()
 #' 
-#' model_data <- readRDS("~/ProteinGym_data/EH_data/v1.2/ProGym217_zeroshot_scores_v1.2.rds")
-#' 
-#' model_data <- zeroshot_substitutions()
-#' 
 #' plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-#'     model_data = model_data, 
 #'     model = "GEMME",
-#'     start_pos = 600, 
-#'     end_pos = 700)
+#'     start_pos = 600,
+#'     end_pos = 700, 
+#'     color_scheme = "EVE")
 #'     
 #' plot_zeroshot_heatmap(assay_name = "SRC_HUMAN_Nguyen_2022",
-#'     model_data = model_data,
 #'     model = "CARP_38M")
-#'     
-#' plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-#'     model_data = model_data, 
-#'     model = "EVmutations",
-#'     start_pos = 10, 
-#'     end_pos = 80, exact_coord = TRUE)
 #' 
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
 #'              arrange select
@@ -183,6 +208,8 @@ filter_exact_coord <-
 #' @importFrom circlize colorRamp2
 #' 
 #' @importFrom stringr str_sub
+#' 
+#' @importFrom pals parula
 #'
 #' @export
 plot_zeroshot_heatmap <- 
@@ -195,6 +222,7 @@ plot_zeroshot_heatmap <-
         exact_coord = FALSE,
         cluster_rows = FALSE,
         cluster_columns = FALSE,
+        color_scheme,
         ...) 
 {
         ## Check model is defined
@@ -212,12 +240,10 @@ plot_zeroshot_heatmap <-
                 "using default data loaded with zeroshot_substitutions()"
             ))
          
-            model_data <- readRDS("~/ProteinGym_data/EH_data/v1.2/ProGym217_zeroshot_scores_v1.2.rds")
+            model_data <- zeroshot_substitutions()
      
         } else {
-            
             model_data
-            
         }
         
         ## Extract the specified assay
@@ -238,7 +264,7 @@ plot_zeroshot_heatmap <-
         ## Select chosen model
         assay_df <- assay_df |>
             dplyr::select(
-                mutant,
+                .data$mutant,
                 all_of(model)
             )
         
@@ -254,9 +280,9 @@ plot_zeroshot_heatmap <-
         
         ## Reshape to wide format
         assay_wide <- assay_df |>
-            dplyr::select(-mutant) |>
-            pivot_wider(names_from = alt, values_from = model) |>
-            arrange(pos)
+            dplyr::select(-.data$mutant) |>
+            pivot_wider(names_from = .data$alt, values_from = model) |>
+            arrange(.data$pos)
     
         ## Subset to start_pos and end_pos, or default to first and last sites.
         if (is.null(start_pos)) {
@@ -294,7 +320,7 @@ plot_zeroshot_heatmap <-
         
         ## Define a text annotation for the columns
         column_annotation <- assay_pos |> 
-            dplyr::select(ref, pos) |> 
+            dplyr::select(.data$ref, .data$pos) |> 
             unique()
         
         ## cluster_columns with NA check
@@ -320,7 +346,7 @@ plot_zeroshot_heatmap <-
         alt <- alt[-c(1)]
         
         assay_pos <- assay_pos |>
-            dplyr::select(-c(ref))
+            dplyr::select(-c(.data$ref))
         
         heatmap_matrix <- assay_pos |>
             dplyr::select(2:length(assay_pos)) |> as.matrix()
@@ -334,14 +360,13 @@ plot_zeroshot_heatmap <-
         phyiochem_order <- unlist(strsplit(phyiochem_order, split = ""))
         
         reordered_matrix <- heatmap_matrix[match(phyiochem_order, 
-                                                   rownames(heatmap_matrix)), ]
+                                rownames(heatmap_matrix)), ]
         
         ## Create the heatmap
-        col_fun <- colorRamp2(c(
-                        min(reordered_matrix, na.rm = TRUE), 0,
-                        max(reordered_matrix, na.rm = TRUE)),
-                    c("red", "white", "blue")
-                    )
+        if (missing(color_scheme)) {
+            color_scheme <- "default"
+        }
+        col_fun <- make_col_fun_model(reordered_matrix, color_scheme)
         
         ComplexHeatmap::Heatmap(reordered_matrix,
             name = paste(model),

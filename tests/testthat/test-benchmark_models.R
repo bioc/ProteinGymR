@@ -30,8 +30,8 @@ test_that("check_model_argument() works", {
     ## Test case when more than 5 models selected
     expect_error(
         check_model_argument(
-            models = c("Site_Independent", "EVmutation", "ESM_1b",
-            "ProtGPT2", "Progen2_Base", "CARP_640M")
+            models = c("Site_Independent", "EVE_single", "GEMME",
+            "VESPA", "PoET", "CARP_640M")
         ),
         paste(
             "Select up to 5 models for comparison"

@@ -48,12 +48,15 @@
 #' @export
 zeroshot_DMS_metrics <- function (metadata = FALSE)
 {
+    eh <- ExperimentHub::ExperimentHub()
+    ehid <- "EH9644"
+    
     ## updated to v1.2 79 models
     if (metadata == TRUE) {
         eh[ehid]
     }
     else  {
-        data <- readRDS("../ProteinGym_data/EH_data/v1.2/zeroshot_summary_scores_v1.2.rds")
+        data <- eh[[ehid]]
         return(data)
     }
 }
@@ -94,12 +97,15 @@ zeroshot_DMS_metrics <- function (metadata = FALSE)
 #' @export
 zeroshot_substitutions <- function (metadata = FALSE)
 {
+    eh <- ExperimentHub::ExperimentHub()
+    ehid <- "EH9645"
+    
     # Check for metadata argument
     if (metadata == TRUE) {
-        #eh[ehid]
-        message("Grabbing metadata.")
+        eh[ehid]
+        message("Grabbing metadata only.")
     } else {
-       data <- readRDS("../ProteinGym_data/EH_data/v1.2/zeroshot_scores_v1.2.rds")
+       data <- eh[[ehid]]
        return(data)
     }
 }

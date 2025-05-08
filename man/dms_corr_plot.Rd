@@ -2,52 +2,62 @@
 % Please edit documentation in R/dms_corr_plot.R
 \name{dms_corr_plot}
 \alias{dms_corr_plot}
-\title{Integrate ProteinGym DMS and AlphaMissense Pathogenicity Scores}
+\title{Integrate ProteinGym DMS and Model Prediction Scores}
 \usage{
-dms_corr_plot(uniprotId, alphamissense_table, dms_table)
+dms_corr_plot(
+  uniprotId,
+  alphamissense_table = deprecated(),
+  dms_table,
+  model = "AlphaMissense"
+)
 }
 \arguments{
 \item{uniprotId}{\code{character()} a valid UniProt accession identifier.}
 
-\item{alphamissense_table}{a table containing AlphaMissense predictions
-for variants matching ProteinGym substitution mutants. The default is
-the supplemental table from the AlphaMissense paper.
-Alternatively, a user-defined \code{\link[tibble:tbl_df-class]{tibble::tbl_df}} or \code{\link{data.frame}}
-can be supplied.}
+\item{alphamissense_table}{deprecated as of ProteinGymR 1.2.0. To access
+AlphaMissense model predictions, get \code{model} argument to "AlphaMissense".}
 
 \item{dms_table}{a table containing deep mutational scanning (DMS)
 assay scores for mutations. The default table loads substitutions from
 \href{https://proteingym.org/download}{ProteinGym}.
 Alternatively, a user-defined \code{\link[tibble:tbl_df-class]{tibble::tbl_df}} or \code{\link{data.frame}}
 can be supplied.}
+
+\item{model}{\code{character()} a model to plot. To view the possible zero-shot
+and semi-supervised models available in ProteinGym v1.2 run
+\code{ProteinGymR::available_models()} or
+\code{ProteinGymR::supervised_available_models()}, respectively, or set
+\verb{model = "AlphaMissense} to access AlphaMissense predictions.
+If no \code{model} argument is specified, the default loads in the
+supplemental table from the AlphaMissense paper.}
 }
 \value{
 \code{dms_corr_plot()} returns a \code{ggplot} object visualizing
-the Spearman correlation between experimental DMS scores and AlphaMissense
-predicted scores and prints the r and p-value of the analysis to console.
-Generally, a stronger negative correlation corresponds to a tighter
+the Spearman correlation between experimental DMS scores and predicted
+model scores and prints the r and p-value of the analysis to console.
 }
 \description{
 \code{dms_corr_plot()} runs a Spearman correlation
 between ProteinGym deep mutational scanning (DMS) assay scores and
-AlphaMissense predicted pathogenicity scores.
+predicted model scores.
 Returns a ggplot object for visualization.
 }
 \details{
 For \code{dms_corr_plot()},
-\code{alphamissense_table} columns must include:
+\code{model_table} columns must include:
 \itemize{
 \item \code{UniProt_id}: UniProt accession identifier.
-\item \code{mutant}: Mutant identifier string matching the dms_table format.
+\item \code{mutant}: Mutant identifier string matching the \code{dms_table} format.
 Protein position in the middle, and the reference and mutant
 amino acid residues to the left and right of the position, respectively.
-\item \code{AlphaMissense}: AlphaMissense pathogenicity score.
+\item \code{{{model}}}: Predicted model scores. Set this column name as the model
+name.
 }
 
 \code{dms_table} columns must include:
 \itemize{
 \item \code{UniProt_id}: UniProt accession identifier.
-\item \code{mutant}: Mutant identifier string matching AlphaMissense variants.
+\item \code{mutant}: Mutant identifier string matching \code{model_table} variants.
 Specifically, the set of substitutions to apply on the reference sequence
 to obtain the mutated sequence (e.g., A1P:D2N implies the amino acid 'A'
 at position 1 should be replaced by 'P', and 'D' at position 2 should be
@@ -58,8 +68,13 @@ Higher values indicate higher fitness of the mutated protein.
 }
 \examples{
 
+# Use defaults. Only requires uniprotId
 dms_corr_plot(uniprotId = "Q9NV35")
 
+dms_corr_plot(
+    uniprotId = "P04637",
+    model = "Kermut"
+)
 
 }
 \references{

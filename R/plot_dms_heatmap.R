@@ -87,6 +87,24 @@ filter_exact_coord <-
     }
 }
 
+#' Create a color function for the heatmap
+#' @noRd
+make_col_fun_dms <- function(mat, color_scheme = "default") {
+  if (color_scheme == "EVE") {
+    halfpt <- (min(mat, na.rm = TRUE) / 2)
+    col_fun <- colorRamp2(
+      c(min(mat, na.rm = TRUE), halfpt, 0, max(mat, na.rm = TRUE)),
+      c("#000", "#9440e8", "#00CED1", "#fde662")
+    )
+  } else {
+    col_fun <- colorRamp2(
+      c(min(mat, na.rm = TRUE), 0, max(mat, na.rm = TRUE)),
+      c("red", "white", "blue")
+    )
+  }
+  return(col_fun)
+}
+
 #' @rdname plot_dms_heatmap
 #' 
 #' @title Visualize DMS Scores Along a Protein
@@ -122,6 +140,12 @@ filter_exact_coord <-
 #' 
 #' @param cluster_columns `logical()` defaults to FALSE. See argument details in 
 #'    [ComplexHeatmap::Heatmap].
+#'    
+#' @param color_scheme `character()` defaults to blue, white, and red to 
+#'  represent positive, neutral, negative scores. Set argument equal to "EVE" 
+#'  to use the color scheme consistent with the popEVE portal.
+#'  
+#' @param ... additional arguments passed to internal plotting functions.
 #' 
 #' @details
 #'
@@ -156,11 +180,14 @@ filter_exact_coord <-
 #'     
 #' plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
 #'     start_pos = 10, 
-#'     end_pos = 80, exact_coord = TRUE)
+#'     end_pos = 80, 
+#'     exact_coord = TRUE,
+#'     color_scheme = "EVE")
 #'     
 #' plot_dms_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
 #'     start_pos = 50, 
-#'     end_pos = 100, cluster_rows = TRUE)
+#'     end_pos = 100, 
+#'     cluster_rows = TRUE)
 #' 
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
 #'              arrange select
@@ -185,6 +212,7 @@ plot_dms_heatmap <-
         exact_coord = FALSE,
         cluster_rows = FALSE,
         cluster_columns = FALSE,
+        color_scheme,
         ...) 
 {
 
@@ -195,13 +223,9 @@ plot_dms_heatmap <-
             "'dms_data' not provided,",
             "using DMS data loaded with dms_substitutions()"
         ))
-     
         dms_data <- dms_substitutions()
-     
     } else {
-        
         dms_data
-        
     }
         
     ## Extract the specified assay
@@ -234,7 +258,7 @@ plot_dms_heatmap <-
     ## Reshape to wide format
     assay_wide <- assay_df |>
         #select(-ref) |>
-        pivot_wider(names_from = alt, values_from = DMS_score) |>
+        pivot_wider(names_from = .data$alt, values_from = .data$DMS_score) |>
         arrange(pos)
     
     ## Subset to start_pos and end_pos, or default to first and last sites.
@@ -286,7 +310,6 @@ plot_dms_heatmap <-
     
     column_annotation[is.na(column_annotation)] <- " "
     
-    
     ## Convert to matrix
     pos <- assay_pos$pos
     alt <- colnames(assay_pos)
@@ -317,13 +340,12 @@ plot_dms_heatmap <-
     )
 
     ## Create the heatmap
-    col_fun <- colorRamp2(c(
-                    min(reordered_matrix, na.rm = TRUE), 0, 
-                    max(reordered_matrix, na.rm = TRUE)), 
-                c("red", "white", "blue")
-                )
-    
-    ComplexHeatmap::Heatmap(reordered_matrix,
+    if (missing(color_scheme)) {
+        color_scheme <- "default"
+    }
+    col_fun <- make_col_fun_dms(reordered_matrix, color_scheme)
+        
+    plot <- ComplexHeatmap::Heatmap(reordered_matrix,
         name = "DMS Score",
         cluster_rows = cluster_rows,
         cluster_columns = cluster_columns,
@@ -332,4 +354,5 @@ plot_dms_heatmap <-
         top_annotation = column_annotation,
         ...)
 
+    return(plot)
 }

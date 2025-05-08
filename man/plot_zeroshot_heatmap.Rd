@@ -13,6 +13,7 @@ plot_zeroshot_heatmap(
   exact_coord = FALSE,
   cluster_rows = FALSE,
   cluster_columns = FALSE,
+  color_scheme,
   ...
 )
 }
@@ -26,6 +27,9 @@ user-defined DMS assay.}
 \code{ProteinGymR::zeroshot_substitutions()}.
 Alternatively, a user-defined list of assays with names corresponding
 to \code{assay_name} param.}
+
+\item{model}{\code{character()} one of the 79 zero-shot models to plot. To view
+the list of models, runs \code{ProteinGymR::available_models()}.}
 
 \item{start_pos}{\code{integer()} first amino acid position to plot. If missing,
 default start is at the first position along the protein where zero shot
@@ -45,6 +49,12 @@ chosen assay.}
 
 \item{cluster_columns}{\code{logical()} defaults to FALSE. See argument details in
 \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap}.}
+
+\item{color_scheme}{\code{character()} defaults to blue, white, and red to
+represent positive, neutral, negative scores. Set argument equal to "EVE"
+to use the color scheme consistent with the popEVE portal.}
+
+\item{...}{additional arguments passed to internal plotting functions.}
 }
 \value{
 Returns a \link[ComplexHeatmap:Heatmap]{ComplexHeatmap::Heatmap} plot of zero-shot model scores
@@ -79,24 +89,13 @@ should match \code{model} argument string.
 
 available_models()
 
-model_data <- readRDS("~/ProteinGym_data/EH_data/v1.2/ProGym217_zeroshot_scores_v1.2.rds")
-
-model_data <- zeroshot_substitutions()
-
 plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-    model_data = model_data, 
     model = "GEMME",
-    start_pos = 600, 
-    end_pos = 700)
+    start_pos = 600,
+    end_pos = 700, 
+    color_scheme = "EVE")
     
 plot_zeroshot_heatmap(assay_name = "SRC_HUMAN_Nguyen_2022",
-    model_data = model_data,
     model = "CARP_38M")
-    
-plot_zeroshot_heatmap(assay_name = "A0A192B1T2_9HIV1_Haddox_2018", 
-    model_data = model_data, 
-    model = "EVmutations",
-    start_pos = 10, 
-    end_pos = 80, exact_coord = TRUE)
 
 }

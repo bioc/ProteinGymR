@@ -2,10 +2,13 @@
 % Please edit documentation in R/benchmark_models.R
 \name{available_models}
 \alias{available_models}
+\alias{supervised_available_models}
 \alias{benchmark_models}
 \title{Benchmark Variant Effect Prediction Models}
 \usage{
 available_models()
+
+supervised_available_models()
 
 benchmark_models(
   metric = c("AUC", "MCC", "NDCG", "Spearman", "Top_recall"),

@@ -1,4 +1,4 @@
-#' @rdname ProteinGym_supervised_scores
+#' @rdname supervised_scores
 #' 
 #' @title Load Semi-Supervised Model Predictions for Substitutions in 217 Assays
 #'
@@ -35,54 +35,52 @@
 #' @examples
 #' data <- supervised_substitutions()
 #' data_random <- supervised_substitutions(fold_scheme = "random")
+#' meta <- supervised_substitutions(metadata = TRUE)
 #' 
 #' @export
-supervised_substitutions <- function (metadata = FALSE, fold_scheme = "contiguous")
+supervised_substitutions <- function(metadata = FALSE, 
+    fold_scheme = c("contiguous", "modulo", "random")) 
 {
     
-    # Check if fold_scheme is one of the allowed values
-    valid_schemes <- c("contiguous", "modulo", "random")
-  
-    if (!(fold_scheme %in% valid_schemes)) {
-        stop(sprintf("Invalid fold_scheme: '%s'. Must be one of: %s", 
-            fold_scheme, paste(valid_schemes, collapse = ", ")))
+    # Check if fold_scheme was missing and set default with a message
+    if (missing(fold_scheme)) {
+        message("No fold_scheme specified, using contiguous scheme as default.")
     }
+
+    # Match the argument to allowed choices and set default
+    fold_scheme <- match.arg(fold_scheme)
     
-    # Check for metadata argument
-    if (metadata == TRUE) {
-        #eh[ehid]
-        message("Grabbing metadata.")
+    # Load EH
+    eh <- ExperimentHub::ExperimentHub()
+    
+    if (isTRUE(metadata)) {
+        message("Grabbing metadata only.")
+        
+        ehids <- c("EH9646", "EH9647", "EH9648")
+        metadata_results <- lapply(ehids, function(id) eh[[id]])
+        return(metadata_results)
+        
     } else {
-    
-        # Load respective dataset
-        if (fold_scheme == "contiguous") {
-            message(
-                c("Loading semi-supervised model scores ", 
-                "with contiguous folding scheme")
+        ehid <- switch(
+            fold_scheme,
+            "contiguous" = "EH9646",
+            "modulo"     = "EH9647",
+            "random"     = "EH9648"
+        )
+        
+        message(
+            sprintf(
+                "Loading semi-supervised model scores with %s folding scheme", 
+                fold_scheme
             )
-            data <- readRDS("../ProteinGym_data/EH_data/v1.2/supervised_contiguous5_scores_v1.2.rds")
-            return(data)
-        }   
-        else if (fold_scheme == "modulo") {
-            message(
-                c("Loading semi-supervised model scores ", 
-                "with modulo folding scheme")
-            )
-            data <- readRDS("../ProteinGym_data/EH_data/v1.2/supervised_modulo5_scores_v1.2.rds")
-            return(data)
-        } 
-        else {
-            message(
-                c("Loading semi-supervised model scores ", 
-                "with random folding scheme")
-            )
-            data <- readRDS("../ProteinGym_data/EH_data/v1.2/supervised_random5_scores_v1.2.rds")
-            return(data)
-        }
+        )
+        
+        data <- eh[[ehid]]
+        return(data)
     }
 }
 
-#' @rdname ProteinGym_supervised_scores
+#' @rdname supervised_scores
 #' 
 #' @title Load Semi-Supervised Model Summary Metrics
 #'
@@ -111,7 +109,7 @@ supervised_substitutions <- function (metadata = FALSE, fold_scheme = "contiguou
 #' 
 #' @examples
 #' data <- supervised_metrics()
-#' data_meta <- supervised_metrics(metadata = TRUE)
+#' meta <- supervised_metrics(metadata = TRUE)
 #' 
 #' @references
 #' Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., Spinner, H., 
@@ -125,13 +123,16 @@ supervised_substitutions <- function (metadata = FALSE, fold_scheme = "contiguou
 #' @export
 supervised_metrics <- function (metadata = FALSE)
 {
+    # Load EH
+    eh <- ExperimentHub::ExperimentHub()
+    
     # Check for metadata argument
     if (metadata == TRUE) {
-        #eh[ehid]
-        message("gathering metadata")
+        eh["EH9649"]
+        message("Grabbing metadata only.")
     }
     else {
-        data <- readRDS("../ProteinGym_data/EH_data/v1.2/supervised_random5_scores_v1.2.rds")
+        data <- eh[["EH9649"]]
         return(data)
     }
 }

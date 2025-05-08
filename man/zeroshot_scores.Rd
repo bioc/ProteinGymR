@@ -74,7 +74,7 @@ data <- zeroshot_DMS_metrics()
 data_meta <- zeroshot_DMS_metrics(metadata = TRUE)
 
 data <- zeroshot_substitutions()
-data_random <- zeroshot_substitutions(fold_scheme = "random")
+data_meta <- zeroshot_substitutions(metadata = TRUE)
 
 }
 \references{
