@@ -247,7 +247,7 @@ this protein and set the aggregation method to view the minimum DMS score across
 all mutants at each position by setting `aggregation_fun = min`. To view a 
 specific region in detail: use `start_pos` and `end_pos`.
 
-```{r, fig.wide = TRUE, echo = FALSE}
+```{r, fig.wide = TRUE}
 plot_structure(assay_name = "C6KNH7_9INFA_Lee_2018", 
     aggregate_fun = min)
 ```
