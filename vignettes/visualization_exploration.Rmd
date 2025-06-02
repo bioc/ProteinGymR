@@ -31,7 +31,9 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, nobreak = TRUE)
+knitr::opts_chunk$set(echo = TRUE, nobreak = TRUE, 
+                      warning = FALSE,
+                      messages = FALSE)
 ```
 
 [CH]: https://bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html
@@ -74,7 +76,7 @@ of positions where DMS data is available for this assay. To plot a specific
 region of interest, use the arguments `start_pos()` and `end_pos()` which takes
 in an integer for the first and last residue position to plot in the protein.
 
-```{r ACE default heatmap, fig.wide = TRUE, echo = FALSE}
+```{r ACE default heatmap, fig.wide = TRUE}
 ace2_dms <- plot_dms_heatmap(
     assay_name = "ACE2_HUMAN_Chan_2020",
     start_pos = 1, 
@@ -108,7 +110,7 @@ row clustering under the hood. For more details about this clustering method or
 to view more function parameters, read the function documentation with 
 `?plot_dms_heatmap()`.
 
-```{r SHOC2 heatmap, fig.wide = TRUE, echo=FALSE}
+```{r SHOC2 heatmap, fig.wide = TRUE}
 shoc2_dms <- plot_dms_heatmap(assay_name = "SHOC2_HUMAN_Kwon_2022", 
     start_pos = 10,
     end_pos = 60,
@@ -130,7 +132,7 @@ zero-shot models, and `supervised_available_models()` for the 11 semi-supervised
 models. If `model_data` is not provided, the default model scores from 
 ProteinGym will be loaded in from `ProteinGymR::zeroshot_substitutions()`.
 
-```{r, fig.wide = TRUE, echo = FALSE}
+```{r, fig.wide = TRUE}
 ace2_model <- plot_zeroshot_heatmap(
     assay_name = "ACE2_HUMAN_Chan_2020", 
     model = "GEMME",
@@ -199,7 +201,7 @@ However, it is possible to set any user-defined aggregation function with the
 For DMS assays, a score of zero will always be represented as white, 
 corresponding to the biological interpretation of neutral fitness effect.
 
-```{r, fig.wide = TRUE, echo = FALSE}
+```{r, fig.wide = TRUE}
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
 ```
 
@@ -227,7 +229,7 @@ full visualization of the complete protein structure, rather than just the
 
 <br>
 
-```{r, fig.wide = TRUE, echo = FALSE}
+```{r, fig.wide = TRUE}
 plot_structure(assay_name = "ACE2_HUMAN_Chan_2020", 
     data_scores = "Kermut",
     full_structure = TRUE)
