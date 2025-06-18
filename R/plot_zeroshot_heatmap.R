@@ -93,26 +93,27 @@ filter_exact_coord <-
 #' 
 #' @noRd
 make_col_fun_model <- function(mat, color_scheme = "default") {
-  min_val <- min(mat, na.rm = TRUE)
-  max_val <- max(mat, na.rm = TRUE)
-  mid_val <- 0
-  
-  if (color_scheme == "EVE") {
-    halfpt <- min_val / 2
-    col_fun <- colorRamp2(
-      c(min_val, halfpt, mid_val, max_val),
-      c("#000", "#9440e8", "#00CED1", "#fde662")
-    )
-  } else {
-    parula_colors <- parula(3)
-    col_fun <- colorRamp2(
-      c(min_val, mid_val, max_val),
-      parula_colors
-    )
-  }
-  
-  return(col_fun)
+    min_val <- min(mat, na.rm = TRUE)
+    max_val <- max(mat, na.rm = TRUE)
+    mid_val <- max_val/2
+
+    if (color_scheme == "EVE") {
+        mid_val <- max_val/2
+        halfpt <- min_val / 2
+        col_fun <- colorRamp2(
+            c(min_val, halfpt, mid_val, max_val),
+            c("#000", "#9440e8", "#00CED1", "#fde662")
+        )
+    } else {
+        parula_colors <- parula(3)
+        col_fun <- colorRamp2(
+            c(min_val, mid_val, max_val),
+            parula_colors
+        )
+    }
+    return(col_fun)
 }
+
 
 #' @rdname plot_zeroshot_heatmap
 #' 
@@ -370,6 +371,21 @@ plot_zeroshot_heatmap <-
         
         ComplexHeatmap::Heatmap(reordered_matrix,
             name = paste(model),
+            heatmap_legend_param = list(
+                at = c(min(reordered_matrix,na.rm = TRUE), 
+                       ((max(reordered_matrix, na.rm = TRUE) - 
+                            min(reordered_matrix, na.rm = TRUE))/2),
+                       max(reordered_matrix, na.rm = TRUE)
+                       ),
+                labels = c(
+                    sprintf("%.2f", min(reordered_matrix, na.rm = TRUE)),
+                    sprintf("%.2f",(
+                        (max(reordered_matrix, na.rm = TRUE) - 
+                            min(reordered_matrix, na.rm = TRUE))/2)
+                    ),
+                    sprintf("%.2f", max(reordered_matrix, na.rm = TRUE))
+                )
+            ),
             cluster_rows = cluster_rows,
             cluster_columns = cluster_columns,
             col = col_fun,
