@@ -20,7 +20,8 @@ output:
       toc_float: true
       toc_depth: 2
       code_folding: show
-date: "April 23, 2025"
+date: "June 18, 2025"
+bibliography: references.bib
 vignette: >
     %\VignetteIndexEntry{Data access and representation}
     %\VignetteEncoding{UTF-8}
@@ -61,91 +62,81 @@ library(stringr)
 library(ggplot2)
 ```
 
-[ProteinGym]: https://proteingym.org/
-[pg_publication]: https://proceedings.neurips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html
-[zenodo]: https://zenodo.org/records/14997691
-[dms_paper]: https://www.nature.com/articles/nmeth.3027
-[physiochem]: https://biology.stackexchange.com/questions/105321/arrangement-of-amino-acids-in-the-protein-alphabet
-[boucher]: https://pubmed.ncbi.nlm.nih.gov/27010590/
-
 # Introduction
 
 Predicting the effects of mutations in proteins is critical to many
-applications, from understanding genetic disease to designing novel proteins
-to address our most pressing challenges in climate, agriculture and
-healthcare. Despite an increase in machine learning-based protein modeling
-methods, assessing the effectiveness of these models is problematic due to
-the use of distinct, often contrived, experimental datasets and variable
-performance across different protein families.
+applications, from understanding genetic disease to designing novel proteins to
+address our most pressing challenges in climate, agriculture and healthcare.
+Despite an increase in machine learning-based protein modeling methods,
+assessing the effectiveness of these models is problematic due to the use of
+distinct, often contrived, experimental datasets and variable performance across
+different protein families.
 
-[ProteinGym][ProteinGym] is a large-scale and holistic set of benchmarks 
-specifically designed for protein fitness prediction and design curated by
-([Notin et al. 2023][pg_publication]). It encompasses both a broad collection 
-of over 250 standardized deep mutational scanning (DMS) assays, spanning 
-millions of mutated sequences, as well as curated clinical datasets providing 
-high-quality expert annotations about mutation effects. Furthermore, ProteinGym 
-reports the performance of a diverse set of over 70 high-performing models from 
-various subfields (eg., mutation effects, inverse folding) into a unified 
-benchmark.
+[ProteinGym](https://proteingym.org/) is a large-scale and holistic set of
+benchmarks specifically designed for protein fitness prediction and design
+curated by @Notin2023.
+It encompasses both a broad collection of over 250 standardized deep mutational
+scanning (DMS) assays, spanning millions of mutated sequences, as well as
+curated clinical datasets providing high-quality expert annotations about
+mutation effects. Furthermore, ProteinGym reports the performance of a diverse
+set of over 70 high-performing models from various subfields (eg., mutation
+effects, inverse folding) into a unified benchmark.
 
-ProteinGym datasets are openly available as a community resource both on
-[Zenodo][zenodo] and the official [ProteinGym website][ProteinGym]. 
-ProteinGym v1.1 was released with Bioconductor 3.20 and v1.2 with 
-Bioconductor 3.21.
+ProteinGym datasets are publicly available as a community resource both on
+[Zenodo](https://doi.org/10.5281/zenodo.13932632) and the official [ProteinGym
+website](https://proteingym.org/) under the MIT license.
 
+# Available datasets
 
-# Data
-
-The `ProteinGymR` package provides the following analysis-ready datasets from 
+The `ProteinGymR` package provides the following analysis-ready datasets from
 ProteinGym:
 
-1.  DMS assay scores from 217 assays measuring the impact of all possible 
-amino acid substitutions across 186 proteins. The data is provided with 
-`dms_substitutions()`.
+1.  DMS assay scores from 217 assays measuring the impact of all possible amino
+    acid substitutions across 186 proteins. The dataset can be obtained using
+    the `dms_substitutions()` function
 
-2.  AlphaMissense pathogenicity scores for ~1.6 M substitutions in the
-ProteinGym DMS data. The data is provided with `am_scores()`.
+2.  AlphaMissense pathogenicity scores for \~1.6 M substitutions in the
+    ProteinGym DMS data. The data is provided with `am_scores()`.
 
-3. Reference file containing metadata associated with the 217 DMS assays.
+3.  Reference file containing metadata associated with the 217 DMS assays, such
+    as taxon, protein sequence length, UniProt ID, etc.
 
-4. Five model performance metrics ("AUC", "MCC", "NDCG", "Spearman", 
-"Top_recall") for 79 models across 217 assays (as of Bioc 3.21) calculated on 
-DMS substitutions in a zero-shot setting. The data is provided with 
-`zeroshot_DMS_metrics()`.
+4.  Five model performance metrics ("AUC", "MCC", "NDCG", "Spearman",
+    "Top_recall") for 79 models across 217 assays calculated on DMS
+    substitutions in a zero-shot setting. The data can be obtained with
+    `zeroshot_DMS_metrics()`.
 
-5. Model scores on the DMS substitutions for 79 models in the zero-shot setting.
-Load in with `zeroshot_substitutions()`.
+5.  Model scores on the DMS substitutions for 79 models in the zero-shot
+    setting. Load with `zeroshot_substitutions()`.
 
-6. Two model performance metrics ("Spearman", and "MSE") for 12 models across 
-217 assays (as of Bioc 3.21) calculated on DMS substitutions in a 
-semi-supervised setting. Load in this data with `supervised_metrics()`.
+6.  Two model performance metrics ("Spearman", and "MSE") for 12 models across
+    217 assays (as of Bioc 3.21) calculated on DMS substitutions in a
+    semi-supervised setting. Load in this data with `supervised_metrics()`.
 
-7. Model scores on the DMS substitutions for 11 semi-supervised models with 3 
-folding schemes: contiguous, modulo, and random. Loaded in with 
-`supervised_substitutions()` and by changing the 
-"fold_scheme" argument, respectively.
+7.  Model scores on the DMS substitutions for 11 semi-supervised models with 3
+    folding schemes: contiguous, modulo, and random. Loaded in with
+    `supervised_substitutions()` and by changing the "fold_scheme" argument,
+    respectively.
 
-8. PDB files for 197 protein structures, to be used in the `plot_structure()` 
-3D visualization function.
+8.  PDB files for 197 protein structures, to be used in the `plot_structure()`
+    3D visualization function.
 
+# Data import
 
-# Import ProteinGym data
+ProteinGym data can be obtained through
+[ExperimentHub](https://bioconductor.org/packages/release/bioc/html/ExperimentHub.html).
 
-ProteinGym data is accessed through ExperimentHub.
+## DMS data
 
-
-## Load and explore the DMS data
-
-Deep mutational scanning is an experimental technique that provides 
-comprehensive data on the functional effects of all possible single mutations 
-in a protein ([Fowler & Fields 2014][dms_paper]). For each position in a 
-protein, the amino acid residue is mutated and the fitness effects are recorded. 
-While most mutations tend to be deleterious, some can enhance protein activity. 
-In addition to analyzing single mutations, this method can also examine the 
-effects of multiple mutations, yielding insights into protein structure and 
-function. Overall, DMS scores provide a detailed map of how changes in a 
-protein's sequence affect its function, offering valuable yet complex insights 
-for researchers studying protein biology.
+Deep mutational scanning is an experimental technique that provides
+experimental data on the fitness effects of all possible single mutations in
+a protein [@Fowler2014].
+For each position in a protein, the amino acid residue is mutated and the
+fitness effects are recorded. While most mutations tend to be deleterious, some
+can enhance protein activity. In addition to analyzing single mutations, this
+method can also examine the effects of multiple mutations, yielding insights
+into protein structure and function. Overall, DMS scores provide a detailed map
+of how changes in a protein's sequence affect its function, offering valuable
 
 Datasets in `ProteinGymR` can be easily loaded with built-in functions.
 
@@ -154,25 +145,25 @@ dms_data <- dms_substitutions()
 ```
 
 View the DMS study names for the first 6 assays.
+
 ```{r view studies}
 head(names(dms_data))
 ```
 
 View an example of one DMS assay.
+
 ```{r view assay}
 head(dms_data[[1]])
 ```
 
-For each DMS assay, the columns show the UniProt protein identifier, the DMS 
-experiment assay identifier, the mutant at a given protein position, the mutated
-protein sequence, the recorded DMS score, and a binary DMS score bin 
-categorizing whether the mutation has an affect on fitness (1) or not (0). For 
-more details, access the function documentation with `?dms_substitutions()` and
-the reference publication from Notin et al. 2023.
+For each DMS assay, the columns show the UniProt protein identifier, the DMS
+experiment assay identifier, the amino acid substitution at a given sequence 
+position, the mutated protein sequence, the recorded DMS score, and a binary 
+DMS score bin categorizing whether the mutation has an effect on fitness 
+(1) or not (0). For details, see `?dms_substitutions` and the reference 
+publication from @Notin2023.
 
-To access the metadata associated with each DMS assay, we can load in the 
-reference table. Do this by querying all datasets on ExperimentHub affilitated
-with "ProteinGymR".
+Here, we obtain the metadata table that provides additional information for the DMS experiments.
 
 ```{r queryEH}
 eh <- ExperimentHub::ExperimentHub()
@@ -182,55 +173,55 @@ dms_metadata <- eh[["EH9607"]]
 names(dms_metadata)
 ```
 
-There are 45 columns representing metadata for DMS assays. For more information 
-about the information, see the [ProteinGym publication][pg_publication].
+There are 45 columns representing metadata for DMS assays. See @Notin2023 for details on the individual metadata columns.
 
+# Model benchmarking
 
-# Benchmarking across models
+The function `benchmark_models()` can be used to compare
+performance across several variant effect prediction models when using the 
+DMS data as ground truth. This function takes in one of the five
+available metrics, and and compares the performance of up to 5 out of the 
+79 available models.
 
-We will now use the built-in function `benchmark_models()` to compare 
-performance across several variant effect prediction models calculated on the 
-217 DMS assays in the zero-shot setting. This function takes in one of the five 
-available metrics, and compares up to 5 models of the 79 available (as of 
-ProteinGym v1.2).
+In the zero-shot setting, the effects of mutations on fitness are predicted 
+without relying on ground-truth labels for the protein of interest. 
+Robust zero-shot performance is particularly informative when labels are
+subject to several biases or scarcely available (e.g., labels for rare genetic
+pathologies).
 
-In the zero-shot setting, experimental phenotypical measurements from
-a given assay are predicted without having access to any ground-truth labels at 
-training time. Robust zero-shot performance is particularly informative when 
-labels are subject to several biases or scarcely available (e.g., labels for 
-rare genetic pathologies).
+Model performance was evaluated across 5 metrics:
 
-Model performance was evaluted across 5 metrics:
+1.  Spearman's rank correlation coefficient (default metric)
+2.  Area Under the ROC Curve (AUC)
+3.  Matthews Correlation Coefficient (MCC), most suitable for bimodal DMS 
+measurements
+4.  Normalized Discounted Cumulative Gains (NDCG)
+5.  Top K Recall (top 10% of DMS values)
 
-1. Spearman's rank correlation coefficient (primary metric)
-2. Area Under the ROC Curve (AUC)
-3. Matthews Correlation Coefficient (MCC) for bimodal DMS measurements
-4. Normalized Discounted Cumulative Gains (NDCG) for identifying the most 
-functional protein variants
-5. Top K Recall (top 10% of DMS values)
+To account for the fact that certain protein functions are overrepresented 
+in the list of proteins assayed with DMS (e.g., thermostability), these metrics 
+were first calculated within groups of proteins with similar functions. The 
+final value of the metric is then the average of these averages, giving each 
+functional group equal weight. The final values are referred to as the 
+‘corrected average’.
 
-To avoid placing too much weight on properties with many assays 
-(e.g., thermostability), these metrics were first calculated within groups 
-of assays that measure similar functions. The final value of the metric
-is then the average of these averages, giving each functional group equal 
-weight. The final values are referred to as the ‘corrected average’.
-
-Due to the often non-linear relationship between protein function and 
-organism fitness ([Boucher et al., 2016][boucher]), the Spearman’s rank 
-correlation coefficient is the most generally appropriate 
-metric for model performance on experimental measurements. However, in 
+Due to the often non-linear relationship between protein function and organism
+fitness [@Boucher2016], the
+Spearman’s rank correlation coefficient is typically an appropriate choice for 
+evaluating model performance against experimental measurements. However, in 
 situations where DMS measurements exhibit a bimodal profile, rank correlations 
 may not be the optimal choice. Therefore, additional metrics are also provided, 
 such as the Area Under the ROC Curve (AUC) and the Matthews Correlation 
-Coefficient (MCC), which compare model scores with binarized experimental 
+Coefficient (MCC), which compare binarized model scores and experimental 
 measurements. Furthermore, for certain goals (e.g., optimizing functional 
 properties of designed proteins), it is more important that a model is able to 
 correctly identify the most functional protein variants, rather than properly 
-capture the overall distribution of all assayed variants. Thus, we also 
-calculate the Normalized Discounted Cumulative Gains (NDCG), which up-weights a 
-model if it gives its highest scores to sequences with the highest DMS value. 
-Finally, we also calculate Top K Recall, where we select K to be the top 10% 
-of DMS values.
+capture the overall distribution of all assayed variants. For such scenarios, 
+it is beneficial to use the Normalized Discounted Cumulative Gains (NDCG) which 
+prioritizes models that return high scores for sequences with high DMS value 
+(corresponding to strong gain in fitness). Alternatively, the Top K Recall 
+(with K being set to the top 10% of DMS values) can also be informative for such 
+scenarios.
 
 To view all available zero-shot models, use the function: `available_models()`.
 
@@ -245,31 +236,15 @@ benchmark_models(metric = "AUC",
     models = c("GEMME", "CARP_600K", "ESM1b", "VESPA", "ProtGPT2"))
 ```
 
-Based on the AUC metric of evaluation, GEMME performed the best while of the 5 
-selected models. If the `metric` argument is not defined, the default used is 
-a Spearman correlation. For more information about the models and metrics, see 
-the function documentation `?benchmark_models()`.
-
-
-# Reference
-
-Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., Spinner, H., 
-Rollins, N., Shaw, A., Orenbuch, R., Weitzman, R., Frazer, J., Dias, M., 
-Franceschi, D., Gal, Y., & Marks, D. (2023). ProteinGym: Large-Scale 
-Benchmarks for Protein Fitness Prediction and Design. In A. Oh, T. Neumann, 
-A. Globerson, K. Saenko, M. Hardt, & S. Levine (Eds.), Advances in Neural 
-Information Processing Systems (Vol. 36, pp. 64331-64379). 
-Curran Associates, Inc.
-
-Fowler, D., Fields, S. Deep mutational scanning: a new style of protein science. 
-Nat Methods 11, 801–807 (2014). doi: 10.1038/nmeth.3027.
-
-Boucher JI, Bolon DN, Tawfik DS. Quantifying and understanding the fitness 
-effects of protein mutations: Laboratory versus nature. Protein Sci. 2016 Jul;
-25(7):1219-26. doi: 10.1002/pro.2928.
-
+Here, GEMME performed the best, achieving highest AUC of the 5 selected models. 
+If not specified by the user, Spearman correlation is used as the default 
+metric. For more information about the models and metrics, see the
+function documentation `?benchmark_models()`.
 
 # Session Info
+
 ```{r, sesh info}
 sessionInfo()
 ```
+
+# References
