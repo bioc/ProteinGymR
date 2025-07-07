@@ -26,14 +26,14 @@ knitr::opts_chunk$set(echo = TRUE)
     1. "ProteinGym_AF2_structures": PDB protein structures files (n=197)
     2. "zeroshot_scores_v1.2.rds": Zero-shot model prediction scores calculated 
     on DMS substitutions in 217 assays across 79 models
-    2. "zeroshot_summary_scores_v1.2.rds": Zero-shot model performance summary 
+    3. "zeroshot_summary_scores_v1.2.rds": Zero-shot model performance summary 
     metrics updated from Bioc 3.20 from 62 -> 79 models
         - Previously: "ProteinGymR/ProGym217_DMS_subs_v1.1.rds"
-    3. "supervised_contiguous5_scores_v1.2.rds", 
+    4. "supervised_contiguous5_scores_v1.2.rds", 
     "supervised_modulo5_scores_v1.2.rds", and
     "supervised_random5_scores_v1.2.rds": Semi-supervised model prediction 
     scores calculated on 217 assays for 12 models with 3 folding schemes
-    4. "supervised_summary_scores_v1.2.rds": Semi-supervised model performance 
+    5. "supervised_summary_scores_v1.2.rds": Semi-supervised model performance 
     summary metrics (Spearman and MSE) for 12 models
     
 - New functions:
