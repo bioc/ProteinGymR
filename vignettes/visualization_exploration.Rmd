@@ -20,7 +20,8 @@ output:
       toc_float: true
       toc_depth: 2
       code_folding: show
-date: "May 7, 2025"
+date: "June 18, 2025"
+bibliography: references.bib
 vignette: >
     %\VignetteIndexEntry{Visualization and exploration"}
     %\VignetteEncoding{UTF-8}
@@ -31,18 +32,18 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, nobreak = TRUE, 
-                      warning = FALSE,
-                      messages = FALSE)
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE)
 ```
 
 [CH]: https://bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html
 [r3d]: https://cran.r-project.org/web/packages/r3dmol/vignettes/r3dmol.html
 [pg_publication]: https://proceedings.neurips.cc/paper_files/paper/2023/hash/cac723e5ff29f65e3fcbb0739ae91bee-Abstract-Datasets_and_Benchmarks.html
+[physiochem]: https://biology.stackexchange.com/questions/105321/arrangement-of-amino-acids-in-the-protein-alphabet
 
 # Setup
 
-```{r, message=FALSE, warning=FALSE, echo = FALSE}
+```{r, message=FALSE, warning=FALSE}
 library(ProteinGymR)
 library(ComplexHeatmap)
 library(stringr)
@@ -54,26 +55,28 @@ library(ggExtra)
 
 # Introduction 
 
-This vignette demonstrates how to explore and visualize DMS and model scores 
-from the ProteinGym database v1.2. Specifically, it walks through the 
-functionality to generate heatmaps of all pairwise DMS substitution mutants and 
-projects these scores onto 3D protein structures. `ProteinGymR` uses 
-functionality from the Bioconductor package [ComplexHeatmap][CH] and 
-[r3dmol][r3d] from CRAN under the hood to generate the heatmaps and 3D protein 
-structures, respectively. Finally, this vignette demonstrates how to
-contrast models with DMS experiment scores using correlation plots. 
+This vignette demonstrates how to explore and visualize experimental deep 
+mutational scanning (DMS) fitness scores and variant effect prediction model 
+scores from the ProteinGym database [@Notin2023]. Specifically, it walks through
+the functionality to generate heatmaps of DMS scores for all possible amino acid
+substitutions and projects these scores onto 3D protein structures. 
+`ProteinGymR` uses functionality from the Bioconductor package 
+[ComplexHeatmap][CH] and [r3dmol][r3d] from CRAN under the hood to generate the
+heatmaps and 3D protein structures, respectively. Finally, this vignette 
+demonstrates how to contrast variant effects predictions with experimental 
+measurements. 
 
 
-# Visualize DMS scores along a protein
+# Visualize DMS scores along a protein sequence
 
-Explore the "ACE2_HUMAN" assay from Chan et al. 2020 and create a heatmap of 
-the DMS scores with `plot_dms_heatmap()`. If the argument `dms_data` is not 
+Here, we explore the "ACE2_HUMAN" DMS assay from @Chan2020 and create a heatmap
+of the DMS scores with `plot_dms_heatmap()`. If the argument `dms_data` is not 
 specified, the default will load the most recent DMS substitution data from 
 ProteinGym with `ProteinGymR::dms_substitutions()`. This function only requires
 a specific assay name. To obtain all assay names, run: 
 `names(dms_substitutions())`. By default, the function also plots the full range
 of positions where DMS data is available for this assay. To plot a specific 
-region of interest, use the arguments `start_pos()` and `end_pos()` which takes
+region of interest, use the arguments `start_pos` and `end_pos` which takes
 in an integer for the first and last residue position to plot in the protein.
 
 ```{r ACE default heatmap, fig.wide = TRUE}
@@ -85,30 +88,30 @@ ace2_dms <- plot_dms_heatmap(
 ace2_dms
 ```
 
-The heatmap shows the DMS score at each position along the given protein
-(x-axis) where a residue was mutated (alternate amino acid on displayed on the 
-y-axis and the reference allele at the position is shown on top). For this 
-demonstration, we subset to the first 1-100 positions and grouped the amino
-acids by their physiochemical properties (DE,KRH,NQ,ST,PGAVIL,MC,FYW). See
-[here][physiochem] for more information. As a note, not all positions along the 
-protein sequence may be subjected to mutation for every DMS assay. This results 
-from the specific research objectives, prioritization choices of the 
-investigators, or technical constraints inherent to the experimental design. 
+The heatmap shows the DMS score at each position along the given protein 
+sequence (x-axis) where a residue was mutated (y-axis: substituted amino acid, 
+top; x-axis: reference amino acid). For demonstration, we subset to the first 
+1-100 positions and grouped the amino acids by their physiochemical properties 
+(DE,KRH,NQ,ST,PGAVIL,MC,FYW). See [here][physiochem] for more information. Note 
+that not all positions along the protein sequence may be subjected to mutation 
+for every DMS assay. This results from the specific research objectives, 
+prioritization choices of the investigators, or technical constraints inherent 
+to the experimental design. 
 
 A low DMS score indicates low fitness, while a higher DMS score indicates high 
 fitness. We can think of higher DMS scores as being more benign, while lower DMS
 score indicates more pathogenic regions.
 
-Based on the "ACE2_HUMAN_Chan_2020" assay, we can see that at positions 90 and 
-92, fitness remained high despite across amino acid changes; possibly 
+Based on the "ACE2_HUMAN_Chan_2020" assay, virtually all possible amino acid 
+changes at positions 90 and 92 lead to higher fitness; possibly 
 suggestive of a benign region of the protein. However, several mutations at 
 position 48 resulted in low fitness. This could represent an important region 
 for protein function where any perturbation would likely be deleterious.
 
 Let's plot another assay, specifying a region and invoking the `ComplexHeatmap`
 row clustering under the hood. For more details about this clustering method or
-to view more function parameters, read the function documentation with 
-`?plot_dms_heatmap()`.
+to view more function parameters, refer to the documentation of the 
+`plot_dms_heatmap` function.
 
 ```{r SHOC2 heatmap, fig.wide = TRUE}
 shoc2_dms <- plot_dms_heatmap(assay_name = "SHOC2_HUMAN_Kwon_2022", 
@@ -118,21 +121,22 @@ shoc2_dms <- plot_dms_heatmap(assay_name = "SHOC2_HUMAN_Kwon_2022",
 
 shoc2_dms
 ```
-In this region of the SHOC2_HUMAN protein, mutating to a K (y-axis) seemed to 
-have the most benign affect across all mutations.
+
+For example, in this region of the SHOC2_HUMAN protein, mutating to a Lysine (K, y-axis) resulted more frequently in higher fitness.
 
 # Visualize model scores along a protein
 
-ProteinGymR Bioc 3.21 provides functionality to generate heatmaps of zero-shot
+ProteinGymR provides functionality to generate heatmaps of zero-shot
 mode scores for 79 variant effect prediction models and 11 semi-supervised 
 models with the function `plot_zeroshot_heatmap()`. The required arguments 
 for this function are the assay name to plot (same as for the DMS heatmap), 
 and a model to plot. For a complete list of models, run `available_models()` for
 zero-shot models, and `supervised_available_models()` for the 11 semi-supervised
 models. If `model_data` is not provided, the default model scores from 
-ProteinGym will be loaded in from `ProteinGymR::zeroshot_substitutions()`.
+ProteinGym will be loaded in from default model scores from 
+`zeroshot_substitutions()`.
 
-```{r, fig.wide = TRUE}
+```{r, fig.width = 9, fig.height = 7}
 ace2_model <- plot_zeroshot_heatmap(
     assay_name = "ACE2_HUMAN_Chan_2020", 
     model = "GEMME",
@@ -142,24 +146,24 @@ ace2_model <- plot_zeroshot_heatmap(
 ComplexHeatmap::draw(ace2_dms %v% ace2_model)
 ```
 
-As with the DMS scores, we are plotting the GEMME zero-shot scores for 
+As for DMS scores, we are plotting the GEMME zero-shot scores for 
 positions 1 to 100 in the assay "ACE2_HUMAN_Chan_2020". At first glance, both
 the DMS data and GEMME model reveal position 48 to be quite pathogenic across 
-amino acid substitutions.Note that the model scores here are mostly negative; 
+amino acid substitutions. Note that the model scores here are mostly negative; 
 however because these are model prediction scores, negative values do not 
 necessarily indicate lower fitness after mutation as with DMS scores.
 Thus, model scores are always represented with another color palette to 
-distinguish from experimental scores. Also note, model scores are not
-rescaled or normalized across the 79 models, and comparison across of 
-raw model predictions should be cautioned in this context. For more information 
-on model scores and how to interpret them, consult the original ProteinGym 
-[publication][pg_publication].
+distinguish from experimental scores. Note further that model scores are not
+rescaled or normalized across the 79 models, and comparison of the predicted 
+scores between models is thus not straightforward. See [@Notin2023] for more 
+information on model scores and how to interpret them.
 
 It can be useful to visualize the DMS and model scores side by side for a given 
 assay to compare the experimental DMS scores and predicted zero-shot scores 
 outputted from the model. This is easily done with `%v%` which stacks the 
 heatmaps in one column, while `+` will display them in two columns, side by 
-side. This can also be done with any output of class ComplexHeatmap::Heatmap().
+side. This functionality is available for all Heatmap objects generated with 
+the ComplexHeatmap package.
 
 <br>
 
@@ -314,17 +318,9 @@ model_corr_plot(
 There seems to be good correlation between
 the model predictions for all variants in assays assessing the "P04637" protein.
 
-# Reference
-
-Notin, P., Kollasch, A., Ritter, D., van Niekerk, L., Paul, S., Spinner, H., 
-Rollins, N., Shaw, A., Orenbuch, R., Weitzman, R., Frazer, J., Dias, M., 
-Franceschi, D., Gal, Y., & Marks, D. (2023). ProteinGym: Large-Scale 
-Benchmarks for Protein Fitness Prediction and Design. In A. Oh, T. Neumann, 
-A. Globerson, K. Saenko, M. Hardt, & S. Levine (Eds.), Advances in Neural 
-Information Processing Systems (Vol. 36, pp. 64331-64379). 
-Curran Associates, Inc.
-
 # Session Info
 ```{r}
 sessionInfo()
 ```
+
+# References
