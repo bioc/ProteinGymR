@@ -72,7 +72,7 @@ measurements.
 Here, we explore the "ACE2_HUMAN" DMS assay from @Chan2020 and create a heatmap
 of the DMS scores with `plot_dms_heatmap()`. If the argument `dms_data` is not 
 specified, the default will load the most recent DMS substitution data from 
-ProteinGym with `ProteinGymR::dms_substitutions()`. This function only requires
+ProteinGym with `dms_substitutions()`. This function only requires
 a specific assay name. To obtain all assay names, run: 
 `names(dms_substitutions())`. By default, the function also plots the full range
 of positions where DMS data is available for this assay. To plot a specific 
@@ -197,7 +197,7 @@ First, let's use all the default settings. The only required arguments are
 the `assay_name`.
 
 Importantly, because the plot shows one protein structure, all DMS fitness 
-scores across amino acids are aggregated within a position. By defaut this 
+scores across amino acids are aggregated within a position. By default this 
 aggregation function is just the average of all the DMS scores at that position.
 However, it is possible to set any user-defined aggregation function with the 
 `aggregation_func` argument. 
@@ -212,9 +212,9 @@ plot_structure(assay_name = "ACE2_HUMAN_Chan_2020")
 <br>
 
 In this example, we are plotting the 3D structure of the ACE2_HUMAN protein and
-overlaying the mean DMS score across all mutants in a given position. Chan et 
-al. 2020 who generated the DMS assay data only experimentally assessed a subset
-of the entire ACE2_HUMAN protein. By default the function only colors the 
+overlaying the mean DMS score across all mutants in a given position. @Chan2020 
+who generated the DMS assay data only experimentally assessed a subset
+of the entire ACE2_HUMAN protein. By default, the function only colors the 
 regions where there is information available in the assay. Red colors represent
 more pathogenic (lower DMS scores) and blue colors show more benign positions
 (higher DMS scores). Regions that appear white indicate closer to no change 
@@ -228,7 +228,7 @@ semi-supervised models. Do this by setting `data_scores` argument to any model
 string matching `available_models()` or `supervised_available_models()`. 
 Here, let's demonstrate plotting the "Kermut" model and also allowing the 
 full visualization of the complete protein structure, rather than just the
-"ball and stick" representation. Do this by seting the argument 
+"ball and stick" representation. Do this by setting the argument 
 `full_structure == TRUE`.
 
 <br>
@@ -246,7 +246,7 @@ ribbon representation, and we have overlaid the model prediction scores from the
 Kermut model.
 
 Some assays extensively assessed nearly every position of the complete protein, 
-for example: the C6KNH7_9INFA protein from Lee et al. 2018. Let's visualize 
+for example: the C6KNH7_9INFA protein from [@Lee2018]. Let's visualize 
 this protein and set the aggregation method to view the minimum DMS score across
 all mutants at each position by setting `aggregation_fun = min`. To view a 
 specific region in detail: use `start_pos` and `end_pos`.
@@ -263,7 +263,7 @@ negative number across all positions of this protein. Therefore, there seems to
 be at least one amino acid mutation that could severely disrupt the fitness at
 any position of this protein.
 
-Fnally, it is possible to use the same color scheme as the popEVE 
+Finally, it is possible to use the same color scheme as the popEVE 
 mutation [portal](https://pop.evemodel.org/). We can do this for any of 
 the heatmaps or protein structure plots. Do this by setting the `color_scheme`
 argument = "EVE".
