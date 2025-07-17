@@ -228,8 +228,7 @@ semi-supervised models. Do this by setting `data_scores` argument to any model
 string matching `available_models()` or `supervised_available_models()`. 
 Here, let's demonstrate plotting the "Kermut" model and also allowing the 
 full visualization of the complete protein structure, rather than just the
-"ball and stick" representation. Do this by setting the argument 
-`full_structure == TRUE`.
+"ball and stick" representation. This can be done by setting the argument `full_structure` to `TRUE`.
 
 <br>
 
@@ -263,10 +262,9 @@ negative number across all positions of this protein. Therefore, there seems to
 be at least one amino acid mutation that could severely disrupt the fitness at
 any position of this protein.
 
-Finally, it is possible to use the same color scheme as the popEVE 
-mutation [portal](https://pop.evemodel.org/). We can do this for any of 
-the heatmaps or protein structure plots. Do this by setting the `color_scheme`
-argument = "EVE".
+Finally, it is possible to use the same color scheme as the [popEVE 
+mutation portal](https://pop.evemodel.org/). We can do this for any of 
+the heatmaps or protein structure plots. This can be done by setting the argument `color_scheme` to "EVE".
 
 
 # Correlate DMS scores with model scores
@@ -274,9 +272,7 @@ argument = "EVE".
 The `dms_corr_plot()` function allows the user to evaluate the correlation 
 between experimental and model prediction scores. By default, it takes in a
 protein UniProt ID and runs a Spearman correlation between the ProteinGym DMS 
-assay scores and AlphaMissense predicted pathogenicity scores. It returns a 
-ggplot for visualization. However, as with `plot_structure()`, you may specify
-any model in ProteinGym v1.2 to examine.
+assay scores and AlphaMissense predicted pathogenicity scores. However, as with `plot_structure()`, other models benchmarked in ProteinGym can also be specified via the `model` argument.
 
 <br>
 
@@ -292,8 +288,7 @@ assays and the AlphaMissense model predictions.
 
 Although the default uses the AlphaMissense scores, it is simple to correlate 
 DMS experimental scores with predictions from any of the 79 zero-shot 
-or 11 supervised models. Below is an example of the workflow to accomplish this
-for the same protein "Q9NV35".
+or 11 supervised models. Below is an example of the workflow to accomplish this for the UniProt ID "Q9NV35" as before.
 
 <br>
 
@@ -304,7 +299,7 @@ models for a given protein instead of looking at the DMS experimental data.
 We can do this for the protein "P04637" and the `model_corr_plot()` function.
 By default, the function only requires a UniProt ID, and uses "AlphaMissense"
 and "EVE_single" models as defaults. Let's change that to 
-"Kermut" and "ProteinNPT" or our demonstration.
+"Kermut" and "ProteinNPT" for our demonstration.
 
 ```{r, fig.wide = TRUE}
 model_corr_plot(
