@@ -46,8 +46,6 @@ Imports:
     spdl,
     tidyr,
     tidyselect,
-    ComplexHeatmap,
-    circlize,
     stringr,
     lifecycle,
     rlang,
@@ -56,7 +54,9 @@ Suggests:
     tibble,
     BiocStyle,
     knitr,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    ComplexHeatmap,
+    circlize
 VignetteBuilder: knitr
 Encoding: UTF-8
 biocViews: ExperimentData, ExperimentHub, PackageTypeData, Homo_sapiens_Data,

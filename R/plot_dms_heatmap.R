@@ -88,21 +88,28 @@ filter_exact_coord <-
 }
 
 #' Create a color function for the heatmap
+#' 
 #' @noRd
+#' 
 make_col_fun_dms <- function(mat, color_scheme = "default") {
-  if (color_scheme == "EVE") {
-    halfpt <- (min(mat, na.rm = TRUE) / 2)
-    col_fun <- colorRamp2(
-      c(min(mat, na.rm = TRUE), halfpt, 0, max(mat, na.rm = TRUE)),
-      c("#000", "#9440e8", "#00CED1", "#fde662")
-    )
-  } else {
-    col_fun <- colorRamp2(
-      c(min(mat, na.rm = TRUE), 0, max(mat, na.rm = TRUE)),
-      c("red", "white", "blue")
-    )
-  }
-  return(col_fun)
+    
+    if (!requireNamespace("colorRamp2", quietly = TRUE))
+        stop(paste("Required package \'colorRamp2\' not found.", 
+                    "Use \'BiocManager::install(\"colorRamp2\") to install it."))
+    
+    if (color_scheme == "EVE") {
+        halfpt <- (min(mat, na.rm = TRUE) / 2)
+        col_fun <- colorRamp2(
+            c(min(mat, na.rm = TRUE), halfpt, 0, max(mat, na.rm = TRUE)),
+            c("#000", "#9440e8", "#00CED1", "#fde662")
+        )
+    } else {
+        col_fun <- colorRamp2(
+            c(min(mat, na.rm = TRUE), 0, max(mat, na.rm = TRUE)),
+            c("red", "white", "blue")
+        )
+    }
+    return(col_fun)
 }
 
 #' @rdname plot_dms_heatmap
@@ -194,12 +201,6 @@ make_col_fun_dms <- function(mat, color_scheme = "default") {
 #'              
 #' @importFrom tidyr pivot_wider
 #' 
-#' @importFrom ComplexHeatmap Heatmap columnAnnotation anno_text 
-#' 
-#' @importFrom grid gpar 
-#' 
-#' @importFrom circlize colorRamp2
-#' 
 #' @importFrom stringr str_sub
 #'
 #' @export
@@ -216,6 +217,19 @@ plot_dms_heatmap <-
         ...) 
 {
 
+    ## Check dependencies
+    if (!requireNamespace("circlize", quietly = TRUE))
+        stop(paste("Required package \'circlize\' not found.", 
+                    "Use \'BiocManager::install(\"circlize\") to install it."))
+        
+    if (!requireNamespace("ComplexHeatmap", quietly = TRUE))
+        stop(paste("Required package \'ComplexHeatmap\' not found.", 
+                    "Use \'BiocManager::install(\"ComplexHeatmap\") to install it."))
+    
+    if (!requireNamespace("grid", quietly = TRUE))
+        stop(paste("Required package \'grid\' not found.", 
+                    "Use \'BiocManager::install(\"grid\") to install it."))
+        
     ## If dms_data argument missing
     if (missing(dms_data)) {
  
