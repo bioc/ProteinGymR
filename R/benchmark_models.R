@@ -138,21 +138,30 @@ check_model_argument <- function(models){
 #' 
 #' @importFrom tidyselect all_of everything
 #' 
-#' @importFrom forcats fct_reorder
-#' 
-#' @importFrom ggplot2 ggplot coord_cartesian element_text scale_fill_discrete
-#'     theme_classic annotate theme geom_boxplot element_blank ylab aes
-#'     
-#' @importFrom ggdist stat_halfeye stat_dots
-#' 
-#' @importFrom gghalves geom_half_point
-#' 
 #' @importFrom spdl info
 #' 
 #' @export
 benchmark_models <- function(
     metric = c("AUC", "MCC", "NDCG", "Spearman", "Top_recall"),
     models = available_models()){
+    
+    ## Check function dependencies
+    if (!requireNamespace("forcats", quietly = TRUE))
+        stop(paste("Required package \'forcats\' not found.", 
+                    "Use \'BiocManager::install(\"forcats\") to install it."))
+        
+    if (!requireNamespace("ggplot2", quietly = TRUE))
+        stop(paste("Required package \'ggplot2\' not found.", 
+                    "Use \'BiocManager::install(\"ggplot2\") to install it."))
+    
+    if (!requireNamespace("ggdist", quietly = TRUE))
+        stop(paste("Required package \'ggdist\' not found.", 
+                    "Use \'BiocManager::install(\"ggdist\") to install it."))
+    
+    if (!requireNamespace("gghalves", quietly = TRUE))
+        stop(paste("Required package \'gghalves\' not found.", 
+                    "Use \'BiocManager::install(\"gghalves\") to install it."))
+    
 
     ## If metric not provided, use Spearman
     if (missing(metric)){

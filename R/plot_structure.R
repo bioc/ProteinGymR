@@ -215,22 +215,13 @@ get_col_func <- function(
 #' @importFrom dplyr filter pull as_tibble rename_with mutate 
 #'              arrange select rename
 #'              
-#' @importFrom grDevices colorRampPalette
-#'              
 #' @importFrom ExperimentHub ExperimentHub
 #' 
 #' @importFrom AnnotationHub query
 #'              
 #' @importFrom tidyr pivot_wider
 #' 
-#' @importFrom bio3d read.pdb
-#' 
 #' @importFrom stringr str_sub
-#' 
-#' @importFrom htmltools tags browsable tagList
-#' 
-#' @importFrom r3dmol r3dmol m_zoom_to m_add_model m_remove_all_models
-#'              m_style_cartoon m_set_style m_add_surface
 #' 
 #' @examples
 #' 
@@ -261,6 +252,24 @@ plot_structure <- function(
     aggregate_fun = mean, 
     color_scheme = NULL)
 {
+    ## Check function dependencies
+    if (!requireNamespace("grDevices", quietly = TRUE))
+        stop(paste("Required package \'grDevices\' not found.", 
+                    "Use \'BiocManager::install(\"grDevices\") to install it."))
+    
+    if (!requireNamespace("bio3d", quietly = TRUE))
+        stop(paste("Required package \'bio3d\' not found.", 
+                    "Use \'BiocManager::install(\"bio3d\") to install it."))
+    
+    if (!requireNamespace("r3dmol", quietly = TRUE))
+        stop(paste("Required package \'r3dmol\' not found.", 
+                    "Use \'BiocManager::install(\"r3dmol\") to install it."))
+    
+    if (!requireNamespace("htmltools", quietly = TRUE))
+        stop(paste("Required package \'htmltools\' not found.", 
+                    "Use \'BiocManager::install(\"htmltools\") to install it."))
+    
+    
     
     ## Validate data source
     valid_scores <- c(
