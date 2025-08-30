@@ -32,15 +32,7 @@ Depends:
 Imports: 
     ExperimentHub,
     AnnotationHub,
-    bio3d,
-    r3dmol,
-    ggExtra,
     dplyr,
-    forcats,
-    ggdist,
-    gghalves,
-    ggplot2,
-    pals,
     purrr,
     queryup,
     spdl,
@@ -48,15 +40,24 @@ Imports:
     tidyselect,
     stringr,
     lifecycle,
-    rlang,
-    htmltools
+    rlang
 Suggests: 
     tibble,
     BiocStyle,
     knitr,
     testthat (>= 3.0.0),
     ComplexHeatmap,
-    circlize
+    circlize,
+    pals,
+    ggplot2,
+    grDevices,
+    ggExtra,
+    bio3d,
+    r3dmol,
+    htmltools,
+    forcats,
+    ggdist,
+    gghalves
 VignetteBuilder: knitr
 Encoding: UTF-8
 biocViews: ExperimentData, ExperimentHub, PackageTypeData, Homo_sapiens_Data,

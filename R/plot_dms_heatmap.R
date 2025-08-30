@@ -217,7 +217,7 @@ plot_dms_heatmap <-
         ...) 
 {
 
-    ## Check dependencies
+    ## Check function dependencies
     if (!requireNamespace("circlize", quietly = TRUE))
         stop(paste("Required package \'circlize\' not found.", 
                     "Use \'BiocManager::install(\"circlize\") to install it."))

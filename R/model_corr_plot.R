@@ -248,11 +248,6 @@ pg_model_corr <-
 #' A. Globerson, K. Saenko, M. Hardt, & S. Levine (Eds.), \emph{Advances in 
 #' Neural Information Processing Systems} (Vol. 36, pp. 64331-64379). 
 #' Curran Associates, Inc.
-#' 
-#' @importFrom ggplot2 ggplot geom_bin2d aes element_text labs xlab ylab
-#'     scale_fill_continuous theme_classic annotate theme geom_point
-#'     
-#' @importFrom ggExtra ggMarginal
 #
 #' @importFrom dplyr filter pull as_tibble rename_with mutate case_when
 #'
@@ -266,7 +261,15 @@ model_corr_plot <-
         model2 = "GEMME"
     )
 {
-    
+    ## Check function dependencies
+    if (!requireNamespace("ggExtra", quietly = TRUE))
+        stop(paste("Required package \'ggExtra\' not found.", 
+                    "Use \'BiocManager::install(\"ggExtra\") to install it."))
+        
+    if (!requireNamespace("ggplot2", quietly = TRUE))
+        stop(paste("Required package \'ggplot2\' not found.", 
+                    "Use \'BiocManager::install(\"ggplot2\") to install it."))
+        
     ## Validate required uniprotId argument
     stopifnot(is.character(uniprotId))
     

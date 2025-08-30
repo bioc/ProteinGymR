@@ -202,15 +202,7 @@ make_col_fun_model <- function(mat, color_scheme = "default") {
 #'              
 #' @importFrom tidyr pivot_wider
 #' 
-#' @importFrom ComplexHeatmap Heatmap columnAnnotation anno_text 
-#' 
-#' @importFrom grid gpar 
-#' 
-#' @importFrom circlize colorRamp2
-#' 
 #' @importFrom stringr str_sub
-#' 
-#' @importFrom pals parula
 #'
 #' @export
 plot_zeroshot_heatmap <- 
@@ -226,10 +218,28 @@ plot_zeroshot_heatmap <-
         color_scheme,
         ...) 
 {
+        
+        ## Check dependencies
+        if (!requireNamespace("circlize", quietly = TRUE))
+        stop(paste("Required package \'circlize\' not found.", 
+                    "Use \'BiocManager::install(\"circlize\") to install it."))
+        
+        if (!requireNamespace("ComplexHeatmap", quietly = TRUE))
+            stop(paste("Required package \'ComplexHeatmap\' not found.", 
+                "Use \'BiocManager::install(\"ComplexHeatmap\") to install it."))
+    
+        if (!requireNamespace("grid", quietly = TRUE))
+            stop(paste("Required package \'grid\' not found.", 
+                "Use \'BiocManager::install(\"grid\") to install it."))
+        
+        if (!requireNamespace("pals", quietly = TRUE))
+            stop(paste("Required package \'pals\' not found.", 
+                "Use \'BiocManager::install(\"pals\") to install it."))
+        
         ## Check model is defined
         if (missing(model)){
-                stop("Please define a `model` to explore. See all options ", 
-                    "with: `available_models()`."
+            stop("Please define a `model` to explore. See all options ", 
+                "with: `available_models()`."
                 )
         }
         
