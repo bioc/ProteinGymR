@@ -50,7 +50,7 @@ filter_by_pos <-
 #' 
 getProtIDs <- function(names) {
     sapply(names, function(x) {
-        parts <- strsplit(x, "_", fixed = TRUE)[[1]]
+        parts <- stringr::strsplit(x, "_", fixed = TRUE)[[1]]
         paste(parts[1:2], collapse = "_")
         })
 }
@@ -77,8 +77,6 @@ getProtIDs <- function(names) {
 #' - Mapping to color gradients (e.g., with `parula` palette)
 #'
 #' @noRd
-#' 
-#' @importFrom pals parula
 #'
 color_line <- function(
         df, 
@@ -86,6 +84,10 @@ color_line <- function(
         quant_norm = TRUE, 
         col_pal, n = 200) 
 {
+    if (!requireNamespace("pals", quietly = TRUE))
+        stop(paste("Required package \'pals\' not found.", 
+                    "Use \'BiocManager::install(\"pals\") to install it."))
+    
     if (quant_norm) {
         df = df |> 
             mutate(quant_score = qnorm(ecdf(aggregate_score)(aggregate_score)))
@@ -112,15 +114,19 @@ color_line <- function(
 get_col_func <- function(
     color_scheme,
     values) {
+    
+    if (!requireNamespace("colorRamp2", quietly = TRUE))
+        stop(paste("Required package \'colorRamp2\' not found.", 
+                    "Use \'BiocManager::install(\"colorRamp2\") to install it."))
 
     if (!is.null(color_scheme) && color_scheme == "EVE") {
-        col_fun <- colorRamp2(
+        col_fun <- colorRamp2::colorRamp2(
             values,
             c("#000000", "#9440e8", "#00CED1", "#fde662")
         )
         return(col_fun) 
     } else {
-        col_fun <- colorRamp2(
+        col_fun <- colorRamp2::colorRamp2(
             values,
             c("red", "white", "blue")
         ) 
@@ -221,6 +227,8 @@ get_col_func <- function(
 #'              
 #' @importFrom tidyr pivot_wider
 #' 
+#' @importFrom tidyselect all_of
+#' 
 #' @importFrom stringr str_sub
 #' 
 #' @examples
@@ -319,7 +327,7 @@ plot_structure <- function(
         df <- data[[assay_name]]
         df <- df[,c("mutant", data_scores)]
         df <- df |> 
-            rename(pg_scores = all_of(data_scores))
+            dplyr::rename(pg_scores = tidyselect::all_of(data_scores))
         
     ## Load semi-supervised model
     } else if (data_scores %in% supervised_available_models()) {
@@ -329,7 +337,7 @@ plot_structure <- function(
         df <- data[[assay_name]]
         df <- df[,c("mutant", data_scores)]
         df <- df |> 
-            dplyr::rename(pg_scores = all_of(data_scores))
+            dplyr::rename(pg_scores = tidyselect::all_of(data_scores))
         
     } else {
         stop("Invalid data_source. Choose from 'DMS' or pass a valid model name.")
@@ -354,7 +362,7 @@ plot_structure <- function(
     }
 
     ## Read the PDB file
-    pdb <- read.pdb(pdb_file)
+    pdb <- bio3d::read.pdb(pdb_file)
 
     ## Process data: split position and amino acids
     df <- df |>
@@ -497,7 +505,7 @@ plot_structure <- function(
                 color_gradient_css <- paste(col_pal_grad, collapse = ", ")
             } else {
                 # Create interpolator function
-                col_fun <- colorRampPalette(col_pal)
+                col_fun <- grDevices::colorRampPalette(col_pal)
                 # Generate 100 colors spanning your value range
                 col_pal_grad <- col_fun(100)
                 # Create a CSS gradient string
@@ -524,12 +532,12 @@ plot_structure <- function(
     if (missing(full_structure) | full_structure == FALSE) {
 
         ## Initialize the 3D viewer, hide all but except selected regions
-        viewer <- r3dmol() |>
-            m_remove_all_models() |>
-            m_add_model(data = pdb_file, format = "pdb") |>
-            m_set_style(style = m_style_cartoon(), 
+        viewer <- r3dmol::r3dmol() |>
+            r3dmol::m_remove_all_models() |>
+            r3dmol::m_add_model(data = pdb_file, format = "pdb") |>
+            r3dmol::m_set_style(style = m_style_cartoon(), 
                 sel = list(resi =  start_pos:end_pos)) |>
-            m_zoom_to(sel = list(resi = start_pos:end_pos)) 
+            r3dmol::m_zoom_to(sel = list(resi = start_pos:end_pos)) 
         
         ## Apply colors to residues with data
         for (i in 1:nrow(filtered_df)) {
@@ -558,10 +566,10 @@ plot_structure <- function(
         ))
      
         ## Code to show full protein
-        full_viewer <- r3dmol() |>
-            m_remove_all_models() |> 
-            m_add_model(data = pdb_file, format = "pdb") |> 
-            m_set_style(style = m_style_cartoon())
+        full_viewer <- r3dmol::r3dmol() |>
+            r3dmol::m_remove_all_models() |> 
+            r3dmol::m_add_model(data = pdb_file, format = "pdb") |> 
+            r3dmol::m_set_style(style = m_style_cartoon())
          
         ## Get all residues in the PDB
         pdb_residues <- unique(data.frame(
