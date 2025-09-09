@@ -17,17 +17,16 @@ DMS data.
 
 ## Installation
 
-Install the package from Bioconductor or GitHub, ensuring correct
-*Bioconductor* dependencies.
+Install the package from [Bioconductor](https://bioconductor.org/packages/ProteinGymR) via
 
 ``` r
-if (!"BiocManager" %in% rownames(installed.packages()))
-    install.packages("BiocManager", repos = "https://cloud.R-project.org")
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
 
-BiocManager::install("ccb-hms/ProteinGymR")
+BiocManager::install("ProteinGymR")
 ```
 
-Load the library.
+Load the package via
 
 ``` r
 library(ProteinGymR)
