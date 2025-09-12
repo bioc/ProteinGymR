@@ -381,12 +381,12 @@ dms_corr_plot <-
         ggplot2::ylab(paste(model, "score")) +
         ggplot2::theme_classic() +
         ggplot2::theme(
-            axis.text.x = element_text(size = 16),
-            axis.text.y = element_text(size = 16),
-            axis.title.y = element_text(size = 16, vjust = 2),
-            axis.title.x = element_text(size = 16, vjust = 0),
-            legend.title = element_text(size = 16),
-            legend.text = element_text(size = 16)
+            axis.text.x = ggplot2::element_text(size = 16),
+            axis.text.y = ggplot2::element_text(size = 16),
+            axis.title.y = ggplot2::element_text(size = 16, vjust = 2),
+            axis.title.x = ggplot2::element_text(size = 16, vjust = 0),
+            legend.title = ggplot2::element_text(size = 16),
+            legend.text = ggplot2::element_text(size = 16)
         )
     
     # Add marginal density plots

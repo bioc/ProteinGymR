@@ -276,7 +276,7 @@ plot_zeroshot_heatmap <-
         assay_df <- assay_df |>
             dplyr::select(
                 .data$mutant,
-                all_of(model)
+                tidyselect::all_of(model)
             )
         
         ## Wrangle the data
@@ -346,9 +346,9 @@ plot_zeroshot_heatmap <-
         column_annotation[is.na(column_annotation)] <- " "
     
         ## Define a text annotation for the columns
-        column_annotation <- columnAnnotation(
-          text = anno_text(column_annotation$ref, 
-               rot = 0, just = "right", gp = gpar(fontsize = 10))
+        column_annotation <- ComplexHeatmap::columnAnnotation(
+          text = ComplexHeatmap::anno_text(column_annotation$ref, 
+               rot = 0, just = "right", gp = grid::gpar(fontsize = 10))
         )
         
         ## Convert to matrix
