@@ -100,13 +100,13 @@ make_col_fun_model <- function(mat, color_scheme = "default") {
     if (color_scheme == "EVE") {
         mid_val <- max_val/2
         halfpt <- min_val / 2
-        col_fun <- colorRamp2(
+        col_fun <- colorRamp2::colorRamp2(
             c(min_val, halfpt, mid_val, max_val),
             c("#000", "#9440e8", "#00CED1", "#fde662")
         )
     } else {
-        parula_colors <- parula(3)
-        col_fun <- colorRamp2(
+        parula_colors <- pals::parula(3)
+        col_fun <- colorRamp2::colorRamp2(
             c(min_val, mid_val, max_val),
             parula_colors
         )
@@ -276,7 +276,7 @@ plot_zeroshot_heatmap <-
         assay_df <- assay_df |>
             dplyr::select(
                 .data$mutant,
-                all_of(model)
+                tidyselect::all_of(model)
             )
         
         ## Wrangle the data
@@ -346,9 +346,9 @@ plot_zeroshot_heatmap <-
         column_annotation[is.na(column_annotation)] <- " "
     
         ## Define a text annotation for the columns
-        column_annotation <- columnAnnotation(
-          text = anno_text(column_annotation$ref, 
-               rot = 0, just = "right", gp = gpar(fontsize = 10))
+        column_annotation <- ComplexHeatmap::columnAnnotation(
+          text = ComplexHeatmap::anno_text(column_annotation$ref, 
+               rot = 0, just = "right", gp = grid::gpar(fontsize = 10))
         )
         
         ## Convert to matrix

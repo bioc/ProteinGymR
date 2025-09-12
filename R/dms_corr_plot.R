@@ -277,20 +277,28 @@ pg_correlate <-
 #' Neural Information Processing Systems} (Vol. 36, pp. 64331-64379). 
 #' Curran Associates, Inc.
 #' 
-#' @importFrom ggplot2 ggplot geom_bin2d aes element_text labs xlab ylab
-#'     scale_fill_continuous theme_classic annotate theme geom_point
-#' @importFrom ggExtra ggMarginal
-#' @importFrom lifecycle is_present deprecate_stop deprecated
 #' 
 #' @export
 dms_corr_plot <-
     function(
         uniprotId, 
-        alphamissense_table = deprecated(), 
+        alphamissense_table = lifecycle::deprecated(), 
         dms_table, 
         model = "AlphaMissense"
     )
 {
+    if (!requireNamespace("ggplot2", quietly = TRUE))
+        stop(paste("Required package \'ggplot2\' not found.", 
+                    "Use \'BiocManager::install(\"ggplot2\") to install it."))
+        
+    if (!requireNamespace("ggExtra", quietly = TRUE))
+        stop(paste("Required package \'ggExtra\' not found.", 
+                    "Use \'BiocManager::install(\"ggExtra\") to install it."))
+        
+    if (!requireNamespace("lifecycle", quietly = TRUE))
+        stop(paste("Required package \'lifecycle\' not found.", 
+                    "Use \'BiocManager::install(\"lifecycle\") to install it."))
+        
     ## Deprecate alphamissense_table argument, replace with model_table
     if (lifecycle::is_present(alphamissense_table)) {
         lifecycle::deprecate_stop(
@@ -362,27 +370,27 @@ dms_corr_plot <-
     ## Correlation density plot
     pg_density_plot <- 
         merged_table |> 
-        ggplot(
-            aes(y = .data$mean_model, x = .data$mean_dms)
+        ggplot2::ggplot(
+            ggplot2::aes(y = .data$mean_model, x = .data$mean_dms)
         ) +
-        geom_bin2d(bins = 60) +
-        geom_point(alpha = 0) +
-        scale_fill_continuous(type = "viridis") +
-        labs(title = paste0("\nUniProt ID: ", uniprotId)) +
-        xlab("DMS score") +
-        ylab(paste(model, "score")) +
-        theme_classic() +
-        theme(
-            axis.text.x = element_text(size = 16),
-            axis.text.y = element_text(size = 16),
-            axis.title.y = element_text(size = 16, vjust = 2),
-            axis.title.x = element_text(size = 16, vjust = 0),
-            legend.title = element_text(size = 16),
-            legend.text = element_text(size = 16)
+        ggplot2::geom_bin2d(bins = 60) +
+        ggplot2::geom_point(alpha = 0) +
+        ggplot2::scale_fill_continuous(type = "viridis") +
+        ggplot2::labs(title = paste0("\nUniProt ID: ", uniprotId)) +
+        ggplot2::xlab("DMS score") +
+        ggplot2::ylab(paste(model, "score")) +
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+            axis.text.x = ggplot2::element_text(size = 16),
+            axis.text.y = ggplot2::element_text(size = 16),
+            axis.title.y = ggplot2::element_text(size = 16, vjust = 2),
+            axis.title.x = ggplot2::element_text(size = 16, vjust = 0),
+            legend.title = ggplot2::element_text(size = 16),
+            legend.text = ggplot2::element_text(size = 16)
         )
     
     # Add marginal density plots
-    pg_density_plot <- ggMarginal(
+    pg_density_plot <- ggExtra::ggMarginal(
         pg_density_plot,
         type = "densigram", # Can also use "histogram"
         fill = "#B0C4DE", 
