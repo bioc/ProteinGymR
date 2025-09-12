@@ -6,7 +6,7 @@
 \usage{
 dms_corr_plot(
   uniprotId,
-  alphamissense_table = deprecated(),
+  alphamissense_table = lifecycle::deprecated(),
   dms_table,
   model = "AlphaMissense"
 )

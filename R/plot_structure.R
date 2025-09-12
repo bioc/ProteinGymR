@@ -50,7 +50,7 @@ filter_by_pos <-
 #' 
 getProtIDs <- function(names) {
     sapply(names, function(x) {
-        parts <- stringr::strsplit(x, "_", fixed = TRUE)[[1]]
+        parts <- strsplit(x, "_", fixed = TRUE)[[1]]
         paste(parts[1:2], collapse = "_")
         })
 }
@@ -230,6 +230,8 @@ get_col_func <- function(
 #' @importFrom tidyselect all_of
 #' 
 #' @importFrom stringr str_sub
+#' 
+#' @importFrom htmltools tags
 #' 
 #' @examples
 #' 
@@ -535,14 +537,14 @@ plot_structure <- function(
         viewer <- r3dmol::r3dmol() |>
             r3dmol::m_remove_all_models() |>
             r3dmol::m_add_model(data = pdb_file, format = "pdb") |>
-            r3dmol::m_set_style(style = m_style_cartoon(), 
+            r3dmol::m_set_style(style = r3dmol::m_style_cartoon(), 
                 sel = list(resi =  start_pos:end_pos)) |>
             r3dmol::m_zoom_to(sel = list(resi = start_pos:end_pos)) 
         
         ## Apply colors to residues with data
         for (i in 1:nrow(filtered_df)) {
         viewer <- viewer |>
-            m_set_style(
+            r3dmol::m_set_style(
                 sel = list(resi = filtered_df$pos[i]),
                 style = list(cartoon = list(color = filtered_df$color[i]))
               )
@@ -551,8 +553,8 @@ plot_structure <- function(
 
         ## Combine viewer and legend
         return(
-        browsable(
-            tagList(
+        htmltools::browsable(
+            htmltools::tagList(
                 tags$div(style = "position:relative; width:100%; height:600px;",
                     viewer, legend_div)
             )
@@ -569,7 +571,7 @@ plot_structure <- function(
         full_viewer <- r3dmol::r3dmol() |>
             r3dmol::m_remove_all_models() |> 
             r3dmol::m_add_model(data = pdb_file, format = "pdb") |> 
-            r3dmol::m_set_style(style = m_style_cartoon())
+            r3dmol::m_set_style(style = r3dmol::m_style_cartoon())
          
         ## Get all residues in the PDB
         pdb_residues <- unique(data.frame(
@@ -582,7 +584,7 @@ plot_structure <- function(
         ## Apply colors to residues with data
         for (i in 1:nrow(filtered_df)) {
         full_viewer <- full_viewer |>
-            m_set_style(
+            r3dmol::m_set_style(
                 sel = list(resi = filtered_df$pos[i]),
                 style = list(cartoon = list(color = filtered_df$color[i]))
               )
@@ -591,7 +593,7 @@ plot_structure <- function(
         ## Color residues without PDB coords as black
         for (resi in residues_without_data) {
          full_viewer <- full_viewer |>
-             m_set_style(
+             r3dmol::m_set_style(
                  sel = list(resi = resi),
                  style = list(cartoon = list(color = "#3f3f3f"))
              )
@@ -599,8 +601,8 @@ plot_structure <- function(
 
         ## Combine viewer and legend
         return(
-            browsable(
-                tagList(
+            htmltools::browsable(
+                htmltools::tagList(
                     tags$div(style = "position:relative; width:100%; height:600px;",
                         full_viewer, legend_div)
                 )

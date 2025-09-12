@@ -202,39 +202,40 @@ benchmark_models <- function(
         group_by(.data$model) |> 
         mutate(model_mean = mean(.data$score)) |> 
         ungroup() |> 
-        mutate(model = fct_reorder(.data$model, .data$model_mean, .desc = TRUE))
+        mutate(model = forcats::fct_reorder(.data$model, 
+            .data$model_mean, .desc = TRUE))
 
     ## Raincloud plot
     res_long |> 
-        ggplot(aes(x = .data$model, y = .data$score, 
+        ggplot2::ggplot(ggplot2::aes(x = .data$model, y = .data$score, 
             fill = .data$model, group = .data$model)) + 
-        stat_halfeye(
+        ggdist::stat_halfeye(
             adjust = .5, 
             width = .6, 
             .width = 0, 
             justification = -.2, 
             point_colour = NA
         ) + 
-        geom_boxplot(
+        ggplot2::geom_boxplot(
             width = .15, 
             outlier.shape = NA
         ) +
-        geom_half_point(
+        gghalves::geom_half_point(
             side = "l", 
             range_scale = .4, 
             alpha = .2
         ) +
         ## add theme and fonts
-        coord_cartesian(clip = "off") +
-        scale_fill_discrete(name = "Models") +
-        theme_classic() +
-        ylab(paste(metric, "score")) +
-        theme(
-            axis.text.x = element_text(size = 16),
-            axis.text.y = element_text(size = 16),
-            axis.title.y = element_text(size = 16),
-            axis.title.x = element_blank(),
-            legend.title = element_text(size = 16),
-            legend.text = element_text(size = 11)
+        ggplot2::coord_cartesian(clip = "off") +
+        ggplot2::scale_fill_discrete(name = "Models") +
+        ggplot2::theme_classic() +
+        ggplot2::ylab(paste(metric, "score")) +
+        ggplot2::theme(
+            axis.text.x = ggplot2::element_text(size = 16),
+            axis.text.y = ggplot2::element_text(size = 16),
+            axis.title.y = ggplot2::element_text(size = 16),
+            axis.title.x = ggplot2::element_blank(),
+            legend.title = ggplot2::element_text(size = 16),
+            legend.text = ggplot2::element_text(size = 11)
         )
 }

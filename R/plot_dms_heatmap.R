@@ -99,12 +99,12 @@ make_col_fun_dms <- function(mat, color_scheme = "default") {
     
     if (color_scheme == "EVE") {
         halfpt <- (min(mat, na.rm = TRUE) / 2)
-        col_fun <- colorRamp2(
+        col_fun <- colorRamp2::colorRamp2(
             c(min(mat, na.rm = TRUE), halfpt, 0, max(mat, na.rm = TRUE)),
             c("#000", "#9440e8", "#00CED1", "#fde662")
         )
     } else {
-        col_fun <- colorRamp2(
+        col_fun <- colorRamp2::colorRamp2(
             c(min(mat, na.rm = TRUE), 0, max(mat, na.rm = TRUE)),
             c("red", "white", "blue")
         )

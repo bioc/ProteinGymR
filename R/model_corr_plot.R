@@ -315,17 +315,17 @@ model_corr_plot <-
     ## Correlation density plot
     pg_density_plot <- 
         merged_table |> 
-        ggplot(
-            aes(x = .data$mean_model1, y = .data$mean_model2)
+        ggplot2::ggplot(
+            ggplot2::aes(x = .data$mean_model1, y = .data$mean_model2)
         ) +
-        geom_bin2d(bins = 60) +
-        geom_point(alpha = 0) +
-        scale_fill_continuous(type = "viridis") +
-        labs(title = paste0("\nUniProt ID: ", uniprotId)) +
-        xlab(paste(model1, "score")) +
-        ylab(paste(model2, "score")) +
-        theme_classic() +
-        theme(
+        ggplot2::geom_bin2d(bins = 60) +
+        ggplot2::geom_point(alpha = 0) +
+        ggplot2::scale_fill_continuous(type = "viridis") +
+        ggplot2::labs(title = paste0("\nUniProt ID: ", uniprotId)) +
+        ggplot2::xlab(paste(model1, "score")) +
+        ggplot2::ylab(paste(model2, "score")) +
+        ggplot2::theme_classic() +
+        ggplot2::theme(
             axis.text.x = element_text(size = 16),
             axis.text.y = element_text(size = 16),
             axis.title.y = element_text(size = 16, vjust = 2),
@@ -335,7 +335,7 @@ model_corr_plot <-
         )
     
     # Add marginal density plots
-    pg_density_plot <- ggMarginal(
+    pg_density_plot <- ggExtra::ggMarginal(
         pg_density_plot,
         type = "densigram", # Can also use "histogram"
         fill = "#B0C4DE", 

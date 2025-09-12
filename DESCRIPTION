@@ -40,7 +40,8 @@ Imports:
     tidyselect,
     stringr,
     lifecycle,
-    rlang
+    rlang,
+    htmltools
 Suggests: 
     tibble,
     BiocStyle,
@@ -48,13 +49,13 @@ Suggests:
     testthat (>= 3.0.0),
     ComplexHeatmap,
     circlize,
+    colorRamp2,
     pals,
     ggplot2,
     grDevices,
     ggExtra,
     bio3d,
     r3dmol,
-    htmltools,
     forcats,
     ggdist,
     gghalves
