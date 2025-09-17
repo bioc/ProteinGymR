@@ -51,14 +51,14 @@ Suggests:
     circlize,
     colorRamp2,
     pals,
-    ggplot2,
+    ggplot2 (>= 3.5.0),
     grDevices,
     ggExtra,
     bio3d,
     r3dmol,
     forcats,
-    ggdist,
-    gghalves
+    ggdist (>= 3.3.0),
+    gghalves (>= 0.1.3)
 VignetteBuilder: knitr
 Encoding: UTF-8
 biocViews: ExperimentData, ExperimentHub, PackageTypeData, Homo_sapiens_Data,
