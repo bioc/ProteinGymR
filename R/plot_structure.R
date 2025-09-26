@@ -115,18 +115,18 @@ get_col_func <- function(
     color_scheme,
     values) {
     
-    if (!requireNamespace("colorRamp2", quietly = TRUE))
-        stop(paste("Required package \'colorRamp2\' not found.", 
-                    "Use \'BiocManager::install(\"colorRamp2\") to install it."))
+    if (!requireNamespace("circlize", quietly = TRUE))
+        stop(paste("Required package \'circlize\' not found.", 
+                    "Use \'BiocManager::install(\"circlize\") to install it."))
 
     if (!is.null(color_scheme) && color_scheme == "EVE") {
-        col_fun <- colorRamp2::colorRamp2(
+        col_fun <- circlize::colorRamp2(
             values,
             c("#000000", "#9440e8", "#00CED1", "#fde662")
         )
         return(col_fun) 
     } else {
-        col_fun <- colorRamp2::colorRamp2(
+        col_fun <- circlize::colorRamp2(
             values,
             c("red", "white", "blue")
         ) 

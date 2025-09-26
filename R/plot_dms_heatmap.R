@@ -93,18 +93,18 @@ filter_exact_coord <-
 #' 
 make_col_fun_dms <- function(mat, color_scheme = "default") {
     
-    if (!requireNamespace("colorRamp2", quietly = TRUE))
-        stop(paste("Required package \'colorRamp2\' not found.", 
-                    "Use \'BiocManager::install(\"colorRamp2\") to install it."))
+    if (!requireNamespace("circlize", quietly = TRUE))
+        stop(paste("Required package \'circlize\' not found.", 
+                    "Use \'BiocManager::install(\"circlize\") to install it."))
     
     if (color_scheme == "EVE") {
         halfpt <- (min(mat, na.rm = TRUE) / 2)
-        col_fun <- colorRamp2::colorRamp2(
+        col_fun <- circlize::colorRamp2(
             c(min(mat, na.rm = TRUE), halfpt, 0, max(mat, na.rm = TRUE)),
             c("#000", "#9440e8", "#00CED1", "#fde662")
         )
     } else {
-        col_fun <- colorRamp2::colorRamp2(
+        col_fun <- circlize::colorRamp2(
             c(min(mat, na.rm = TRUE), 0, max(mat, na.rm = TRUE)),
             c("red", "white", "blue")
         )

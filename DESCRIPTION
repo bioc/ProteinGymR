@@ -49,7 +49,6 @@ Suggests:
     testthat (>= 3.0.0),
     ComplexHeatmap,
     circlize,
-    colorRamp2,
     pals,
     ggplot2 (>= 3.5.0),
     grDevices,
