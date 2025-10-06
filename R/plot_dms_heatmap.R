@@ -350,7 +350,7 @@ plot_dms_heatmap <-
     ## Define a text annotation for the columns
     column_annotation <- ComplexHeatmap::columnAnnotation(
       text = ComplexHeatmap::anno_text(column_annotation$ref, 
-           rot = 0, just = "right", gp = grid::gpar(fontsize = 10))
+           rot = 0, just = "center", gp = grid::gpar(fontsize = 10))
     )
 
     ## Create the heatmap
