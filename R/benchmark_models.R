@@ -157,11 +157,6 @@ benchmark_models <- function(
     if (!requireNamespace("ggdist", quietly = TRUE))
         stop(paste("Required package \'ggdist\' not found.", 
                     "Use \'BiocManager::install(\"ggdist\") to install it."))
-    
-    if (!requireNamespace("gghalves", quietly = TRUE))
-        stop(paste("Required package \'gghalves\' not found.", 
-                    "Use \'BiocManager::install(\"gghalves\") to install it."))
-    
 
     ## If metric not provided, use Spearman
     if (missing(metric)){
@@ -205,37 +200,40 @@ benchmark_models <- function(
         mutate(model = forcats::fct_reorder(.data$model, 
             .data$model_mean, .desc = TRUE))
 
-    ## Raincloud plot
-    res_long |> 
-        ggplot2::ggplot(ggplot2::aes(x = .data$model, y = .data$score, 
-            fill = .data$model, group = .data$model)) + 
-        ggdist::stat_halfeye(
-            adjust = .5, 
-            width = .6, 
-            .width = 0, 
-            justification = -.2, 
+    ## Boxplots
+    res_long |>
+          ggplot2::ggplot(ggplot2::aes(
+            x = .data$model,
+            y = .data$score,
+            fill = .data$model
+          )) +
+          ggdist::stat_halfeye(
+            adjust = 0.5,
+            width = 0.6,
+            .width = 0,
+            justification = -0.2,
             point_colour = NA
-        ) + 
-        ggplot2::geom_boxplot(
-            width = .15, 
+          ) +
+          ggplot2::geom_boxplot(
+            width = 0.15,
             outlier.shape = NA
-        ) +
-        gghalves::geom_half_point(
-            side = "l", 
-            range_scale = .4, 
-            alpha = .2
-        ) +
-        ## add theme and fonts
-        ggplot2::coord_cartesian(clip = "off") +
-        ggplot2::scale_fill_discrete(name = "Models") +
-        ggplot2::theme_classic() +
-        ggplot2::ylab(paste(metric, "score")) +
-        ggplot2::theme(
+          ) +
+          ggplot2::geom_jitter(
+            width = 0.1,   # controls horizontal spread
+            alpha = 0.4,   # transparency
+            size = 1.5     # point size
+          ) +
+          ggplot2::coord_cartesian(clip = "off") +
+          ggplot2::scale_fill_discrete(name = "Models") +
+          ggplot2::theme_classic() +
+          ggplot2::ylab(paste(metric, "score")) +
+          ggplot2::theme(
             axis.text.x = ggplot2::element_text(size = 16),
             axis.text.y = ggplot2::element_text(size = 16),
             axis.title.y = ggplot2::element_text(size = 16),
             axis.title.x = ggplot2::element_blank(),
             legend.title = ggplot2::element_text(size = 16),
             legend.text = ggplot2::element_text(size = 11)
-        )
+          )
+
 }

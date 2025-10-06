@@ -100,13 +100,13 @@ make_col_fun_model <- function(mat, color_scheme = "default") {
     if (color_scheme == "EVE") {
         mid_val <- max_val/2
         halfpt <- min_val / 2
-        col_fun <- colorRamp2::colorRamp2(
+        col_fun <- circlize::colorRamp2(
             c(min_val, halfpt, mid_val, max_val),
             c("#000", "#9440e8", "#00CED1", "#fde662")
         )
     } else {
         parula_colors <- pals::parula(3)
-        col_fun <- colorRamp2::colorRamp2(
+        col_fun <- circlize::colorRamp2(
             c(min_val, mid_val, max_val),
             parula_colors
         )
@@ -348,7 +348,7 @@ plot_zeroshot_heatmap <-
         ## Define a text annotation for the columns
         column_annotation <- ComplexHeatmap::columnAnnotation(
           text = ComplexHeatmap::anno_text(column_annotation$ref, 
-               rot = 0, just = "right", gp = grid::gpar(fontsize = 10))
+               rot = 0, just = "center", gp = grid::gpar(fontsize = 10))
         )
         
         ## Convert to matrix
